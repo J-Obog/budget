@@ -1,2 +1,2 @@
-# budget
-budget tracker
+# PaidOff
+Budget management
