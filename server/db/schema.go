@@ -1,13 +1,12 @@
 package db
 
 type Account struct {
-	Id           string
-	Email        string
-	Password     string
-	EmailEnabled bool
-	Tombstone    *int64
-	CreatedAt    int64
-	UpdatedAt    int64
+	Id                   string
+	Email                string
+	Password             string
+	NotificationsEnabled bool
+	CreatedAt            int64
+	UpdatedAt            int64
 }
 
 type Category struct {
