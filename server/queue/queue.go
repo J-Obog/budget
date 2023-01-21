@@ -1,9 +1,9 @@
 package queue
 
 type Message struct {
-	Id        string
-	Data      []byte
-	Timestamp int64
+	Id        string `json:"id"`
+	Data      []byte `json:"data"`
+	Timestamp int64  `json:"timestamp"`
 }
 
 type Queue interface {
