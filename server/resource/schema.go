@@ -11,7 +11,7 @@ type Request struct {
 	Url         string
 	UrlParams   map[string]interface{}
 	QueryParams map[string]interface{}
-	Metadata    map[string]interface{}
+	Meta        map[string]interface{}
 	Body        []byte
 }
 
@@ -79,7 +79,6 @@ type AccountUpdateRequest struct {
 }
 
 type AccountCreateRequest struct {
-	Id       string `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
