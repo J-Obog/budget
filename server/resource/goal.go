@@ -44,7 +44,25 @@ func (this *GoalResource) GetGoal(req Request) *Response {
 }
 
 func (this *GoalResource) GetGoals(req Request) *Response {
-	return nil
+	accountId := mustGetAccountId(req)
+
+	goals, err := this.goalStore.GetAll(accountId)
+
+	if err != nil {
+		//return 500
+	}
+
+	goalListResponse := this.toGoalListResponse(goals)
+	responseBody, err := json.Marshal(&goalListResponse)
+
+	if err != nil {
+		//return 500
+	}
+
+	return &Response{
+		Body:   responseBody,
+		Status: http.StatusOK,
+	}
 }
 
 func (this *GoalResource) UpdateGoal(req Request) *Response {
@@ -104,6 +122,10 @@ func (this *GoalResource) DeleteGoal(req Request) *Response {
 }
 
 func (this *GoalResource) toGoalResponse(goal db.Goal) *GoalResponse {
+	return nil
+}
+
+func (this *GoalResource) toGoalListResponse(goals []db.Goal) *GoalListResponse {
 	return nil
 }
 
