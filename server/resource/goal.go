@@ -18,7 +18,29 @@ func NewGoalResource(goalStore db.GoalStore) *GoalResource {
 }
 
 func (this *GoalResource) GetGoal(req Request) *Response {
-	return nil
+	goalId := this.mustGetGoalId(req)
+
+	goal, err := this.goalStore.Get(goalId)
+
+	if err != nil {
+		//return 500
+	}
+
+	if goal == nil {
+		//return 404
+	}
+
+	goalResponse := this.toGoalResponse(*goal)
+	responseBody, err := json.Marshal(&goalResponse)
+
+	if err != nil {
+		//return 500
+	}
+
+	return &Response{
+		Body:   responseBody,
+		Status: http.StatusOK,
+	}
 }
 
 func (this *GoalResource) GetGoals(req Request) *Response {
@@ -83,4 +105,8 @@ func (this *GoalResource) DeleteGoal(req Request) *Response {
 
 func (this *GoalResource) toGoalResponse(goal db.Goal) *GoalResponse {
 	return nil
+}
+
+func (this *GoalResource) mustGetGoalId(req Request) string {
+	return req.UrlParams["id"].(string)
 }
