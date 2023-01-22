@@ -1,9 +1,9 @@
 package queue
 
 type Message struct {
-	Id        string `json:"id"`
-	Data      []byte `json:"data"`
-	Timestamp int64  `json:"timestamp"`
+	Id        string      `json:"id"`
+	Data      interface{} `json:"data"`
+	Timestamp int64       `json:"timestamp"`
 }
 
 type AccountDeletionMessage struct {
@@ -15,6 +15,6 @@ type NotificationMessage struct {
 }
 
 type Queue interface {
-	Push(message Message) error
+	Push(serializable interface{}) error
 	Pull() ([]Message, error)
 }

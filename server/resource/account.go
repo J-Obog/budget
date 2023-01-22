@@ -5,15 +5,18 @@ import (
 	"net/http"
 
 	"github.com/J-Obog/paidoff/db"
+	"github.com/J-Obog/paidoff/queue"
 )
 
 type AccountResource struct {
 	accountStore db.AccountStore
+	accountQueue queue.Queue
 }
 
-func NewAccountResource(accountStore db.AccountStore) *AccountResource {
+func NewAccountResource(accountStore db.AccountStore, accountQeueue queue.Queue) *AccountResource {
 	return &AccountResource{
 		accountStore: accountStore,
+		accountQueue: accountQeueue,
 	}
 }
 
@@ -145,7 +148,34 @@ func (this *AccountResource) CreateAccount(req Request) *Response {
 }
 
 func (this *AccountResource) DeleteAccount(req Request) *Response {
-	return nil
+	accountId := mustGetAccountId(req)
+	account, err := this.accountStore.Get(accountId)
+
+	if err != nil {
+		//return 500
+	}
+
+	if account == nil {
+		//return 404
+	}
+
+	err = this.accountStore.Delete(accountId)
+
+	if err != nil {
+		//return 500
+	}
+
+	accountDeletionMessage := &queue.AccountDeletionMessage{
+		AccountId: accountId,
+	}
+
+	err = this.accountQueue.Push(accountDeletionMessage)
+
+	if err != nil {
+		//log error
+	}
+
+	return &Response{} //populate response
 }
 
 func (this *AccountResource) toAccountResponse(account db.Account) *AccountResponse {
