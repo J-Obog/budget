@@ -3,8 +3,8 @@ package resource
 import "github.com/J-Obog/paidoff/db"
 
 type Response struct {
-	Body    interface{}
-	Success bool
+	Body   []byte
+	Status int
 }
 
 type Request struct {
@@ -15,22 +15,14 @@ type Request struct {
 	Body        []byte
 }
 
+//responses
 type AuthLoginResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 }
 
-type AuthLoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type AuthRefreshResponse struct {
 	AccessToken string `json:"accessToken"`
-}
-
-type AuthRevokeRequest struct {
-	Token string `json:"token"`
 }
 
 type AccountResponse struct {
@@ -41,23 +33,12 @@ type AccountResponse struct {
 	UpdatedAt            int64  `json:"updatedAt"`
 }
 
-type AccountUpdateRequest struct {
-	Email                string `json:"email"`
-	NotificationsEnabled bool   `json:"notificationsEnabled"`
-}
-
-type AccountCreateRequest struct {
-	Id       string `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type CategoryResponse struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	ImageUrl  string `json:""`
-	CreatedAt int64
-	UpdatedAt int64
+	CreatedAt int64  `json:"createdAt"`
+	UpdatedAt int64  `json:"updatedAt"`
 }
 
 type CategoryListResponse struct {
@@ -80,6 +61,27 @@ type GoalResponse struct {
 
 type GoalListResponse struct {
 	Goals []GoalResponse `json:"goals"`
+}
+
+//requests
+type AuthLoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type AuthRevokeRequest struct {
+	Token string `json:"token"`
+}
+
+type AccountUpdateRequest struct {
+	Email                string `json:"email"`
+	NotificationsEnabled bool   `json:"notificationsEnabled"`
+}
+
+type AccountCreateRequest struct {
+	Id       string `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type GoalUpdateRequest struct {
