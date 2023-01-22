@@ -43,7 +43,54 @@ func (this *AccountResource) GetAccount(req Request) *Response {
 }
 
 func (this *AccountResource) UpdateAccount(req Request) *Response {
-	return nil
+	var accountUpdateRequest AccountUpdateRequest
+
+	err := json.Unmarshal(req.Body, &accountUpdateRequest)
+
+	if err != nil {
+		//return 500
+	}
+
+	accountId := mustGetAccountId(req)
+	account, err := this.accountStore.Get(accountId)
+
+	if err != nil {
+		//return 500
+	}
+
+	if account == nil {
+		//return 404
+	}
+
+	if accountUpdateRequest.Password != nil {
+
+	}
+
+	if accountUpdateRequest.Email != nil {
+
+	}
+
+	if accountUpdateRequest.NotificationsEnabled != nil {
+		account.NotificationsEnabled = *accountUpdateRequest.NotificationsEnabled
+	}
+
+	err = this.accountStore.Update(*account)
+
+	if err != nil {
+		//return 500
+	}
+
+	accountResponse := this.toAccountResponse(*account)
+	responseBody, err := json.Marshal(accountResponse)
+
+	if err != nil {
+		//return 500
+	}
+
+	return &Response{
+		Body:   responseBody,
+		Status: http.StatusOK,
+	}
 }
 
 func (this *AccountResource) CreateAccount(req Request) *Response {

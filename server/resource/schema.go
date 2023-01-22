@@ -74,8 +74,9 @@ type AuthRevokeRequest struct {
 }
 
 type AccountUpdateRequest struct {
-	Email                string `json:"email"`
-	NotificationsEnabled bool   `json:"notificationsEnabled"`
+	Email                *string `json:"email"`
+	Password             *string `json:"password"`
+	NotificationsEnabled *bool   `json:"notificationsEnabled"`
 }
 
 type AccountCreateRequest struct {
