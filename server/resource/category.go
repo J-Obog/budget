@@ -44,10 +44,26 @@ func (this *CategoryResource) GetCategory(req Request) *Response {
 }
 
 func (this *CategoryResource) GetCategories(req Request) *Response {
+	categories, err := this.categoryStore.GetAll()
+
+	categoryListResponse := this.toCategoryListResponse(categories)
+	responseBody, err := json.Marshal(categoryListResponse)
+
+	if err != nil {
+		//return 500
+	}
+
+	return &Response{
+		Body:   responseBody,
+		Status: http.StatusOK,
+	}
+}
+
+func (this *CategoryResource) toCategoryResponse(category db.Category) *CategoryResponse {
 	return nil
 }
 
-func (this *CategoryResource) toCategoryResponse(category db.Category) *AccountResponse {
+func (this *CategoryResource) toCategoryListResponse(categories []db.Category) *CategoryListResponse {
 	return nil
 }
 
