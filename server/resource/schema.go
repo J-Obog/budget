@@ -86,8 +86,6 @@ type AccountCreateRequest struct {
 
 type GoalUpdateRequest struct {
 	CategoryId    *string  `json:"categoryId"`
-	Month         *int64   `json:"month"`
-	Year          *int64   `json:"year"`
 	Name          *string  `json:"name"`
 	CurrentAmount *float64 `json:"currentAmount"`
 	TargetAmount  *float64 `json:"targetAmount"`
