@@ -1,10 +1,12 @@
 package store
 
-import "github.com/J-Obog/paidoff/models"
+import (
+	"github.com/J-Obog/paidoff/data"
+)
 
 type AccountStore interface {
-	Get(id string) (error *models.Account)
-	Insert(account models.Account) error
-	Update(account models.Account) error
+	Get(id string) (error *data.Account)
+	Insert(account data.Account) error
+	Update(account data.Account) error
 	Delete(id string) error
 }

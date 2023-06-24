@@ -1,15 +1,15 @@
 package server
 
 import (
-	resource "github.com/J-Obog/paidoff/resources"
+	"github.com/J-Obog/paidoff/api"
 )
 
 type Server interface {
 	Start(port int,
-		accountResource *resource.AccountResource,
-		authResource *resource.AuthResource,
-		budgetResource *resource.BudgetResource,
-		categoryResource *resource.CategoryResource,
-		transactionResource *resource.TransactionResource,
+		accountAPI *api.AccountAPI,
+		authAPI *api.AuthAPI,
+		budgetAPI *api.BudgetAPI,
+		categoryAPI *api.CategoryAPI,
+		transactionAPI *api.TransactionAPI,
 	) error
 }

@@ -1,10 +1,10 @@
 package store
 
-import "github.com/J-Obog/paidoff/models"
+import "github.com/J-Obog/paidoff/data"
 
 type TransactionStore interface {
-	Get(id string) (error, *models.Transaction)
-	Insert(transaction models.Transaction) error
-	Update(transaction models.Transaction) error
+	Get(id string) (error, *data.Transaction)
+	Insert(transaction data.Transaction) error
+	Update(transaction data.Transaction) error
 	Delete(id string) error
 }

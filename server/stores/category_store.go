@@ -1,10 +1,10 @@
 package store
 
-import "github.com/J-Obog/paidoff/models"
+import "github.com/J-Obog/paidoff/data"
 
 type CategoryStore interface {
-	Get(id string) (error, *models.Category)
-	Insert(category models.Category) error
-	Update(account models.Account) error
+	Get(id string) (error, *data.Category)
+	Insert(category data.Category) error
+	Update(account data.Account) error
 	Delete(id string) error
 }
