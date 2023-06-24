@@ -1,10 +1,10 @@
 package models
 
 type Category struct {
-	Id        string
-	AccountId string
-	Name      string
-	Color     int
-	UpdatedAt int
-	CreatedAt int
+	Id        string `json:"id"`
+	AccountId string `json:"accountId"`
+	Name      string `json:"name"`
+	Color     int    `json:"color"`
+	UpdatedAt int    `json:"updatedAt"`
+	CreatedAt int    `json:"createdAt"`
 }

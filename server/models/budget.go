@@ -8,15 +8,15 @@ const (
 )
 
 type Budget struct {
-	Id         string
-	AccountId  string
-	CategoryId *string
-	Name       string
-	Type       BudgetType
-	Month      int
-	Year       int
-	Projected  float64
-	Actual     float64
-	CreatedAt  int
-	UpdatedAt  int
+	Id         string     `json:"id"`
+	AccountId  string     `json:"accountId"`
+	CategoryId *string    `json:"categoryId"`
+	Name       string     `json:"name"`
+	Type       BudgetType `json:"type"`
+	Month      int        `json:"month"`
+	Year       int        `json:"year"`
+	Projected  float64    `json:"projected"`
+	Actual     float64    `json:"actual"`
+	CreatedAt  int        `json:"createdAt"`
+	UpdatedAt  int        `json:"updatedAt"`
 }
