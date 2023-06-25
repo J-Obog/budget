@@ -87,11 +87,11 @@ func (pg *PostgresStore) GetBudget(id string) (*data.Budget, error) {
 	return nil, nil
 }
 
-func (pg *PostgresStore) InsertBudget(category data.Budget) error {
+func (pg *PostgresStore) InsertBudget(budget data.Budget) error {
 	return nil
 }
 
-func (pg *PostgresStore) UpdateBudget(category data.Budget) error {
+func (pg *PostgresStore) UpdateBudget(budget data.Budget) error {
 	return nil
 }
 
@@ -105,11 +105,11 @@ func (pg *PostgresStore) GetTransaction(id string) (*data.Transaction, error) {
 	return nil, nil
 }
 
-func (pg *PostgresStore) InsertTransaction(category data.Transaction) error {
+func (pg *PostgresStore) InsertTransaction(transaction data.Transaction) error {
 	return nil
 }
 
-func (pg *PostgresStore) UpdateTransaction(category data.Transaction) error {
+func (pg *PostgresStore) UpdateTransaction(transaction data.Transaction) error {
 	return nil
 }
 
