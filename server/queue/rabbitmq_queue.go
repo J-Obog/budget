@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/J-Obog/paidoff/data"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -23,7 +24,7 @@ func NewRabbitMqQueue(channel *amqp.Channel, name string) *RabbitMqQueue {
 	}
 }
 
-func (this *RabbitMqQueue) Push(message Message) error {
+func (this *RabbitMqQueue) Push(message data.Message) error {
 	ctx := context.Background()
 
 	payload, err := json.Marshal(message)
@@ -39,16 +40,16 @@ func (this *RabbitMqQueue) Push(message Message) error {
 	return this.channel.PublishWithContext(ctx, exchange, this.name, true, false, msg)
 }
 
-func (this *RabbitMqQueue) Pull() ([]Message, error) {
+func (this *RabbitMqQueue) Pull() ([]data.Message, error) {
 	messageChan, err := this.channel.Consume(this.name, "", true, false, false, false, nil)
-	messages := make([]Message, len(messageChan))
+	messages := make([]data.Message, len(messageChan))
 
 	if err != nil {
 		return nil, err
 	}
 
 	for message := range messageChan {
-		var msg Message
+		var msg data.Message
 
 		err = json.Unmarshal(message.Body, &msg)
 

@@ -5,7 +5,7 @@ import (
 )
 
 type AccountStore interface {
-	Get(id string) (error *data.Account)
+	Get(id string) (*data.Account, error)
 	Insert(account data.Account) error
 	Update(account data.Account) error
 	Delete(id string) error

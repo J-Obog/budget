@@ -1,11 +1,13 @@
 package api
 
-import "github.com/J-Obog/paidoff/data"
+import (
+	"github.com/J-Obog/paidoff/data"
+)
 
 type TransactionAPI struct {
 }
 
-func (api *TransactionAPI) GetTransaction(req *data.RestRequest, res *data.RestResponse) error {
+func (api *TransactionAPI) GetTransaction(req *data.RestRequest, res *data.RestResponse) error {\
 	return nil
 }
 
