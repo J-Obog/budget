@@ -7,6 +7,7 @@ type Store interface {
 	InsertAccount(account data.Account) error
 	UpdateAccount(account data.Account) error
 	DeleteAccount(id string) error
+	DeleteAllAccounts() error
 
 	GetCategory(id string) (*data.Category, error)
 	InsertCategory(account data.Category) error

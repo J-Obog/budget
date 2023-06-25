@@ -19,25 +19,18 @@ func NewPostgresStore(dbClient *gorm.DB) *PostgresStore {
 
 // Account queries
 
-func (pg *PostgresStore) GetAccount(id string) (*data.Account, error) {
-	account := &data.Account{}
+func (pg *PostgresStore) GetAccount(id string) (account *data.Account, e error) {
+	err := pg.client.Where("id = ?", id).First(account).Error
 
-	err := pg.client.First(account).Where(data.Account{Id: id}).Error
-
-	if err == nil {
-		return account, nil
+	if err == nil || errors.Is(err, gorm.ErrRecordNotFound) {
+		return
 	}
 
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-
-	return nil, err
+	e = err
 }
 
 func (pg *PostgresStore) InsertAccount(account data.Account) error {
-	err := pg.client.Create(&account).Error
-	return err
+	return pg.client.Create(&account).Error
 }
 
 func (pg *PostgresStore) UpdateAccount(account data.Account) error {
