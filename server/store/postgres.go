@@ -17,16 +17,37 @@ func NewPostgresStore(dbClient *gorm.DB) *PostgresStore {
 	}
 }
 
+func (pg *PostgresStore) Flush() error {
+	if err := pg.client.Delete(data.Account{}).Error; err != nil {
+		return err
+	}
+
+	if err := pg.client.Delete(data.Budget{}).Error; err != nil {
+		return err
+	}
+
+	if err := pg.client.Delete(data.Transaction{}).Error; err != nil {
+		return err
+	}
+
+	if err := pg.client.Delete(data.Category{}).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Account queries
 
 func (pg *PostgresStore) GetAccount(id string) (account *data.Account, e error) {
-	err := pg.client.Where("id = ?", id).First(account).Error
+	err := pg.client.Where(data.Account{Id: id}).First(account).Error
 
 	if err == nil || errors.Is(err, gorm.ErrRecordNotFound) {
 		return
 	}
 
 	e = err
+	return
 }
 
 func (pg *PostgresStore) InsertAccount(account data.Account) error {
