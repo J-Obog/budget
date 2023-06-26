@@ -22,17 +22,17 @@ func (pg *PostgresStore) Flush() error {
 		return err
 	}
 
-	if err := pg.client.Delete(data.Budget{}).Error; err != nil {
+	/*if err := pg.client.Delete(data.Budget{}).Error; err != nil {
 		return err
-	}
+	}*/
 
-	if err := pg.client.Delete(data.Transaction{}).Error; err != nil {
+	/*if err := pg.client.Delete(data.Transaction{}).Error; err != nil {
 		return err
-	}
+	}*/
 
-	if err := pg.client.Delete(data.Category{}).Error; err != nil {
+	/*if err := pg.client.Delete(data.Category{}).Error; err != nil {
 		return err
-	}
+	}*/
 
 	return nil
 }
@@ -40,8 +40,9 @@ func (pg *PostgresStore) Flush() error {
 // Account queries
 
 func (pg *PostgresStore) GetAccount(id string) (account *data.Account, e error) {
-	err := pg.client.Where(data.Account{Id: id}).First(account).Error
+	account = new(data.Account)
 
+	err := pg.client.Where(data.Account{Id: id}).First(account).Error
 	if err == nil || errors.Is(err, gorm.ErrRecordNotFound) {
 		return
 	}
