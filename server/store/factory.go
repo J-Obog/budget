@@ -17,6 +17,7 @@ func MakeStore(cfg *config.AppConfig) (Store, error) {
 	case "postgres":
 		pgDb, err := gorm.Open(postgres.Open(cfg.PostgresUrl), &gorm.Config{
 			AllowGlobalUpdate: true,
+			NowFunc:           nil,
 		})
 
 		if err != nil {

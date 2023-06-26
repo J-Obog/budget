@@ -39,16 +39,19 @@ func (pg *PostgresStore) Flush() error {
 
 // Account queries
 
-func (pg *PostgresStore) GetAccount(id string) (account *data.Account, e error) {
-	account = new(data.Account)
+func (pg *PostgresStore) GetAccount(id string) (*data.Account, error) {
+	account := new(data.Account)
 
 	err := pg.client.Where(data.Account{Id: id}).First(account).Error
-	if err == nil || errors.Is(err, gorm.ErrRecordNotFound) {
-		return
+	if err == nil {
+		return account, nil
 	}
 
-	e = err
-	return
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+
+	return nil, err
 }
 
 func (pg *PostgresStore) InsertAccount(account data.Account) error {
@@ -56,7 +59,7 @@ func (pg *PostgresStore) InsertAccount(account data.Account) error {
 }
 
 func (pg *PostgresStore) UpdateAccount(account data.Account) error {
-	err := pg.client.Save(&account).Error
+	err := pg.client.UpdateColumns(&account).Error
 	return err
 }
 
