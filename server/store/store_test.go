@@ -51,6 +51,21 @@ func makeBudget() data.Budget {
 	}
 }
 
+func makeTransaction() data.Transaction {
+	return data.Transaction{
+		Id:          "t-12354",
+		AccountId:   "testing-45678",
+		BudgetId:    "testy-123",
+		Description: nil,
+		Amount:      590.20,
+		Month:       9,
+		Day:         5,
+		Year:        2028,
+		CreatedAt:   123,
+		UpdatedAt:   456,
+	}
+}
+
 func TestAccounts(t *testing.T) {
 	store := getStore(t)
 
@@ -177,5 +192,69 @@ func TestBudgets(t *testing.T) {
 		fetchedBudget, err := store.GetBudget(testId)
 		assert.NoError(t, err)
 		assert.Nil(t, fetchedBudget)
+	})
+}
+
+func TestTransactions(t *testing.T) {
+	store := getStore(t)
+
+	t.Run("it inserts and gets", func(t *testing.T) {
+		setup(t, store)
+
+		testId := "test-1"
+
+		transaction := makeTransaction()
+		transaction.Id = testId
+
+		err := store.InsertTransaction(transaction)
+		assert.NoError(t, err)
+
+		fetchedTransaction, err := store.GetTransaction(testId)
+		assert.NoError(t, err)
+		assert.Equal(t, transaction, *fetchedTransaction)
+	})
+
+	t.Run("it updates", func(t *testing.T) {
+		setup(t, store)
+
+		oldAmount := float64(123)
+		newAmount := float64(9000)
+
+		testId := "t-123456"
+
+		transaction := makeTransaction()
+		transaction.Id = testId
+		transaction.Amount = oldAmount
+
+		err := store.InsertTransaction(transaction)
+		assert.NoError(t, err)
+
+		transaction.Amount = newAmount
+
+		err = store.UpdateTransaction(transaction)
+		assert.NoError(t, err)
+
+		fetchedTransaction, err := store.GetTransaction(testId)
+		assert.NoError(t, err)
+		assert.Equal(t, transaction, *fetchedTransaction)
+	})
+
+	t.Run("it deletes", func(t *testing.T) {
+		setup(t, store)
+
+		testId := "t-1"
+
+		transaction := makeTransaction()
+		transaction.Id = testId
+
+		err := store.InsertTransaction(transaction)
+		assert.NoError(t, err)
+
+		err = store.DeleteTransaction(testId)
+		assert.NoError(t, err)
+
+		fetchedTransaction, err := store.GetTransaction(testId)
+		assert.NoError(t, err)
+		assert.Nil(t, fetchedTransaction)
 	})
 }
