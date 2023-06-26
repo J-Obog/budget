@@ -33,4 +33,13 @@ CREATE TABLE IF NOT EXISTS transactions (
 	"day" INTEGER NOT NULL,
 	"created_at" BIGINT NOT NULL,
 	"updated_at" BIGINT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+    "id" VARCHAR PRIMARY KEY,
+	"account_id" VARCHAR NOT NULL,
+	"name" VARCHAR NOT NULL,
+	"color" INTEGER NOT NULL,
+	"created_at" BIGINT NOT NULL,
+	"updated_at" BIGINT NOT NULL
 )

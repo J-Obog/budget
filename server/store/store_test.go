@@ -66,6 +66,17 @@ func makeTransaction() data.Transaction {
 	}
 }
 
+func makeCategory() data.Category {
+	return data.Category{
+		Id:        "testing-1234",
+		AccountId: "t-3",
+		Name:      "personal",
+		Color:     1234,
+		CreatedAt: 123,
+		UpdatedAt: 456,
+	}
+}
+
 func TestAccounts(t *testing.T) {
 	store := getStore(t)
 
@@ -256,5 +267,69 @@ func TestTransactions(t *testing.T) {
 		fetchedTransaction, err := store.GetTransaction(testId)
 		assert.NoError(t, err)
 		assert.Nil(t, fetchedTransaction)
+	})
+}
+
+func TestCategories(t *testing.T) {
+	store := getStore(t)
+
+	t.Run("it inserts and gets", func(t *testing.T) {
+		setup(t, store)
+
+		testId := "test-1"
+
+		category := makeCategory()
+		category.Id = testId
+
+		err := store.InsertCategory(category)
+		assert.NoError(t, err)
+
+		fetchedCategory, err := store.GetCategory(testId)
+		assert.NoError(t, err)
+		assert.Equal(t, category, *fetchedCategory)
+	})
+
+	t.Run("it updates", func(t *testing.T) {
+		setup(t, store)
+
+		oldColorCode := 1233445
+		newColorCode := 4556652
+
+		testId := "t-123456"
+
+		category := makeCategory()
+		category.Id = testId
+		category.Color = oldColorCode
+
+		err := store.InsertCategory(category)
+		assert.NoError(t, err)
+
+		category.Color = newColorCode
+
+		err = store.UpdateCategory(category)
+		assert.NoError(t, err)
+
+		fetchedCategory, err := store.GetCategory(testId)
+		assert.NoError(t, err)
+		assert.Equal(t, category, *fetchedCategory)
+	})
+
+	t.Run("it deletes", func(t *testing.T) {
+		setup(t, store)
+
+		testId := "t-1"
+
+		category := makeCategory()
+		category.Id = testId
+
+		err := store.InsertCategory(category)
+		assert.NoError(t, err)
+
+		err = store.DeleteCategory(testId)
+		assert.NoError(t, err)
+
+		fetchedCategory, err := store.GetCategory(testId)
+		assert.NoError(t, err)
+		assert.Nil(t, fetchedCategory)
 	})
 }
