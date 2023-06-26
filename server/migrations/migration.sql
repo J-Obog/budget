@@ -1,9 +1,23 @@
 CREATE TABLE IF NOT EXISTS accounts (
     "id" VARCHAR PRIMARY KEY,
-    "name" VARCHAR,
-    "email" VARCHAR,
-	"password" VARCHAR,
-	"is_activated" BOOLEAN,
-	"created_at"   BIGINT,
-	"updated_at" BIGINT
+    "name" VARCHAR NOT NULL,
+    "email" VARCHAR NOT NULL,
+	"password" VARCHAR NOT NULL,
+	"is_activated" BOOLEAN NOT NULL,
+	"created_at"   BIGINT NOT NULL,
+	"updated_at" BIGINT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS budgets (
+    "id" VARCHAR PRIMARY KEY,
+	"account_id" VARCHAR NOT NULL,
+	"category_id" VARCHAR NULL,
+	"name" VARCHAR NOT NULL,
+	"type" SMALLINT NOT NULL,
+	"month" INTEGER NOT NULL,
+	"year" INTEGER NOT NULL,
+	"projected" FLOAT NOT NULL,
+	"actual" FLOAT NOT NULL,
+	"created_at"   BIGINT NOT NULL,
+	"updated_at" BIGINT NOT NULL
 )
