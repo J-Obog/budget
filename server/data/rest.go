@@ -3,6 +3,7 @@ package data
 type RestRequest struct {
 	Url         string
 	Headers     map[string]interface{}
+	Meta        map[string]interface{}
 	UrlParams   map[string]interface{}
 	QueryParams map[string]interface{}
 	Metadata    map[string]interface{}
@@ -11,5 +12,9 @@ type RestRequest struct {
 
 type RestResponse struct {
 	Data   interface{}
-	Status int64
+	Status int
+}
+
+type AccountUpdateRequest struct {
+	Name string `json:"name"`
 }

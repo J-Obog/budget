@@ -1,5 +1,12 @@
 package data
 
+type BudgetType uint
+
+const (
+	BudgetType_INCOME  BudgetType = 0
+	BudgetType_EXPENSE BudgetType = 1
+)
+
 type Account struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
@@ -9,13 +16,6 @@ type Account struct {
 	CreatedAt   int64 `json:"createdAt"`
 	UpdatedAt   int64 `json:"updatedAt"`
 }
-
-type BudgetType uint
-
-const (
-	BudgetType_INCOME  BudgetType = 0
-	BudgetType_EXPENSE BudgetType = 1
-)
 
 type Budget struct {
 	Id         string     `json:"id"`
