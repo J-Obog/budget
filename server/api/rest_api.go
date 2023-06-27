@@ -79,12 +79,12 @@ func (api *RestAPI) DeleteAccount(req *data.RestRequest, res *data.RestResponse)
 		return err
 	}
 
-	err = api.store.DeleteAccount(account.Id)
+	account.IsDeleted = true
+
+	err = api.store.UpdateAccount(account)
 	if err != nil {
 		return err
 	}
-
-	//
 
 	res.Status = http.StatusOK
 	return nil

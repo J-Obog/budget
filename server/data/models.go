@@ -13,6 +13,7 @@ type Account struct {
 	Email       string `json:"email"`
 	Password    string
 	IsActivated bool  `json:"isActivated"`
+	IsDeleted   bool  `json:"isDeleted"`
 	CreatedAt   int64 `json:"createdAt"`
 	UpdatedAt   int64 `json:"updatedAt"`
 }

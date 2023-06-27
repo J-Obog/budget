@@ -29,6 +29,7 @@ func makeAccount() data.Account {
 		Name:        "John Doe",
 		Email:       "jdoe@gmail.com",
 		Password:    "foobar",
+		IsDeleted:   false,
 		IsActivated: true,
 		CreatedAt:   1234,
 		UpdatedAt:   4567,
