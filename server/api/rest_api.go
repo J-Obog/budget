@@ -3,12 +3,14 @@ package api
 import (
 	"net/http"
 
+	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/store"
 )
 
 type RestAPI struct {
 	store store.Store
+	clock clock.Clock
 }
 
 func (api *RestAPI) getAccount(req *data.RestRequest, res *data.RestResponse) (data.Account, error) {
@@ -60,7 +62,7 @@ func (api *RestAPI) UpdateAccount(req *data.RestRequest, res *data.RestResponse)
 	}
 
 	account.Name = updateReq.Name
-	account.UpdatedAt = 123456 //TODO: use clock time
+	account.UpdatedAt = api.clock.Now()
 
 	err = api.store.UpdateAccount(account)
 
