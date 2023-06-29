@@ -9,6 +9,7 @@ type Store interface {
 	DeleteAccount(id string) error
 
 	GetCategory(id string) (*data.Category, error)
+	GetCategories(accountId string) ([]data.Category, error)
 	InsertCategory(category data.Category) error
 	UpdateCategory(category data.Category) error
 	DeleteCategory(id string) error

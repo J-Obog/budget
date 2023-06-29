@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/J-Obog/paidoff/data"
@@ -14,16 +13,6 @@ func isErrorResponse(status int) bool {
 		status == http.StatusInternalServerError)
 }
 
-func ICast[T interface{}](v interface{}) (T, error) {
-	val, ok := v.(T)
-
-	if !ok {
-		return val, errors.New("failed to convert")
-	}
-
-	return val, nil
-}
-
 func FromJSON[T interface{}](body []byte) (T, error) {
 	var d T
 	err := json.Unmarshal(body, d)
@@ -33,6 +22,10 @@ func FromJSON[T interface{}](body []byte) (T, error) {
 	}
 
 	return d, nil
+}
+
+func ToJSON(serializable interface{}) ([]byte, error) {
+	return json.Marshal(serializable)
 }
 
 func buildServerError(res *data.RestResponse, err error) {

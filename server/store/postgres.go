@@ -84,6 +84,17 @@ func (pg *PostgresStore) GetCategory(id string) (*data.Category, error) {
 	return nil, err
 }
 
+func (pg *PostgresStore) GetCategories(accountId string) ([]data.Category, error) {
+	categories := make([]data.Category, 0)
+
+	err := pg.client.Where(data.Category{AccountId: accountId}).Find(&categories).Error
+	if err == nil {
+		return categories, nil
+	}
+
+	return nil, err
+}
+
 func (pg *PostgresStore) InsertCategory(category data.Category) error {
 	return pg.client.Create(&category).Error
 }
