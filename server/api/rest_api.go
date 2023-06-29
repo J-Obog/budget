@@ -96,6 +96,18 @@ func (api *RestAPI) GetCategory(req *data.RestRequest, res *data.RestResponse) {
 	buildOKResponse(res, category)
 }
 
+func (api *RestAPI) GetCategories(req *data.RestRequest, res *data.RestResponse) {
+	accountId := getAccount(req).Id
+	categories, err := api.store.GetCategories(accountId)
+
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	buildOKResponse(res, categories)
+}
+
 func (api *RestAPI) CreateCategory(req *data.RestRequest, res *data.RestResponse) {
 	createReq, err := FromJSON[data.CategoryCreateRequest](req.Body)
 	if err != nil {
