@@ -4,18 +4,20 @@ import (
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/store"
+	"github.com/J-Obog/paidoff/uid"
 )
 
 type RestAPI struct {
-	store store.Store
-	clock clock.Clock
+	store       store.Store
+	clock       clock.Clock
+	uidProvider uid.UIDProvider
 }
 
 func (api *RestAPI) makeNewCategory(accountId string, req data.CategoryCreateRequest) data.Category {
 	now := api.clock.Now()
 
 	return data.Category{
-		Id:        "", //Update
+		Id:        api.uidProvider.GetId(),
 		AccountId: accountId,
 		Name:      req.Name,
 		Color:     req.Color,
