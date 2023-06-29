@@ -13,36 +13,6 @@ type RestAPI struct {
 	uidProvider uid.UIDProvider
 }
 
-func (api *RestAPI) makeNewTransaction(accountId string, req data.TransactionCreateRequest) data.Transaction {
-	now := api.clock.Now()
-
-	return data.Transaction{
-		Id:          api.uidProvider.GetId(),
-		AccountId:   accountId,
-		CategoryId:  req.CategoryId,
-		Description: req.Description,
-		Amount:      req.Amount,
-		Month:       req.Month,
-		Day:         req.Day,
-		Year:        req.Year,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
-}
-
-func (api *RestAPI) makeNewCategory(accountId string, req data.CategoryCreateRequest) data.Category {
-	now := api.clock.Now()
-
-	return data.Category{
-		Id:        api.uidProvider.GetId(),
-		AccountId: accountId,
-		Name:      req.Name,
-		Color:     req.Color,
-		UpdatedAt: now,
-		CreatedAt: now,
-	}
-}
-
 func (api *RestAPI) checkCategoryExists(accountId string, categoryId string, res *data.RestResponse) {
 	category, err := api.store.GetCategory(categoryId)
 
@@ -55,10 +25,6 @@ func (api *RestAPI) checkCategoryExists(accountId string, categoryId string, res
 		buildForbiddenError(res)
 		return
 	}
-}
-
-func getAccount(req *data.RestRequest) data.Account {
-	return req.Meta["curr_account"].(data.Account)
 }
 
 func (api *RestAPI) getCategory(req *data.RestRequest, res *data.RestResponse) data.Category {
@@ -121,8 +87,8 @@ func (api *RestAPI) UpdateAccount(req *data.RestRequest, res *data.RestResponse)
 		return
 	}
 
-	account.Name = updateReq.Name
-	account.UpdatedAt = api.clock.Now()
+	now := api.clock.Now()
+	buildUpdatedAccount(now, updateReq, &account)
 
 	if err := api.store.UpdateAccount(account); err != nil {
 		buildServerError(res, err)
@@ -197,9 +163,13 @@ func (api *RestAPI) UpdateCategory(req *data.RestRequest, res *data.RestResponse
 		return
 	}
 
-	category.Color = updateReq.Color
-	category.Name = updateReq.Name
-	category.UpdatedAt = api.clock.Now()
+	now := api.clock.Now()
+	buildUpdatedCategory(now, updateReq, &category)
+
+	if err := api.store.UpdateCategory(category); err != nil {
+		buildServerError(res, err)
+		return
+	}
 
 	buildOKResponse(res, category)
 }
@@ -245,7 +215,9 @@ func (api *RestAPI) CreateTransaction(req *data.RestRequest, res *data.RestRespo
 		}
 	}
 
-	newTransaction := api.makeNewTransaction(accountId, createReq)
+	id := api.uidProvider.GetId()
+	now := api.clock.Now()
+	newTransaction := makeNewTransaction(id, accountId, now, createReq)
 
 	if err := api.store.InsertTransaction(newTransaction); err != nil {
 		buildServerError(res, err)
@@ -276,12 +248,8 @@ func (api *RestAPI) UpdateTransaction(req *data.RestRequest, res *data.RestRespo
 		}
 	}
 
-	transaction.CategoryId = updateReq.CategoryId
-	transaction.Description = updateReq.Description
-	transaction.Amount = updateReq.Amount
-	transaction.Month = updateReq.Month
-	transaction.Day = updateReq.Day
-	transaction.Year = updateReq.Year
+	now := api.clock.Now()
+	buildUpdatedTransaction(now, updateReq, &transaction)
 
 	if err := api.store.UpdateTransaction(transaction); err != nil {
 		buildServerError(res, err)
