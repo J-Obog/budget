@@ -19,17 +19,16 @@ type Account struct {
 }
 
 type Budget struct {
-	Id         string     `json:"id"`
-	AccountId  string     `json:"accountId"`
-	CategoryId *string    `json:"categoryId"`
-	Name       string     `json:"name"`
-	Type       BudgetType `json:"type"`
-	Month      int        `json:"month"`
-	Year       int        `json:"year"`
-	Projected  float64    `json:"projected"`
-	Actual     float64    `json:"actual"`
-	CreatedAt  int64      `json:"createdAt"`
-	UpdatedAt  int64      `json:"updatedAt"`
+	Id         string  `json:"id"`
+	AccountId  string  `json:"accountId"`
+	CategoryId *string `json:"categoryId"`
+	Name       string  `json:"name"`
+	Month      int     `json:"month"`
+	Year       int     `json:"year"`
+	Projected  float64 `json:"projected"`
+	Actual     float64 `json:"actual"`
+	CreatedAt  int64   `json:"createdAt"`
+	UpdatedAt  int64   `json:"updatedAt"`
 }
 
 type Category struct {
@@ -42,14 +41,15 @@ type Category struct {
 }
 
 type Transaction struct {
-	Id          string  `json:"id"`
-	AccountId   string  `json:"accountId"`
-	BudgetId    string  `json:"budgetId"`
-	Description *string `json:"description"`
-	Amount      float64 `json:"amount"`
-	Month       int     `json:"month"`
-	Day         int     `json:"day"`
-	Year        int     `json:"year"`
-	CreatedAt   int64   `json:"createdAt"`
-	UpdatedAt   int64   `json:"updatedAt"`
+	Id          string     `json:"id"`
+	AccountId   string     `json:"accountId"`
+	CategoryId  *string    `json:"categoryId"`
+	Description *string    `json:"description"`
+	Type        BudgetType `json:"budgetType"`
+	Amount      float64    `json:"amount"`
+	Month       int        `json:"month"`
+	Day         int        `json:"day"`
+	Year        int        `json:"year"`
+	CreatedAt   int64      `json:"createdAt"`
+	UpdatedAt   int64      `json:"updatedAt"`
 }

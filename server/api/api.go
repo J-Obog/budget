@@ -13,6 +13,23 @@ type RestAPI struct {
 	uidProvider uid.UIDProvider
 }
 
+func (api *RestAPI) makeNewTransaction(accountId string, req data.TransactionCreateRequest) data.Transaction {
+	now := api.clock.Now()
+
+	return data.Transaction{
+		Id:          api.uidProvider.GetId(),
+		AccountId:   accountId,
+		CategoryId:  req.CategoryId,
+		Description: req.Description,
+		Amount:      req.Amount,
+		Month:       req.Month,
+		Day:         req.Day,
+		Year:        req.Year,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+}
+
 func (api *RestAPI) makeNewCategory(accountId string, req data.CategoryCreateRequest) data.Category {
 	now := api.clock.Now()
 
@@ -26,12 +43,26 @@ func (api *RestAPI) makeNewCategory(accountId string, req data.CategoryCreateReq
 	}
 }
 
+func (api *RestAPI) checkCategoryExists(accountId string, categoryId string, res *data.RestResponse) {
+	category, err := api.store.GetCategory(categoryId)
+
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	if category == nil || category.AccountId != accountId {
+		buildForbiddenError(res)
+		return
+	}
+}
+
 func getAccount(req *data.RestRequest) data.Account {
 	return req.Meta["curr_account"].(data.Account)
 }
 
 func (api *RestAPI) getCategory(req *data.RestRequest, res *data.RestResponse) data.Category {
-	id := req.UrlParams["category_id"].(string)
+	id := req.UrlParams["categoryId"].(string)
 	category, err := api.store.GetCategory(id)
 
 	if err != nil {
@@ -51,6 +82,30 @@ func (api *RestAPI) getCategory(req *data.RestRequest, res *data.RestResponse) d
 
 	return *category
 }
+
+func (api *RestAPI) getTransaction(req *data.RestRequest, res *data.RestResponse) data.Transaction {
+	id := req.UrlParams["transactionId"].(string)
+	transaction, err := api.store.GetTransaction(id)
+
+	if err != nil {
+		buildServerError(res, err)
+		return data.Transaction{}
+	}
+
+	if transaction == nil {
+		buildNotFoundError(res)
+		return data.Transaction{}
+	}
+
+	if transaction.AccountId != getAccount(req).Id {
+		buildForbiddenError(res)
+		return data.Transaction{}
+	}
+
+	return *transaction
+}
+
+// Accounts
 
 func (api *RestAPI) GetAccount(req *data.RestRequest, res *data.RestResponse) {
 	account := getAccount(req)
@@ -89,6 +144,7 @@ func (api *RestAPI) DeleteAccount(req *data.RestRequest, res *data.RestResponse)
 	buildOKResponse(res, account)
 }
 
+// Categories
 func (api *RestAPI) GetCategory(req *data.RestRequest, res *data.RestResponse) {
 	category := api.getCategory(req, res)
 	if isErrorResponse(res.Status) {
@@ -161,4 +217,91 @@ func (api *RestAPI) DeleteCategory(req *data.RestRequest, res *data.RestResponse
 	}
 
 	buildOKResponse(res, category)
+}
+
+// Transactions
+func (api *RestAPI) GetTransaction(req *data.RestRequest, res *data.RestResponse) {
+	transaction := api.getTransaction(req, res)
+	if isErrorResponse(res.Status) {
+		return
+	}
+
+	buildOKResponse(res, transaction)
+}
+
+func (api *RestAPI) CreateTransaction(req *data.RestRequest, res *data.RestResponse) {
+	createReq, err := FromJSON[data.TransactionCreateRequest](req.Body)
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	accountId := getAccount(req).Id
+
+	if createReq.CategoryId != nil {
+		api.checkCategoryExists(accountId, *createReq.CategoryId, res)
+		if isErrorResponse(res.Status) {
+			return
+		}
+	}
+
+	newTransaction := api.makeNewTransaction(accountId, createReq)
+
+	if err := api.store.InsertTransaction(newTransaction); err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	buildOKResponse(res, newTransaction)
+}
+
+func (api *RestAPI) UpdateTransaction(req *data.RestRequest, res *data.RestResponse) {
+	transaction := api.getTransaction(req, res)
+
+	if isErrorResponse(res.Status) {
+		return
+	}
+
+	updateReq, err := FromJSON[data.TransactionUpdateRequest](req.Body)
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	if updateReq.CategoryId != nil {
+		accountId := getAccount(req).Id
+		api.checkCategoryExists(accountId, *updateReq.CategoryId, res)
+		if isErrorResponse(res.Status) {
+			return
+		}
+	}
+
+	transaction.CategoryId = updateReq.CategoryId
+	transaction.Description = updateReq.Description
+	transaction.Amount = updateReq.Amount
+	transaction.Month = updateReq.Month
+	transaction.Day = updateReq.Day
+	transaction.Year = updateReq.Year
+
+	if err := api.store.UpdateTransaction(transaction); err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	buildOKResponse(res, transaction)
+}
+
+func (api *RestAPI) DeleteTransaction(req *data.RestRequest, res *data.RestResponse) {
+	transaction := api.getTransaction(req, res)
+
+	if isErrorResponse(res.Status) {
+		return
+	}
+
+	if err := api.store.DeleteCategory(transaction.Id); err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	buildOKResponse(res, transaction)
 }
