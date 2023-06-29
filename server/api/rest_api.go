@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/store"
@@ -13,81 +11,35 @@ type RestAPI struct {
 	clock clock.Clock
 }
 
-func (api *RestAPI) getAccount(req *data.RestRequest, res *data.RestResponse) (data.Account, error) {
-	var account data.Account
-
-	accountId, err := ICast[string](req.Meta["account_id"])
-
-	if err != nil {
-		return account, err
-	}
-
-	dbAccount, err := api.store.GetAccount(accountId)
-
-	if err != nil {
-		return account, err
-	}
-
-	if dbAccount == nil {
-		res.Status = http.StatusNotFound
-		return account, nil
-	}
-
-	return *dbAccount, nil
+func (api *RestAPI) GetAccount(req *data.RestRequest) data.RestResponse {
+	account := getAccount(req)
+	return buildOKResponse(account)
 }
 
-func (api *RestAPI) GetAccount(req *data.RestRequest, res *data.RestResponse) error {
-	account, err := api.getAccount(req, res)
+func (api *RestAPI) UpdateAccount(req *data.RestRequest) data.RestResponse {
+	account := getAccount(req)
 
-	if ResponseIsError(res.Status, err) {
-		return err
+	if updateReq, err := FromJSON[data.AccountUpdateRequest](req.Body); err != nil {
+		return buildServerError(err)
+	} else {
+		account.Name = updateReq.Name
+		account.UpdatedAt = api.clock.Now()
 	}
 
-	res.Data = account
-	res.Status = http.StatusOK
-	return nil
+	if err := api.store.UpdateAccount(account); err != nil {
+		return buildServerError(err)
+	}
+
+	return buildOKResponse(nil)
 }
 
-func (api *RestAPI) UpdateAccount(req *data.RestRequest, res *data.RestResponse) error {
-	account, err := api.getAccount(req, res)
-
-	if ResponseIsError(res.Status, err) {
-		return err
-	}
-
-	updateReq, err := FromJSON[data.AccountUpdateRequest](req.Body)
-
-	if err != nil {
-		return err
-	}
-
-	account.Name = updateReq.Name
-	account.UpdatedAt = api.clock.Now()
-
-	err = api.store.UpdateAccount(account)
-
-	if err != nil {
-		return err
-	}
-
-	res.Status = http.StatusOK
-	return nil
-}
-
-func (api *RestAPI) DeleteAccount(req *data.RestRequest, res *data.RestResponse) error {
-	account, err := api.getAccount(req, res)
-
-	if ResponseIsError(res.Status, err) {
-		return err
-	}
-
+func (api *RestAPI) DeleteAccount(req *data.RestRequest) data.RestResponse {
+	account := getAccount(req)
 	account.IsDeleted = true
 
-	err = api.store.UpdateAccount(account)
-	if err != nil {
-		return err
+	if err := api.store.UpdateAccount(account); err != nil {
+		return buildServerError(err)
 	}
 
-	res.Status = http.StatusOK
-	return nil
+	return buildOKResponse(account)
 }

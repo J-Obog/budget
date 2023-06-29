@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/J-Obog/paidoff/data"
 )
 
 func ResponseIsError(status int, err error) bool {
@@ -32,4 +34,27 @@ func FromJSON[T interface{}](body []byte) (T, error) {
 	}
 
 	return d, nil
+}
+
+func buildServerError(err error) data.RestResponse {
+	return data.RestResponse{
+		Status: http.StatusInternalServerError,
+	}
+}
+
+func buildNotFoundError() data.RestResponse {
+	return data.RestResponse{
+		Status: http.StatusNotFound,
+	}
+}
+
+func buildOKResponse(d interface{}) data.RestResponse {
+	return data.RestResponse{
+		Status: http.StatusOK,
+		Data:   d,
+	}
+}
+
+func getAccount(req *data.RestRequest) data.Account {
+	return req.Meta["curr_account"].(data.Account)
 }
