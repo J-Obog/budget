@@ -28,8 +28,8 @@ type Budget struct {
 	Year       int        `json:"year"`
 	Projected  float64    `json:"projected"`
 	Actual     float64    `json:"actual"`
-	CreatedAt  int        `json:"createdAt"`
-	UpdatedAt  int        `json:"updatedAt"`
+	CreatedAt  int64      `json:"createdAt"`
+	UpdatedAt  int64      `json:"updatedAt"`
 }
 
 type Category struct {
@@ -37,8 +37,8 @@ type Category struct {
 	AccountId string `json:"accountId"`
 	Name      string `json:"name"`
 	Color     int    `json:"color"`
-	UpdatedAt int    `json:"updatedAt"`
-	CreatedAt int    `json:"createdAt"`
+	UpdatedAt int64  `json:"updatedAt"`
+	CreatedAt int64  `json:"createdAt"`
 }
 
 type Transaction struct {
@@ -50,6 +50,6 @@ type Transaction struct {
 	Month       int     `json:"month"`
 	Day         int     `json:"day"`
 	Year        int     `json:"year"`
-	CreatedAt   int     `json:"createdAt"`
-	UpdatedAt   int     `json:"updatedAt"`
+	CreatedAt   int64   `json:"createdAt"`
+	UpdatedAt   int64   `json:"updatedAt"`
 }

@@ -18,3 +18,12 @@ type RestResponse struct {
 type AccountUpdateRequest struct {
 	Name string `json:"name"`
 }
+
+type CategoryCreateRequest struct {
+	Name  string `json:"name"`
+	Color int    `json:"color"`
+}
+
+type CategoryUpdateRequest struct {
+	CategoryCreateRequest
+}

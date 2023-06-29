@@ -8,9 +8,8 @@ import (
 	"github.com/J-Obog/paidoff/data"
 )
 
-func ResponseIsError(status int, err error) bool {
-	return (err != nil ||
-		status == http.StatusForbidden ||
+func isErrorResponse(status int) bool {
+	return (status == http.StatusForbidden ||
 		status == http.StatusNotFound ||
 		status == http.StatusInternalServerError)
 }
@@ -36,25 +35,19 @@ func FromJSON[T interface{}](body []byte) (T, error) {
 	return d, nil
 }
 
-func buildServerError(err error) data.RestResponse {
-	return data.RestResponse{
-		Status: http.StatusInternalServerError,
-	}
+func buildServerError(res *data.RestResponse, err error) {
+	res.Status = http.StatusInternalServerError
 }
 
-func buildNotFoundError() data.RestResponse {
-	return data.RestResponse{
-		Status: http.StatusNotFound,
-	}
+func buildNotFoundError(res *data.RestResponse) {
+	res.Status = http.StatusNotFound
 }
 
-func buildOKResponse(d interface{}) data.RestResponse {
-	return data.RestResponse{
-		Status: http.StatusOK,
-		Data:   d,
-	}
+func buildForbiddenError(res *data.RestResponse) {
+	res.Status = http.StatusForbidden
 }
 
-func getAccount(req *data.RestRequest) data.Account {
-	return req.Meta["curr_account"].(data.Account)
+func buildOKResponse(res *data.RestResponse, d interface{}) {
+	res.Status = http.StatusOK
+	res.Data = d
 }
