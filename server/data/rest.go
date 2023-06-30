@@ -40,3 +40,11 @@ type TransactionCreateRequest struct {
 type TransactionUpdateRequest struct {
 	TransactionCreateRequest
 }
+
+type TransactionQuery struct {
+	CreatedBefore *int64     `json:"createdBefore"`
+	CreatedAfter  *int64     `json:"createdAfter"`
+	AmountGte     *float64   `json:"amountGte"`
+	AmountLte     *float64   `json:"amountLte"`
+	Categories    []Category `json:"categories"`
+}

@@ -199,6 +199,41 @@ func (api *RestAPI) GetTransaction(req *data.RestRequest, res *data.RestResponse
 	buildOKResponse(res, transaction)
 }
 
+func (api *RestAPI) GetTransactions(req *data.RestRequest, res *data.RestResponse) {
+	q, err := FromMap[data.TransactionQuery](req.QueryParams)
+
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	accountId := getAccount(req).Id
+	transactions, err := api.store.GetTransactions(accountId)
+	filtered := make([]data.Transaction, 0)
+
+	for _, transaction := range transactions {
+		if q.AmountGte != nil && (transaction.Amount < *q.AmountGte) {
+			continue
+		}
+		if q.AmountLte != nil && (transaction.Amount > *q.AmountLte) {
+			continue
+		}
+		if q.CreatedAfter != nil && (transaction.CreatedAt <= *q.CreatedAfter) {
+			continue
+		}
+		if q.CreatedBefore != nil && (transaction.CreatedAt >= *q.CreatedBefore) {
+			continue
+		}
+		if q.Categories != nil /*check categories*/ {
+			continue
+		}
+
+		filtered = append(filtered, transaction)
+	}
+
+	buildOKResponse(res, filtered)
+}
+
 func (api *RestAPI) CreateTransaction(req *data.RestRequest, res *data.RestResponse) {
 	createReq, err := FromJSON[data.TransactionCreateRequest](req.Body)
 	if err != nil {
