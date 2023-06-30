@@ -230,7 +230,11 @@ func (api *RestAPI) GetTransactions(req *data.RestRequest, res *data.RestRespons
 	}
 
 	accountId := getAccount(req).Id
+
 	transactions, err := api.store.GetTransactions(accountId)
+	if err != nil {
+		buildServerError(res, err)
+	}
 
 	filter := NewFilter[data.Transaction]()
 	filter.AddCheck(filterTransaction(q))
@@ -322,6 +326,28 @@ func (api *RestAPI) GetBudget(req *data.RestRequest, res *data.RestResponse) {
 	}
 
 	buildOKResponse(res, budget)
+}
+
+func (api *RestAPI) GetBudgets(req *data.RestRequest, res *data.RestResponse) {
+	q, err := FromMap[data.BudgetQuery](req.QueryParams)
+
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	accountId := getAccount(req).Id
+
+	budgets, err := api.store.GetBudgets(accountId)
+	if err != nil {
+		buildServerError(res, err)
+	}
+
+	filter := NewFilter[data.Budget]()
+	filter.AddCheck(filterBudget(q))
+	filtered := filter.Filter(budgets)
+
+	buildOKResponse(res, filtered)
 }
 
 func (api *RestAPI) CreateBudget(req *data.RestRequest, res *data.RestResponse) {

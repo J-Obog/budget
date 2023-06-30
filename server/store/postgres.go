@@ -126,6 +126,17 @@ func (pg *PostgresStore) GetBudget(id string) (*data.Budget, error) {
 	return nil, err
 }
 
+func (pg *PostgresStore) GetBudgets(accountId string) ([]data.Budget, error) {
+	budgets := make([]data.Budget, 0)
+
+	err := pg.client.Where(data.Budget{AccountId: accountId}).Find(&budgets).Error
+	if err == nil {
+		return budgets, nil
+	}
+
+	return nil, err
+}
+
 func (pg *PostgresStore) InsertBudget(budget data.Budget) error {
 	return pg.client.Create(&budget).Error
 }
@@ -160,7 +171,7 @@ func (pg *PostgresStore) GetTransaction(id string) (*data.Transaction, error) {
 func (pg *PostgresStore) GetTransactions(accountId string) ([]data.Transaction, error) {
 	transactions := make([]data.Transaction, 0)
 
-	err := pg.client.Where(data.Category{AccountId: accountId}).Find(&transactions).Error
+	err := pg.client.Where(data.Transaction{AccountId: accountId}).Find(&transactions).Error
 	if err == nil {
 		return transactions, nil
 	}

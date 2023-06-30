@@ -15,6 +15,7 @@ type Store interface {
 	DeleteCategory(id string) error
 
 	GetBudget(id string) (*data.Budget, error)
+	GetBudgets(accountId string) ([]data.Budget, error)
 	InsertBudget(budget data.Budget) error
 	UpdateBudget(budget data.Budget) error
 	DeleteBudget(id string) error

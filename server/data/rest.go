@@ -61,3 +61,8 @@ type BudgetCreateRequest struct {
 type BudgetUpdateRequest struct {
 	BudgetCreateRequest
 }
+
+type BudgetQuery struct {
+	Month *int `json:"month"`
+	Year  *int `json:"year"`
+}

@@ -40,6 +40,19 @@ func (f *Filter[T]) Filter(items []T) []T {
 	return filtered
 }
 
+func filterBudget(q data.BudgetQuery) func(data.Budget) bool {
+	return func(b data.Budget) bool {
+		if (q.Month != nil) && (b.Month < *q.Month) {
+			return false
+		}
+		if (q.Year != nil) && (b.Year > *q.Year) {
+			return false
+		}
+
+		return true
+	}
+}
+
 func filterTransaction(q data.TransactionQuery) func(data.Transaction) bool {
 	return func(t data.Transaction) bool {
 		if (q.AmountGte != nil) && (t.Amount < *q.AmountGte) {
