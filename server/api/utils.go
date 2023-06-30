@@ -87,6 +87,40 @@ func buildUpdatedTransaction(timestamp int64, req data.TransactionUpdateRequest,
 	ref.UpdatedAt = timestamp
 }
 
+/*
+CategoryId *string `json:"categoryId"`
+	Name       string  `json:"name"`
+	Month      int     `json:"month"`
+	Year       int     `json:"year"`
+	Projected  float64 `json:"projected"`
+	Actual     float64 `json:"actual"`
+*/
+
+func buildUpdatedBudget(timestamp int64, req data.BudgetUpdateRequest, ref *data.Budget) {
+	ref.CategoryId = req.CategoryId
+	ref.Name = req.Name
+	ref.Month = req.Month
+	ref.Year = req.Year
+	ref.Projected = req.Projected
+	ref.Actual = req.Actual
+	ref.UpdatedAt = timestamp
+}
+
+func makeNewBudget(id string, accountId string, timestamp int64, req data.BudgetCreateRequest) data.Budget {
+	return data.Budget{
+		Id:         id,
+		AccountId:  accountId,
+		CategoryId: req.CategoryId,
+		Name:       req.Name,
+		Month:      req.Month,
+		Year:       req.Year,
+		Projected:  req.Projected,
+		Actual:     req.Actual,
+		CreatedAt:  timestamp,
+		UpdatedAt:  timestamp,
+	}
+}
+
 func makeNewTransaction(id string, accountId string, timestamp int64, req data.TransactionCreateRequest) data.Transaction {
 	return data.Transaction{
 		Id:          id,

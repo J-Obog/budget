@@ -71,6 +71,28 @@ func (api *RestAPI) getTransaction(req *data.RestRequest, res *data.RestResponse
 	return *transaction
 }
 
+func (api *RestAPI) getBudget(req *data.RestRequest, res *data.RestResponse) data.Budget {
+	id := req.UrlParams["budgetId"].(string)
+	budget, err := api.store.GetBudget(id)
+
+	if err != nil {
+		buildServerError(res, err)
+		return data.Budget{}
+	}
+
+	if budget == nil {
+		buildNotFoundError(res)
+		return data.Budget{}
+	}
+
+	if budget.AccountId != getAccount(req).Id {
+		buildForbiddenError(res)
+		return data.Budget{}
+	}
+
+	return *budget
+}
+
 // Accounts
 
 func (api *RestAPI) GetAccount(req *data.RestRequest, res *data.RestResponse) {
@@ -290,4 +312,89 @@ func (api *RestAPI) DeleteTransaction(req *data.RestRequest, res *data.RestRespo
 	}
 
 	buildOKResponse(res, transaction)
+}
+
+// Budgets
+func (api *RestAPI) GetBudget(req *data.RestRequest, res *data.RestResponse) {
+	budget := api.getBudget(req, res)
+	if isErrorResponse(res.Status) {
+		return
+	}
+
+	buildOKResponse(res, budget)
+}
+
+func (api *RestAPI) CreateBudget(req *data.RestRequest, res *data.RestResponse) {
+	createReq, err := FromJSON[data.BudgetCreateRequest](req.Body)
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	accountId := getAccount(req).Id
+
+	if createReq.CategoryId != nil {
+		api.checkCategoryExists(accountId, *createReq.CategoryId, res)
+		if isErrorResponse(res.Status) {
+			return
+		}
+	}
+
+	id := api.uidProvider.GetId()
+	now := api.clock.Now()
+	newBudget := makeNewBudget(id, accountId, now, createReq)
+
+	if err := api.store.InsertBudget(newBudget); err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	buildOKResponse(res, newBudget)
+}
+
+func (api *RestAPI) UpdateBudget(req *data.RestRequest, res *data.RestResponse) {
+	budget := api.getBudget(req, res)
+
+	if isErrorResponse(res.Status) {
+		return
+	}
+
+	updateReq, err := FromJSON[data.BudgetUpdateRequest](req.Body)
+	if err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	if updateReq.CategoryId != nil {
+		accountId := getAccount(req).Id
+		api.checkCategoryExists(accountId, *updateReq.CategoryId, res)
+		if isErrorResponse(res.Status) {
+			return
+		}
+	}
+
+	now := api.clock.Now()
+	buildUpdatedBudget(now, updateReq, &budget)
+
+	if err := api.store.UpdateBudget(budget); err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	buildOKResponse(res, budget)
+}
+
+func (api *RestAPI) DeleteBudget(req *data.RestRequest, res *data.RestResponse) {
+	budget := api.getBudget(req, res)
+
+	if isErrorResponse(res.Status) {
+		return
+	}
+
+	if err := api.store.DeleteBudget(budget.Id); err != nil {
+		buildServerError(res, err)
+		return
+	}
+
+	buildOKResponse(res, budget)
 }

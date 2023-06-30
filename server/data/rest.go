@@ -48,3 +48,16 @@ type TransactionQuery struct {
 	AmountLte     *float64   `json:"amountLte"`
 	Categories    []Category `json:"categories"`
 }
+
+type BudgetCreateRequest struct {
+	CategoryId *string `json:"categoryId"`
+	Name       string  `json:"name"`
+	Month      int     `json:"month"`
+	Year       int     `json:"year"`
+	Projected  float64 `json:"projected"`
+	Actual     float64 `json:"actual"`
+}
+
+type BudgetUpdateRequest struct {
+	BudgetCreateRequest
+}
