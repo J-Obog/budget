@@ -157,6 +157,17 @@ func (pg *PostgresStore) GetTransaction(id string) (*data.Transaction, error) {
 	return nil, err
 }
 
+func (pg *PostgresStore) GetTransactions(accountId string) ([]data.Transaction, error) {
+	transactions := make([]data.Transaction, 0)
+
+	err := pg.client.Where(data.Category{AccountId: accountId}).Find(&transactions).Error
+	if err == nil {
+		return transactions, nil
+	}
+
+	return nil, err
+}
+
 func (pg *PostgresStore) InsertTransaction(transaction data.Transaction) error {
 	return pg.client.Create(&transaction).Error
 }

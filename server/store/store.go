@@ -20,6 +20,7 @@ type Store interface {
 	DeleteBudget(id string) error
 
 	GetTransaction(id string) (*data.Transaction, error)
+	GetTransactions(accountId string) ([]data.Transaction, error)
 	InsertTransaction(transaction data.Transaction) error
 	UpdateTransaction(transaction data.Transaction) error
 	DeleteTransaction(id string) error

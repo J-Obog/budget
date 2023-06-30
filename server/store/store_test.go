@@ -185,6 +185,35 @@ func TestTransactions(t *testing.T) {
 		fetchedTransaction, _ := store.GetTransaction(testId)
 		assert.Nil(t, fetchedTransaction)
 	})
+
+	t.Run("it gets categories by account", func(t *testing.T) {
+		setup(t, store)
+
+		accountId := "test-12345"
+
+		t1 := makeTransaction()
+		t1.Id = "t-1"
+		t1.AccountId = accountId
+
+		t2 := makeTransaction()
+		t2.Id = "t-2"
+		t2.AccountId = accountId
+
+		t3 := makeTransaction()
+		t3.Id = "t-3"
+		t3.AccountId = accountId
+
+		store.InsertTransaction(t1)
+		store.InsertTransaction(t2)
+		store.InsertTransaction(t3)
+
+		expected := []data.Transaction{t1, t2, t3}
+
+		actual, err := store.GetTransactions(accountId)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, actual, expected)
+	})
+
 }
 
 func TestCategories(t *testing.T) {
@@ -246,7 +275,7 @@ func TestCategories(t *testing.T) {
 		assert.Nil(t, fetchedCategory)
 	})
 
-	t.Run("it gets categories", func(t *testing.T) {
+	t.Run("it gets categories by account", func(t *testing.T) {
 		setup(t, store)
 
 		accountId := "test-12345"

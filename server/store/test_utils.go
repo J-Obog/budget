@@ -42,7 +42,6 @@ func makeBudget() data.Budget {
 		AccountId:  "test-456",
 		CategoryId: nil,
 		Name:       "eating",
-		Type:       data.BudgetType_EXPENSE,
 		Month:      8,
 		Year:       2023,
 		Projected:  115.60,
@@ -56,8 +55,9 @@ func makeTransaction() data.Transaction {
 	return data.Transaction{
 		Id:          "t-12354",
 		AccountId:   "testing-45678",
-		BudgetId:    "testy-123",
+		CategoryId:  nil,
 		Description: nil,
+		Type:        data.BudgetType_INCOME,
 		Amount:      590.20,
 		Month:       9,
 		Day:         5,
