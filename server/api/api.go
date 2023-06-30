@@ -209,27 +209,10 @@ func (api *RestAPI) GetTransactions(req *data.RestRequest, res *data.RestRespons
 
 	accountId := getAccount(req).Id
 	transactions, err := api.store.GetTransactions(accountId)
-	filtered := make([]data.Transaction, 0)
 
-	for _, transaction := range transactions {
-		if q.AmountGte != nil && (transaction.Amount < *q.AmountGte) {
-			continue
-		}
-		if q.AmountLte != nil && (transaction.Amount > *q.AmountLte) {
-			continue
-		}
-		if q.CreatedAfter != nil && (transaction.CreatedAt <= *q.CreatedAfter) {
-			continue
-		}
-		if q.CreatedBefore != nil && (transaction.CreatedAt >= *q.CreatedBefore) {
-			continue
-		}
-		if q.Categories != nil /*check categories*/ {
-			continue
-		}
-
-		filtered = append(filtered, transaction)
-	}
+	filter := NewFilter[data.Transaction]()
+	filter.AddCheck(filterTransaction(q))
+	filtered := filter.Filter(transactions)
 
 	buildOKResponse(res, filtered)
 }
