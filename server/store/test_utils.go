@@ -1,79 +1,57 @@
 package store
 
 import (
-	"testing"
+	"log"
 
 	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/assert"
 )
 
-func setup(t *testing.T, store Store) {
-	err := store.Flush()
-	assert.NoError(t, err)
+func setup(cfg *DBConfig) {
+	cfg.AccountStore.DeleteAll()
+	cfg.BudgetStore.DeleteAll()
+	cfg.CategoryStore.DeleteAll()
+	cfg.TransactionStore.DeleteAll()
 }
 
-func getStore(t *testing.T) Store {
+func dbIntegrationTest() *DBConfig {
 	cfg, err := config.MakeConfig("local")
-	assert.NoError(t, err)
 
-	s, err := MakeStore(cfg)
-	assert.NoError(t, err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	return s
+	return MakeDBConfig(cfg)
 }
 
-func makeAccount() data.Account {
+func testAccount() data.Account {
 	return data.Account{
-		Id:          "test-12345",
-		Name:        "John Doe",
-		Email:       "jdoe@gmail.com",
-		Password:    "foobar",
-		IsDeleted:   false,
-		IsActivated: true,
-		CreatedAt:   1234,
-		UpdatedAt:   4567,
+		Id:        "test-12345",
+		UpdatedAt: 1234,
+		CreatedAt: 1234,
 	}
 }
 
-func makeBudget() data.Budget {
+func testBudget() data.Budget {
 	return data.Budget{
-		Id:         "test-123",
-		AccountId:  "test-456",
-		CategoryId: nil,
-		Name:       "eating",
-		Month:      8,
-		Year:       2023,
-		Projected:  115.60,
-		Actual:     67.89,
-		CreatedAt:  123,
-		UpdatedAt:  456,
+		Id:        "test-123",
+		UpdatedAt: 1234,
+		CreatedAt: 1234,
 	}
 }
 
-func makeTransaction() data.Transaction {
+func testTransaction() data.Transaction {
 	return data.Transaction{
-		Id:          "t-12354",
-		AccountId:   "testing-45678",
-		CategoryId:  nil,
-		Description: nil,
-		Type:        data.BudgetType_INCOME,
-		Amount:      590.20,
-		Month:       9,
-		Day:         5,
-		Year:        2028,
-		CreatedAt:   123,
-		UpdatedAt:   456,
+		Id:        "t-12354",
+		UpdatedAt: 1234,
+		CreatedAt: 1234,
 	}
 }
 
-func makeCategory() data.Category {
+func testCategory() data.Category {
 	return data.Category{
 		Id:        "testing-1234",
-		AccountId: "t-3",
-		Name:      "personal",
-		Color:     1234,
-		CreatedAt: 123,
-		UpdatedAt: 456,
+		UpdatedAt: 1234,
+		CreatedAt: 1234,
 	}
 }

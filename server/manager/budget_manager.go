@@ -21,12 +21,35 @@ func (manager *BudgetManager) GetByAccount(accountId string) ([]data.Budget, err
 	return manager.store.GetByAccount(accountId)
 }
 
-func (manager *BudgetManager) Create(req data.BudgetCreateRequest) error {
-	return nil
+func (manager *BudgetManager) Create(accountId string, req data.BudgetCreateRequest) error {
+	now := manager.clock.Now()
+
+	newBudget := data.Budget{
+		Id:         manager.uid.GetId(),
+		AccountId:  accountId,
+		CategoryId: req.CategoryId,
+		Name:       req.Name,
+		Month:      req.Month,
+		Year:       req.Year,
+		Projected:  req.Projected,
+		Actual:     req.Actual,
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}
+
+	return manager.store.Insert(newBudget)
 }
 
 func (manager *BudgetManager) Update(existing *data.Budget, req data.BudgetUpdateRequest) error {
-	return nil
+	existing.CategoryId = req.CategoryId
+	existing.Name = req.Name
+	existing.Month = req.Month
+	existing.Year = req.Year
+	existing.Projected = req.Projected
+	existing.Actual = req.Actual
+	existing.UpdatedAt = manager.clock.Now()
+
+	return manager.store.Update(*existing)
 }
 
 func (manager *BudgetManager) Delete(id string) error {

@@ -7,61 +7,49 @@ import (
 )
 
 func TestAccountStore(t *testing.T) {
-	store := getStore(t)
+	it := dbIntegrationTest()
 
 	t.Run("it inserts and gets", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
 
-		testId := "testing-123"
+		account := testAccount()
 
-		account := makeAccount()
-		account.Id = testId
-
-		err := store.InsertAccount(account)
+		err := it.AccountStore.Insert(account)
 		assert.NoError(t, err)
 
-		fetchedAccount, err := store.GetAccount(testId)
+		fetched, err := it.AccountStore.Get(account.Id)
 		assert.NoError(t, err)
-		assert.Equal(t, account, *fetchedAccount)
+		assert.Equal(t, account, *fetched)
 	})
 
 	t.Run("it updates", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
 
-		testId := "testing-123"
+		account := testAccount()
+		account.Email = "jdoe@gmail.com"
 
-		oldEmail := "jdoe@gmail.com"
-		newEmail := "jdoe@yahoo.com"
+		it.AccountStore.Insert(account)
 
-		account := makeAccount()
-		account.Id = testId
-		account.Email = oldEmail
+		account.Email = "jdoe@yahoo.com"
 
-		store.InsertAccount(account)
-
-		account.Email = newEmail
-
-		err := store.UpdateAccount(account)
+		err := it.AccountStore.Update(account)
 		assert.NoError(t, err)
 
-		fetchedAccount, _ := store.GetAccount(testId)
-		assert.Equal(t, account, *fetchedAccount)
+		fetched, _ := it.AccountStore.Get(account.Id)
+		assert.Equal(t, account, *fetched)
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
 
-		testId := "testing-123"
+		account := testAccount()
 
-		account := makeAccount()
-		account.Id = testId
+		it.AccountStore.Insert(account)
 
-		store.InsertAccount(account)
-
-		err := store.DeleteAccount(testId)
+		err := it.AccountStore.Delete(account.Id)
 		assert.NoError(t, err)
 
-		fetchedAccount, _ := store.GetAccount(testId)
-		assert.Nil(t, fetchedAccount)
+		fetched, _ := it.AccountStore.Get(account.Id)
+		assert.Nil(t, fetched)
 	})
 }

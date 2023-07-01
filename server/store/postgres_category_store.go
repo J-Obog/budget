@@ -50,3 +50,8 @@ func (pg *PostgresCategoryStore) Delete(id string) error {
 	err := pg.db.Delete(data.Category{Id: id}).Error
 	return err
 }
+
+func (pg *PostgresCategoryStore) DeleteAll() error {
+	err := pg.db.Delete(data.Category{}).Error
+	return err
+}

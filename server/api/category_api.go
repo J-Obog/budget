@@ -35,7 +35,7 @@ func (api *CategoryAPI) CreateCategory(req *data.RestRequest) *data.RestResponse
 		return buildServerError(err)
 	}
 
-	if err := api.categoryManager.Create(createReq); err != nil {
+	if err := api.categoryManager.Create(getAccountCtx(req).Id, createReq); err != nil {
 		return buildServerError(err)
 	}
 

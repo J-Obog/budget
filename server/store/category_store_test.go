@@ -7,89 +7,74 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCategories(t *testing.T) {
-	store := getStore(t)
+func TestCategoryStore(t *testing.T) {
+	it := dbIntegrationTest()
 
 	t.Run("it inserts and gets", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		category := testCategory()
 
-		testId := "test-1"
-
-		category := makeCategory()
-		category.Id = testId
-
-		err := store.InsertCategory(category)
+		err := it.CategoryStore.Insert(category)
 		assert.NoError(t, err)
 
-		fetchedCategory, err := store.GetCategory(testId)
+		fetched, err := it.CategoryStore.Get(category.Id)
 		assert.NoError(t, err)
-		assert.Equal(t, category, *fetchedCategory)
+		assert.Equal(t, category, *fetched)
 	})
 
 	t.Run("it updates", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		category := testCategory()
+		category.Color = 1234
 
-		oldColorCode := 1233445
-		newColorCode := 4556652
+		it.CategoryStore.Insert(category)
 
-		testId := "t-123456"
+		category.Color = 56789
 
-		category := makeCategory()
-		category.Id = testId
-		category.Color = oldColorCode
-
-		store.InsertCategory(category)
-
-		category.Color = newColorCode
-
-		err := store.UpdateCategory(category)
+		err := it.CategoryStore.Update(category)
 		assert.NoError(t, err)
 
-		fetchedCategory, _ := store.GetCategory(testId)
-		assert.Equal(t, category, *fetchedCategory)
+		fetched, _ := it.CategoryStore.Get(category.Id)
+		assert.Equal(t, category, *fetched)
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		category := testCategory()
 
-		testId := "t-1"
+		it.CategoryStore.Insert(category)
 
-		category := makeCategory()
-		category.Id = testId
-
-		store.InsertCategory(category)
-
-		err := store.DeleteCategory(testId)
+		err := it.CategoryStore.Delete(category.Id)
 		assert.NoError(t, err)
 
-		fetchedCategory, _ := store.GetCategory(testId)
-		assert.Nil(t, fetchedCategory)
+		fetched, _ := it.CategoryStore.Get(category.Id)
+		assert.Nil(t, fetched)
 	})
 
 	t.Run("it gets categories by account", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
 
-		accountId := "test-12345"
+		accountId := "acc12345"
 
-		cat1 := makeCategory()
+		cat1 := testCategory()
 		cat1.Id = "t-1"
 		cat1.AccountId = accountId
 
-		cat2 := makeCategory()
+		cat2 := testCategory()
 		cat2.Id = "t-2"
 		cat2.AccountId = accountId
 
-		cat3 := makeCategory()
+		cat3 := testCategory()
 		cat3.Id = "t-3"
-		cat3.AccountId = accountId
+		cat3.AccountId = "notid"
 
-		store.InsertCategory(cat1)
-		store.InsertCategory(cat2)
-		store.InsertCategory(cat3)
+		it.CategoryStore.Insert(cat1)
+		it.CategoryStore.Insert(cat2)
+		it.CategoryStore.Insert(cat3)
 
-		expected := []data.Category{cat1, cat2, cat3}
+		expected := []data.Category{cat1, cat2}
 
-		actual, err := store.GetCategories(accountId)
+		actual, err := it.CategoryStore.GetByAccount(accountId)
 		assert.NoError(t, err)
 		assert.ElementsMatch(t, actual, expected)
 	})

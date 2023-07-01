@@ -29,7 +29,9 @@ func MakeDBConfig(cfg *config.AppConfig) *DBConfig {
 			Logger:            logger.Default.LogMode(logger.Silent),
 		})
 
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		return &DBConfig{
 			AccountStore:     &PostgresAccountStore{db: pgDb},

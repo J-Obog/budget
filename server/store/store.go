@@ -7,6 +7,7 @@ type AccountStore interface {
 	Insert(account data.Account) error
 	Update(account data.Account) error
 	Delete(id string) error
+	DeleteAll() error
 }
 
 type CategoryStore interface {
@@ -15,6 +16,7 @@ type CategoryStore interface {
 	Insert(category data.Category) error
 	Update(category data.Category) error
 	Delete(id string) error
+	DeleteAll() error
 }
 
 type BudgetStore interface {
@@ -23,6 +25,7 @@ type BudgetStore interface {
 	Insert(budget data.Budget) error
 	Update(budget data.Budget) error
 	Delete(id string) error
+	DeleteAll() error
 }
 
 type TransactionStore interface {
@@ -31,4 +34,5 @@ type TransactionStore interface {
 	Insert(transaction data.Transaction) error
 	Update(transaction data.Transaction) error
 	Delete(id string) error
+	DeleteAll() error
 }

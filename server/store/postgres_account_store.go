@@ -39,3 +39,8 @@ func (pg *PostgresAccountStore) Delete(id string) error {
 	err := pg.db.Delete(data.Account{Id: id}).Error
 	return err
 }
+
+func (pg *PostgresAccountStore) DeleteAll() error {
+	err := pg.db.Delete(data.Account{}).Error
+	return err
+}

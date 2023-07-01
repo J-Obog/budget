@@ -50,3 +50,8 @@ func (pg *PostgresTransactionStore) Delete(id string) error {
 	err := pg.db.Delete(data.Transaction{Id: id}).Error
 	return err
 }
+
+func (pg *PostgresTransactionStore) DeleteAll() error {
+	err := pg.db.Delete(data.Transaction{}).Error
+	return err
+}

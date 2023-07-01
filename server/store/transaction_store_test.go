@@ -7,89 +7,74 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTransactions(t *testing.T) {
-	store := getStore(t)
+func TestTransactionStore(t *testing.T) {
+	it := dbIntegrationTest()
 
 	t.Run("it inserts and gets", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		transaction := testTransaction()
 
-		testId := "test-1"
-
-		transaction := makeTransaction()
-		transaction.Id = testId
-
-		err := store.InsertTransaction(transaction)
+		err := it.TransactionStore.Insert(transaction)
 		assert.NoError(t, err)
 
-		fetchedTransaction, err := store.GetTransaction(testId)
+		fetched, err := it.TransactionStore.Get(transaction.Id)
 		assert.NoError(t, err)
-		assert.Equal(t, transaction, *fetchedTransaction)
+		assert.Equal(t, transaction, *fetched)
 	})
 
 	t.Run("it updates", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		transaction := testTransaction()
+		transaction.Year = 1999
 
-		oldAmount := float64(123)
-		newAmount := float64(9000)
+		it.TransactionStore.Insert(transaction)
 
-		testId := "t-123456"
+		transaction.Year = 2001
 
-		transaction := makeTransaction()
-		transaction.Id = testId
-		transaction.Amount = oldAmount
-
-		store.InsertTransaction(transaction)
-
-		transaction.Amount = newAmount
-
-		err := store.UpdateTransaction(transaction)
+		err := it.TransactionStore.Update(transaction)
 		assert.NoError(t, err)
 
-		fetchedTransaction, _ := store.GetTransaction(testId)
-		assert.Equal(t, transaction, *fetchedTransaction)
+		fetched, _ := it.TransactionStore.Get(transaction.Id)
+		assert.Equal(t, transaction, *fetched)
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		transaction := testTransaction()
 
-		testId := "t-1"
+		it.TransactionStore.Insert(transaction)
 
-		transaction := makeTransaction()
-		transaction.Id = testId
-
-		store.InsertTransaction(transaction)
-
-		err := store.DeleteTransaction(testId)
+		err := it.TransactionStore.Delete(transaction.Id)
 		assert.NoError(t, err)
 
-		fetchedTransaction, _ := store.GetTransaction(testId)
-		assert.Nil(t, fetchedTransaction)
+		fetched, _ := it.TransactionStore.Get(transaction.Id)
+		assert.Nil(t, fetched)
 	})
 
-	t.Run("it gets categories by account", func(t *testing.T) {
-		setup(t, store)
+	t.Run("it gets transactions by account", func(t *testing.T) {
+		setup(it)
 
 		accountId := "test-12345"
 
-		t1 := makeTransaction()
+		t1 := testTransaction()
 		t1.Id = "t-1"
 		t1.AccountId = accountId
 
-		t2 := makeTransaction()
+		t2 := testTransaction()
 		t2.Id = "t-2"
 		t2.AccountId = accountId
 
-		t3 := makeTransaction()
+		t3 := testTransaction()
 		t3.Id = "t-3"
-		t3.AccountId = accountId
+		t3.AccountId = "notid"
 
-		store.InsertTransaction(t1)
-		store.InsertTransaction(t2)
-		store.InsertTransaction(t3)
+		it.TransactionStore.Insert(t1)
+		it.TransactionStore.Insert(t2)
+		it.TransactionStore.Insert(t3)
 
-		expected := []data.Transaction{t1, t2, t3}
+		expected := []data.Transaction{t1, t2}
 
-		actual, err := store.GetTransactions(accountId)
+		actual, err := it.TransactionStore.GetByAccount(accountId)
 		assert.NoError(t, err)
 		assert.ElementsMatch(t, actual, expected)
 	})

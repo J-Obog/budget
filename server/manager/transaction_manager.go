@@ -21,12 +21,35 @@ func (manager *TransactionManager) GetByAccount(accountId string) ([]data.Transa
 	return manager.store.GetByAccount(accountId)
 }
 
-func (manager *TransactionManager) Create(req data.TransactionCreateRequest) error {
-	return nil
+func (manager *TransactionManager) Create(accountId string, req data.TransactionCreateRequest) error {
+	now := manager.clock.Now()
+
+	newTransaction := data.Transaction{
+		Id:          manager.uid.GetId(),
+		AccountId:   accountId,
+		CategoryId:  req.CategoryId,
+		Description: req.Description,
+		Amount:      req.Amount,
+		Month:       req.Month,
+		Day:         req.Day,
+		Year:        req.Year,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
+
+	return manager.store.Insert(newTransaction)
 }
 
 func (manager *TransactionManager) Update(existing *data.Transaction, req data.TransactionUpdateRequest) error {
-	return nil
+	existing.CategoryId = req.CategoryId
+	existing.Description = req.Description
+	existing.Amount = req.Amount
+	existing.Month = req.Month
+	existing.Day = req.Day
+	existing.Year = req.Year
+	existing.UpdatedAt = manager.clock.Now()
+
+	return manager.store.Update(*existing)
 }
 
 func (manager *TransactionManager) Delete(id string) error {

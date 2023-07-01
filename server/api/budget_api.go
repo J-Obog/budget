@@ -46,14 +46,12 @@ func (api *BudgetAPI) CreateBudget(req *data.RestRequest) *data.RestResponse {
 		return buildServerError(err)
 	}
 
-	//accountId := getAccountCtx(req).Id
-
 	errRes := validateCategoryId(createReq.CategoryId, req, api.categoryManager)
 	if errRes != nil {
 		return errRes
 	}
 
-	if err := api.budgetManager.Create(createReq); err != nil {
+	if err := api.budgetManager.Create(getAccountCtx(req).Id, createReq); err != nil {
 		return buildServerError(err)
 	}
 

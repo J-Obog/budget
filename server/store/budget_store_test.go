@@ -6,62 +6,47 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBudgets(t *testing.T) {
-	store := getStore(t)
+func TestBudgetStore(t *testing.T) {
+	it := dbIntegrationTest()
 
 	t.Run("it inserts and gets", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		budget := testBudget()
 
-		testId := "test-1"
-
-		budget := makeBudget()
-		budget.Id = testId
-
-		err := store.InsertBudget(budget)
+		err := it.BudgetStore.Insert(budget)
 		assert.NoError(t, err)
 
-		fetchedBudget, err := store.GetBudget(testId)
+		fetched, err := it.BudgetStore.Get(budget.Id)
 		assert.NoError(t, err)
-		assert.Equal(t, budget, *fetchedBudget)
+		assert.Equal(t, budget, *fetched)
 	})
 
 	t.Run("it updates", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		budget := testBudget()
+		budget.Month = 10
 
-		oldProjectedBudget := 12345
-		newProjectedBudget := 50000
+		it.BudgetStore.Insert(budget)
 
-		testId := "t-123456"
+		budget.Month = 9
 
-		budget := makeBudget()
-		budget.Id = testId
-		budget.Projected = float64(oldProjectedBudget)
-
-		store.InsertBudget(budget)
-
-		budget.Projected = float64(newProjectedBudget)
-
-		err := store.UpdateBudget(budget)
+		err := it.BudgetStore.Update(budget)
 		assert.NoError(t, err)
 
-		fetchedBudget, _ := store.GetBudget(testId)
-		assert.Equal(t, budget, *fetchedBudget)
+		fetched, _ := it.BudgetStore.Get(budget.Id)
+		assert.Equal(t, budget, *fetched)
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
-		setup(t, store)
+		setup(it)
+		budget := testBudget()
 
-		testId := "t-1"
+		it.BudgetStore.Insert(budget)
 
-		budget := makeBudget()
-		budget.Id = testId
-
-		store.InsertBudget(budget)
-
-		err := store.DeleteBudget(testId)
+		err := it.BudgetStore.Delete(budget.Id)
 		assert.NoError(t, err)
 
-		fetchedBudget, _ := store.GetBudget(testId)
-		assert.Nil(t, fetchedBudget)
+		fetched, _ := it.BudgetStore.Get(budget.Id)
+		assert.Nil(t, fetched)
 	})
 }

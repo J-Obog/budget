@@ -46,13 +46,12 @@ func (api *TransactionAPI) CreateTransaction(req *data.RestRequest) *data.RestRe
 		return buildServerError(err)
 	}
 
-	//accountId := getAccountCtx(req).Id
 	errRes := validateCategoryId(createReq.CategoryId, req, api.categoryManager)
 	if errRes != nil {
 		return errRes
 	}
 
-	if err := api.transactionManager.Create(createReq); err != nil {
+	if err := api.transactionManager.Create(getAccountCtx(req).Id, createReq); err != nil {
 		return buildServerError(err)
 	}
 
