@@ -2,29 +2,33 @@ package store
 
 import "github.com/J-Obog/paidoff/data"
 
-type Store interface {
-	GetAccount(id string) (*data.Account, error)
-	InsertAccount(account data.Account) error
-	UpdateAccount(account data.Account) error
-	DeleteAccount(id string) error
+type AccountStore interface {
+	Get(id string) (*data.Account, error)
+	Insert(account data.Account) error
+	Update(account data.Account) error
+	Delete(id string) error
+}
 
-	GetCategory(id string) (*data.Category, error)
-	GetCategories(accountId string) ([]data.Category, error)
-	InsertCategory(category data.Category) error
-	UpdateCategory(category data.Category) error
-	DeleteCategory(id string) error
+type CategoryStore interface {
+	Get(id string) (*data.Category, error)
+	GetByAccount(accountId string) ([]data.Category, error)
+	Insert(category data.Category) error
+	Update(category data.Category) error
+	Delete(id string) error
+}
 
-	GetBudget(id string) (*data.Budget, error)
-	GetBudgets(accountId string) ([]data.Budget, error)
-	InsertBudget(budget data.Budget) error
-	UpdateBudget(budget data.Budget) error
-	DeleteBudget(id string) error
+type BudgetStore interface {
+	Get(id string) (*data.Budget, error)
+	GetByAccount(accountId string) ([]data.Budget, error)
+	Insert(budget data.Budget) error
+	Update(budget data.Budget) error
+	Delete(id string) error
+}
 
-	GetTransaction(id string) (*data.Transaction, error)
-	GetTransactions(accountId string) ([]data.Transaction, error)
-	InsertTransaction(transaction data.Transaction) error
-	UpdateTransaction(transaction data.Transaction) error
-	DeleteTransaction(id string) error
-
-	Flush() error
+type TransactionStore interface {
+	Get(id string) (*data.Transaction, error)
+	GetByAccount(accountId string) ([]data.Transaction, error)
+	Insert(transaction data.Transaction) error
+	Update(transaction data.Transaction) error
+	Delete(id string) error
 }

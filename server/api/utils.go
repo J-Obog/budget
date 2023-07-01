@@ -45,27 +45,6 @@ func ToJSON(serializable interface{}) ([]byte, error) {
 	return json.Marshal(serializable)
 }
 
-func buildServerError(res *data.RestResponse, err error) {
-	res.Status = http.StatusInternalServerError
-}
-
-func buildNotFoundError(res *data.RestResponse) {
-	res.Status = http.StatusNotFound
-}
-
-func buildForbiddenError(res *data.RestResponse) {
-	res.Status = http.StatusForbidden
-}
-
-func buildOKResponse(res *data.RestResponse, d interface{}) {
-	res.Status = http.StatusOK
-	res.Data = d
-}
-
-func getAccount(req *data.RestRequest) data.Account {
-	return req.Meta["curr_account"].(data.Account)
-}
-
 func buildUpdatedAccount(timestamp int64, req data.AccountUpdateRequest, ref *data.Account) {
 	ref.UpdatedAt = timestamp
 	ref.Name = req.Name

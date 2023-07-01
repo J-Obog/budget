@@ -1,7 +1,7 @@
 package store
 
 import (
-	"errors"
+	"log"
 
 	"github.com/J-Obog/paidoff/config"
 	"gorm.io/driver/postgres"
@@ -13,7 +13,14 @@ const (
 	storeImpl = "postgres"
 )
 
-func MakeStore(cfg *config.AppConfig) (Store, error) {
+type DBConfig struct {
+	AccountStore     AccountStore
+	CategoryStore    CategoryStore
+	BudgetStore      BudgetStore
+	TransactionStore TransactionStore
+}
+
+func MakeDBConfig(cfg *config.AppConfig) *DBConfig {
 	switch storeImpl {
 	case "postgres":
 		pgDb, err := gorm.Open(postgres.Open(cfg.PostgresUrl), &gorm.Config{
@@ -22,13 +29,18 @@ func MakeStore(cfg *config.AppConfig) (Store, error) {
 			Logger:            logger.Default.LogMode(logger.Silent),
 		})
 
-		if err != nil {
-			return nil, err
+		log.Fatal(err)
+
+		return &DBConfig{
+			AccountStore:     &PostgresAccountStore{db: pgDb},
+			CategoryStore:    &PostgresCategoryStore{db: pgDb},
+			BudgetStore:      &PostgresBudgetStore{db: pgDb},
+			TransactionStore: &PostgresTransactionStore{db: pgDb},
 		}
 
-		return NewPostgresStore(pgDb), nil
-
 	default:
-		return nil, errors.New("cannot find impl for store")
+		log.Fatal("Not a supported impl for store")
 	}
+
+	return nil
 }
