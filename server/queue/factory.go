@@ -21,6 +21,8 @@ func MakeQueue(cfg *config.AppConfig) Queue {
 
 		ch, err := conn.Channel()
 		ch.Qos(1, 0, false)
+		ch.Confirm(false)
+
 		if err != nil {
 			log.Fatal(err)
 		}
