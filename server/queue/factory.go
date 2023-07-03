@@ -27,7 +27,7 @@ func MakeQueue(cfg *config.AppConfig) Queue {
 			log.Fatal(err)
 		}
 
-		return NewRabbitMqQueue(ch, "foob")
+		return NewRabbitMqQueue(ch)
 
 	default:
 		log.Fatal("Not a supported impl for queue")
