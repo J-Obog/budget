@@ -15,7 +15,7 @@ func setup(cfg *DBConfig) {
 }
 
 func dbIntegrationTest() *DBConfig {
-	cfg, err := config.MakeConfig("local")
+	cfg, err := config.MakeConfig(config.EnvType_LOCAL)
 
 	if err != nil {
 		log.Fatal(err)

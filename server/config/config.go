@@ -6,12 +6,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type EnvType uint
+
+const (
+	EnvType_LOCAL EnvType = 0
+)
+
 type AppConfig struct {
 	PostgresUrl string `json:"postgresUrl"`
+	RabbitMqUrl string `json:"rabbitMqUrl"`
 }
 
-func MakeConfig(env string) (*AppConfig, error) {
-	if env == "local" {
+func MakeConfig(envType EnvType) (*AppConfig, error) {
+	if envType == EnvType_LOCAL {
 		if err := godotenv.Load("../.env.local"); err != nil {
 			return nil, err
 		}
@@ -19,5 +26,6 @@ func MakeConfig(env string) (*AppConfig, error) {
 
 	return &AppConfig{
 		PostgresUrl: os.Getenv("POSTGRES_URL"),
+		RabbitMqUrl: os.Getenv("RABBIT_MQ_URL"),
 	}, nil
 }

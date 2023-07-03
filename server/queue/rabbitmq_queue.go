@@ -8,12 +8,9 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-const (
-	exchange string = "direct"
-)
-
 type RabbitMqQueue struct {
 	channel *amqp.Channel
+	dtags   map[string]uint64
 	name    string
 }
 
@@ -21,12 +18,12 @@ func NewRabbitMqQueue(channel *amqp.Channel, name string) *RabbitMqQueue {
 	return &RabbitMqQueue{
 		channel: channel,
 		name:    name,
+		dtags:   make(map[string]uint64),
 	}
 }
 
-func (this *RabbitMqQueue) Push(message data.Message) error {
+func (mq *RabbitMqQueue) Push(message data.Message) error {
 	ctx := context.Background()
-
 	payload, err := json.Marshal(message)
 
 	if err != nil {
@@ -34,31 +31,32 @@ func (this *RabbitMqQueue) Push(message data.Message) error {
 	}
 
 	msg := amqp.Publishing{
-		Body: payload,
+		MessageId: message.Id,
+		Body:      payload,
 	}
 
-	return this.channel.PublishWithContext(ctx, exchange, this.name, true, false, msg)
+	return mq.channel.PublishWithContext(ctx, "", mq.name, true, false, msg)
 }
 
-func (this *RabbitMqQueue) Pull() ([]data.Message, error) {
-	messageChan, err := this.channel.Consume(this.name, "", true, false, false, false, nil)
-	messages := make([]data.Message, len(messageChan))
+func (mq *RabbitMqQueue) Pop() (*data.Message, error) {
+	d, ok, err := mq.channel.Get(mq.name, false)
 
 	if err != nil {
 		return nil, err
 	}
 
-	for message := range messageChan {
-		var msg data.Message
-
-		err = json.Unmarshal(message.Body, &msg)
-
-		if err != nil {
-			return nil, nil
-		}
-
-		messages = append(messages, msg)
+	if !ok {
+		return nil, nil
 	}
 
-	return messages, err
+	mq.dtags[d.MessageId] = d.DeliveryTag
+
+	var message = &data.Message{}
+	err = json.Unmarshal(d.Body, message)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return message, err
 }
