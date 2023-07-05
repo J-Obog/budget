@@ -1,5 +1,7 @@
 package data
 
+type JSON map[string]interface{}
+
 type RestRequest struct {
 	Url         string
 	Headers     map[string]interface{}
@@ -21,7 +23,7 @@ type AccountUpdateRequest struct {
 
 type CategoryCreateRequest struct {
 	Name  string `json:"name"`
-	Color int    `json:"color"`
+	Color uint   `json:"color"`
 }
 
 type CategoryUpdateRequest struct {
@@ -55,7 +57,6 @@ type BudgetCreateRequest struct {
 	Month      int     `json:"month"`
 	Year       int     `json:"year"`
 	Projected  float64 `json:"projected"`
-	Actual     float64 `json:"actual"`
 }
 
 type BudgetUpdateRequest struct {

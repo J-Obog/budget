@@ -28,16 +28,12 @@ func (api *BudgetAPI) GetBudgets(req *data.RestRequest) *data.RestResponse {
 
 	accountId := getAccountCtx(req).Id
 
-	budgets, err := api.budgetManager.GetByAccount(accountId)
+	budgets, err := api.budgetManager.GetByAccount(accountId, q)
 	if err != nil {
 		return buildServerError(err)
 	}
 
-	filter := NewFilter[data.Budget]()
-	filter.AddCheck(filterBudget(q))
-	filtered := filter.Filter(budgets)
-
-	return buildOKResponse(filtered)
+	return buildOKResponse(budgets)
 }
 
 func (api *BudgetAPI) CreateBudget(req *data.RestRequest) *data.RestResponse {
@@ -46,12 +42,13 @@ func (api *BudgetAPI) CreateBudget(req *data.RestRequest) *data.RestResponse {
 		return buildServerError(err)
 	}
 
-	errRes := validateCategoryId(createReq.CategoryId, req, api.categoryManager)
-	if errRes != nil {
-		return errRes
+	accountId := getAccountCtx(req).Id
+
+	if errResponse := validateBudgetCreateRequest(accountId, createReq); errResponse != nil {
+		return errResponse
 	}
 
-	if err := api.budgetManager.Create(getAccountCtx(req).Id, createReq); err != nil {
+	if err := api.budgetManager.Create(accountId, createReq); err != nil {
 		return buildServerError(err)
 	}
 
@@ -69,8 +66,7 @@ func (api *BudgetAPI) UpdateBudget(req *data.RestRequest) *data.RestResponse {
 		return buildServerError(err)
 	}
 
-	errRes = validateCategoryId(updateReq.CategoryId, req, api.categoryManager)
-	if errRes != nil {
+	if errRes = validateCategoryId(updateReq.CategoryId, req, api.categoryManager); errRes != nil {
 		return errRes
 	}
 

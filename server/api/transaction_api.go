@@ -28,16 +28,12 @@ func (api *TransactionAPI) GetTransactions(req *data.RestRequest) *data.RestResp
 
 	accountId := getAccountCtx(req).Id
 
-	transactions, err := api.transactionManager.GetByAccount(accountId)
+	transactions, err := api.transactionManager.GetByAccount(accountId, q)
 	if err != nil {
 		return buildServerError(err)
 	}
 
-	filter := NewFilter[data.Transaction]()
-	filter.AddCheck(filterTransaction(q))
-	filtered := filter.Filter(transactions)
-
-	return buildOKResponse(filtered)
+	return buildOKResponse(transactions)
 }
 
 func (api *TransactionAPI) CreateTransaction(req *data.RestRequest) *data.RestResponse {
@@ -46,8 +42,7 @@ func (api *TransactionAPI) CreateTransaction(req *data.RestRequest) *data.RestRe
 		return buildServerError(err)
 	}
 
-	errRes := validateCategoryId(createReq.CategoryId, req, api.categoryManager)
-	if errRes != nil {
+	if errRes := validateCategoryId(createReq.CategoryId, req, api.categoryManager); errRes != nil {
 		return errRes
 	}
 
@@ -69,8 +64,7 @@ func (api *TransactionAPI) UpdateTransaction(req *data.RestRequest) *data.RestRe
 		return buildServerError(err)
 	}
 
-	errRes = validateCategoryId(updateReq.CategoryId, req, api.categoryManager)
-	if errRes != nil {
+	if errRes = validateCategoryId(updateReq.CategoryId, req, api.categoryManager); errRes != nil {
 		return errRes
 	}
 

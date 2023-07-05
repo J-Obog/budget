@@ -17,7 +17,11 @@ func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 	return manager.store.Get(id)
 }
 
-func (manager *BudgetManager) GetByAccount(accountId string) ([]data.Budget, error) {
+func (manager *BudgetManager) GetByAccount(accountId string, q data.BudgetQuery) ([]data.Budget, error) {
+	//filter := NewFilter[data.Budget]()
+	//filter.AddCheck(filterBudget(q))
+	//filtered := filter.Filter(budgets)
+
 	return manager.store.GetByAccount(accountId)
 }
 
@@ -32,7 +36,7 @@ func (manager *BudgetManager) Create(accountId string, req data.BudgetCreateRequ
 		Month:      req.Month,
 		Year:       req.Year,
 		Projected:  req.Projected,
-		Actual:     req.Actual,
+		Actual:     0,
 		CreatedAt:  now,
 		UpdatedAt:  now,
 	}
@@ -46,7 +50,6 @@ func (manager *BudgetManager) Update(existing *data.Budget, req data.BudgetUpdat
 	existing.Month = req.Month
 	existing.Year = req.Year
 	existing.Projected = req.Projected
-	existing.Actual = req.Actual
 	existing.UpdatedAt = manager.clock.Now()
 
 	return manager.store.Update(*existing)

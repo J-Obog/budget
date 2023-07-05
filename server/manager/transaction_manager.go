@@ -17,7 +17,12 @@ func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
 	return manager.store.Get(id)
 }
 
-func (manager *TransactionManager) GetByAccount(accountId string) ([]data.Transaction, error) {
+func (manager *TransactionManager) GetByAccount(accountId string, q data.TransactionQuery) ([]data.Transaction, error) {
+	/*
+		filter := NewFilter[data.Transaction]()
+			filter.AddCheck(filterTransaction(q))
+			filtered := filter.Filter(transactions)
+	*/
 	return manager.store.GetByAccount(accountId)
 }
 

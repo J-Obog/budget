@@ -21,6 +21,10 @@ func (api *AccountAPI) UpdateAccount(req *data.RestRequest) *data.RestResponse {
 		return buildServerError(err)
 	}
 
+	if errResponse := validateAccountUpdateRequest(updateReq); errResponse != nil {
+		return errResponse
+	}
+
 	if err := api.accountManager.Update(&account, updateReq); err != nil {
 		return buildServerError(err)
 	}
