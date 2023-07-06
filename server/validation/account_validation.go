@@ -1,7 +1,8 @@
 package validation
 
-import "github.com/J-Obog/paidoff/data"
+func ValidateAccountUpdateReq(m map[string]interface{}) error {
+	v := NewValidator()
+	v.Field("name", Required(), As[string](), Length(0, 1))
 
-func ValidateAccountUpdateReq(req data.AccountUpdateRequest) error {
-	return nil
+	return v.Validate(m)
 }
