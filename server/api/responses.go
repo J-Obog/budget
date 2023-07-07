@@ -6,6 +6,12 @@ import (
 	"github.com/J-Obog/paidoff/data"
 )
 
+func buildBadRequestError() *data.RestResponse {
+	return &data.RestResponse{
+		Status: http.StatusBadRequest,
+	}
+}
+
 func buildServerError(err error) *data.RestResponse {
 	return &data.RestResponse{
 		Status: http.StatusInternalServerError,

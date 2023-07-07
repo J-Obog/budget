@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
+	"github.com/J-Obog/paidoff/validation"
 )
 
 type BudgetAPI struct {
@@ -10,10 +11,23 @@ type BudgetAPI struct {
 	categoryManager *manager.CategoryManager
 }
 
+func (api *BudgetAPI) getBudgetCtx(req *data.RestRequest) (data.Budget, *data.RestResponse) {
+	budget, err := api.budgetManager.Get(req.UrlParams["budgetId"].(string))
+
+	if err != nil {
+		return data.Budget{}, buildServerError(err)
+	}
+	if budget == nil || budget.AccountId != getAccountCtx(req).Id {
+		return data.Budget{}, buildBadRequestError()
+	}
+
+	return *budget, nil
+}
+
 func (api *BudgetAPI) GetBudget(req *data.RestRequest) *data.RestResponse {
-	budget, errRes := checkBudget(req, api.budgetManager)
-	if errRes != nil {
-		return errRes
+	budget, errResp := api.getBudgetCtx(req)
+	if errResp != nil {
+		return errResp
 	}
 
 	return buildOKResponse(budget)
@@ -37,16 +51,16 @@ func (api *BudgetAPI) GetBudgets(req *data.RestRequest) *data.RestResponse {
 }
 
 func (api *BudgetAPI) CreateBudget(req *data.RestRequest) *data.RestResponse {
+	if err := validation.ValidateBudgetCreateReq(req.Body); err != nil {
+		return buildBadRequestError()
+	}
+
 	createReq, err := getBugetCreateBody(req)
 	if err != nil {
 		return buildServerError(err)
 	}
 
 	accountId := getAccountCtx(req).Id
-
-	if errResponse := validateBudgetCreateRequest(accountId, createReq); errResponse != nil {
-		return errResponse
-	}
 
 	if err := api.budgetManager.Create(accountId, createReq); err != nil {
 		return buildServerError(err)
@@ -56,9 +70,13 @@ func (api *BudgetAPI) CreateBudget(req *data.RestRequest) *data.RestResponse {
 }
 
 func (api *BudgetAPI) UpdateBudget(req *data.RestRequest) *data.RestResponse {
-	budget, errRes := checkBudget(req, api.budgetManager)
-	if errRes != nil {
-		return errRes
+	if err := validation.ValidateBudgetUpdateReq(req.Body); err != nil {
+		return buildBadRequestError()
+	}
+
+	budget, errResp := api.getBudgetCtx(req)
+	if errResp != nil {
+		return errResp
 	}
 
 	updateReq, err := getBugetUpdateBody(req)
@@ -66,8 +84,8 @@ func (api *BudgetAPI) UpdateBudget(req *data.RestRequest) *data.RestResponse {
 		return buildServerError(err)
 	}
 
-	if errRes = validateCategoryId(updateReq.CategoryId, req, api.categoryManager); errRes != nil {
-		return errRes
+	if errResp = validateCategoryId(updateReq.CategoryId, req, api.categoryManager); errResp != nil {
+		return errResp
 	}
 
 	if err := api.budgetManager.Update(&budget, updateReq); err != nil {
@@ -78,9 +96,9 @@ func (api *BudgetAPI) UpdateBudget(req *data.RestRequest) *data.RestResponse {
 }
 
 func (api *BudgetAPI) DeleteBudget(req *data.RestRequest) *data.RestResponse {
-	budget, errRes := checkBudget(req, api.budgetManager)
-	if errRes != nil {
-		return errRes
+	budget, errResp := api.getBudgetCtx(req)
+	if errResp != nil {
+		return errResp
 	}
 
 	if err := api.budgetManager.Delete(budget.Id); err != nil {

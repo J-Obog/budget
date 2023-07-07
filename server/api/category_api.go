@@ -9,8 +9,21 @@ type CategoryAPI struct {
 	categoryManager *manager.CategoryManager
 }
 
+func (api *CategoryAPI) getCategoryCtx(req *data.RestRequest) (data.Category, *data.RestResponse) {
+	category, err := api.categoryManager.Get(req.UrlParams["categoryId"].(string))
+
+	if err != nil {
+		return data.Category{}, buildServerError(err)
+	}
+	if category == nil || category.AccountId != getAccountCtx(req).Id {
+		return data.Category{}, buildBadRequestError()
+	}
+
+	return *category, nil
+}
+
 func (api *CategoryAPI) GetCategory(req *data.RestRequest) *data.RestResponse {
-	category, errRes := checkCategory(req, api.categoryManager)
+	category, errRes := api.getCategoryCtx(req)
 	if errRes != nil {
 		return errRes
 	}
@@ -43,7 +56,7 @@ func (api *CategoryAPI) CreateCategory(req *data.RestRequest) *data.RestResponse
 }
 
 func (api *CategoryAPI) UpdateCategory(req *data.RestRequest) *data.RestResponse {
-	category, errRes := checkCategory(req, api.categoryManager)
+	category, errRes := api.getCategoryCtx(req)
 	if errRes != nil {
 		return errRes
 	}
@@ -62,7 +75,7 @@ func (api *CategoryAPI) UpdateCategory(req *data.RestRequest) *data.RestResponse
 }
 
 func (api *CategoryAPI) DeleteCategory(req *data.RestRequest) *data.RestResponse {
-	category, errRes := checkCategory(req, api.categoryManager)
+	category, errRes := api.getCategoryCtx(req)
 	if errRes != nil {
 		return errRes
 	}

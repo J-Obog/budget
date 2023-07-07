@@ -10,8 +10,21 @@ type TransactionAPI struct {
 	categoryManager    *manager.CategoryManager
 }
 
+func (api *TransactionAPI) getTransactionCtx(req *data.RestRequest) (data.Transaction, *data.RestResponse) {
+	transaction, err := api.transactionManager.Get(req.UrlParams["transactionId"].(string))
+
+	if err != nil {
+		return data.Transaction{}, buildServerError(err)
+	}
+	if transaction == nil || transaction.AccountId != getAccountCtx(req).Id {
+		return data.Transaction{}, buildBadRequestError()
+	}
+
+	return *transaction, nil
+}
+
 func (api *TransactionAPI) GetTransaction(req *data.RestRequest) *data.RestResponse {
-	transaction, errRes := checkTransaction(req, api.transactionManager)
+	transaction, errRes := api.getTransactionCtx(req)
 	if errRes != nil {
 		return errRes
 	}
@@ -54,7 +67,7 @@ func (api *TransactionAPI) CreateTransaction(req *data.RestRequest) *data.RestRe
 }
 
 func (api *TransactionAPI) UpdateTransaction(req *data.RestRequest) *data.RestResponse {
-	transaction, errRes := checkTransaction(req, api.transactionManager)
+	transaction, errRes := api.getTransactionCtx(req)
 	if errRes != nil {
 		return errRes
 	}
@@ -76,7 +89,7 @@ func (api *TransactionAPI) UpdateTransaction(req *data.RestRequest) *data.RestRe
 }
 
 func (api *TransactionAPI) DeleteTransaction(req *data.RestRequest) *data.RestResponse {
-	transaction, errRes := checkTransaction(req, api.transactionManager)
+	transaction, errRes := api.getTransactionCtx(req)
 	if errRes != nil {
 		return errRes
 	}

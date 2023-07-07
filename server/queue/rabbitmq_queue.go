@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/J-Obog/paidoff/data"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -21,7 +20,7 @@ func NewRabbitMqQueue(channel *amqp.Channel) *RabbitMqQueue {
 	}
 }
 
-func (mq *RabbitMqQueue) Push(message data.Message, queueName string) error {
+func (mq *RabbitMqQueue) Push(message Message, queueName string) error {
 	ctx := context.Background()
 	payload, err := json.Marshal(message)
 
@@ -40,7 +39,7 @@ func (mq *RabbitMqQueue) Push(message data.Message, queueName string) error {
 	return mq.channel.PublishWithContext(ctx, "", queueName, true, false, msg)
 }
 
-func (mq *RabbitMqQueue) Pop(queueName string) (*data.Message, error) {
+func (mq *RabbitMqQueue) Pop(queueName string) (*Message, error) {
 
 	d, ok, err := mq.channel.Get(queueName, false)
 
@@ -52,7 +51,7 @@ func (mq *RabbitMqQueue) Pop(queueName string) (*data.Message, error) {
 		return nil, nil
 	}
 
-	message := &data.Message{}
+	message := &Message{}
 	err = json.Unmarshal(d.Body, message)
 
 	if err != nil {
@@ -64,6 +63,7 @@ func (mq *RabbitMqQueue) Pop(queueName string) (*data.Message, error) {
 
 func (mq *RabbitMqQueue) Ack(messageId string) error {
 	tag, ok := mq.dtags[messageId]
+	delete(mq.dtags, messageId)
 
 	if !ok {
 		//update error message

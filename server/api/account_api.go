@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
+	"github.com/J-Obog/paidoff/validation"
 )
 
 type AccountAPI struct {
@@ -14,15 +15,15 @@ func (api *AccountAPI) GetAccount(req *data.RestRequest) *data.RestResponse {
 }
 
 func (api *AccountAPI) UpdateAccount(req *data.RestRequest) *data.RestResponse {
+	if err := validation.ValidateAccountUpdateReq(req.Body); err != nil {
+		return buildBadRequestError()
+	}
+
 	account := getAccountCtx(req)
 	updateReq, err := getAccountUpdateBody(req)
 
 	if err != nil {
 		return buildServerError(err)
-	}
-
-	if errResponse := validateAccountUpdateRequest(updateReq); errResponse != nil {
-		return errResponse
 	}
 
 	if err := api.accountManager.Update(&account, updateReq); err != nil {

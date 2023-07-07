@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-func FromMap[T interface{}](m map[string]interface{}) (T, error) {
+func FromMap[T any](m map[string]any) (T, error) {
 	var d T
 	b, err := json.Marshal(m)
 
@@ -21,7 +21,7 @@ func FromMap[T interface{}](m map[string]interface{}) (T, error) {
 	return d, nil
 }
 
-func FromJSON[T interface{}](body []byte) (T, error) {
+func FromJSON[T any](body []byte) (T, error) {
 	var d T
 	err := json.Unmarshal(body, d)
 
@@ -32,6 +32,6 @@ func FromJSON[T interface{}](body []byte) (T, error) {
 	return d, nil
 }
 
-func ToJSON(serializable interface{}) ([]byte, error) {
+func ToJSON(serializable any) ([]byte, error) {
 	return json.Marshal(serializable)
 }

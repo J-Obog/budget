@@ -1,4 +1,4 @@
-package data
+package queue
 
 type Message struct {
 	Id        string      `json:"id"`

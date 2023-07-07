@@ -1,6 +1,9 @@
 package validation
 
-import "errors"
+import (
+	"encoding/json"
+	"errors"
+)
 
 type fieldValidation func(field interface{}) error
 
@@ -28,7 +31,13 @@ func (v *Validator) Field(fieldName string, validations ...fieldValidation) {
 	}
 }
 
-func (v *Validator) Validate(m map[string]interface{}) error {
+func (v *Validator) Validate(jsonb []byte) error {
+	var m map[string]interface{}
+
+	if err := json.Unmarshal(jsonb, &m); err != nil {
+		return err
+	}
+
 	for _, check := range v.checks {
 		if err := check.fn(m[check.key]); err != nil {
 			return err

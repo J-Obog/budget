@@ -1,19 +1,17 @@
 package data
 
-type JSON map[string]interface{}
-
 type RestRequest struct {
 	Url         string
-	Headers     map[string]interface{}
-	Meta        map[string]interface{}
-	UrlParams   map[string]interface{}
-	QueryParams map[string]interface{}
-	Metadata    map[string]interface{}
+	Headers     map[string]any
+	Meta        map[string]any
+	UrlParams   map[string]any
+	QueryParams map[string]any
+	Metadata    map[string]any
 	Body        []byte
 }
 
 type RestResponse struct {
-	Data   interface{}
+	Data   any
 	Status int
 }
 
