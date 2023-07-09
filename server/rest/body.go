@@ -39,6 +39,10 @@ type BudgetUpdateBody struct {
 	BudgetCreateBody
 }
 
+func (b JsonBody) Map() map[string]any {
+	return map[string]any{}
+}
+
 func (b JsonBody) AccountUpdateBody() AccountUpdateBody {
 	return AccountUpdateBody{}
 }

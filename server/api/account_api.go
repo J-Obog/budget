@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/J-Obog/paidoff/validation"
 )
 
 type AccountAPI struct {
@@ -34,5 +35,15 @@ func (api *AccountAPI) DeleteAccount(r *rest.Request) *rest.Response {
 }
 
 func (api *AccountAPI) validateUpdate(r *rest.Request) *rest.Response {
+
+	err := validation.Validate(
+		r.Body.Map(),
+		validation.Key("name").Required().Str().MinLen(1),
+	)
+
+	if err != nil {
+		return buildBadRequestError()
+	}
+
 	return nil
 }
