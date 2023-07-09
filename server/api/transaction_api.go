@@ -21,7 +21,7 @@ func (api *TransactionAPI) GetTransaction(r *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) GetTransactions(r *rest.Request) *rest.Response {
-	transactions, err := api.transactionManager.GetByAccount(r.Account.Id, r.Query.TransactionQuery())
+	transactions, err := api.transactionManager.Filter(r.Account.Id, r.Query.TransactionQuery())
 	if err != nil {
 		return buildServerError(err)
 	}

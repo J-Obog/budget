@@ -21,7 +21,7 @@ func (api *BudgetAPI) GetBudget(r *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) GetBudgets(r *rest.Request) *rest.Response {
-	budgets, err := api.budgetManager.GetByAccount(r.Account.Id, r.Query.BudgetQuery())
+	budgets, err := api.budgetManager.Filter(r.Account.Id, r.Query.BudgetQuery())
 	if err != nil {
 		return buildServerError(err)
 	}

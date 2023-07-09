@@ -18,7 +18,7 @@ func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 	return manager.store.Get(id)
 }
 
-func (manager *BudgetManager) GetByAccount(accountId string, q rest.BudgetQuery) ([]data.Budget, error) {
+func (manager *BudgetManager) Filter(accountId string, q rest.BudgetQuery) ([]data.Budget, error) {
 	filtered := make([]data.Budget, 0)
 
 	budgets, err := manager.store.GetByAccount(accountId)
