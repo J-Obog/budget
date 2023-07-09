@@ -1,7 +1,5 @@
 package rest
 
-import "github.com/J-Obog/paidoff/data"
-
 type Query map[string]any
 
 type BudgetQuery struct {
@@ -10,11 +8,10 @@ type BudgetQuery struct {
 }
 
 type TransactionQuery struct {
-	CreatedBefore *int64          `json:"createdBefore"`
-	CreatedAfter  *int64          `json:"createdAfter"`
-	AmountGte     *float64        `json:"amountGte"`
-	AmountLte     *float64        `json:"amountLte"`
-	Categories    []data.Category `json:"categories"`
+	CreatedBefore *int64   `json:"createdBefore"`
+	CreatedAfter  *int64   `json:"createdAfter"`
+	AmountGte     *float64 `json:"amountGte"`
+	AmountLte     *float64 `json:"amountLte"`
 }
 
 func (q Query) TransactionQuery() TransactionQuery {

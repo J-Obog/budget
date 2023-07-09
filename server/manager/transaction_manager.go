@@ -19,12 +19,35 @@ func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
 }
 
 func (manager *TransactionManager) GetByAccount(accountId string, q rest.TransactionQuery) ([]data.Transaction, error) {
-	/*
-		filter := NewFilter[data.Transaction]()
-			filter.AddCheck(filterTransaction(q))
-			filtered := filter.Filter(transactions)
-	*/
-	return manager.store.GetByAccount(accountId)
+	filtered := make([]data.Transaction, 0)
+
+	transactions, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return filtered, err
+	}
+
+	for _, transaction := range transactions {
+		if q.CreatedBefore != nil && transaction.CreatedAt >= *q.CreatedBefore {
+			continue
+		}
+
+		if q.CreatedAfter != nil && transaction.CreatedAt <= *q.CreatedAfter {
+			continue
+		}
+
+		if q.AmountGte != nil && transaction.Amount < *q.AmountGte {
+			continue
+		}
+
+		if q.AmountLte != nil && transaction.Amount > *q.AmountLte {
+			continue
+		}
+
+		filtered = append(filtered, transaction)
+
+	}
+
+	return filtered, nil
 }
 
 func (manager *TransactionManager) Create(accountId string, req rest.TransactionCreateBody) error {
@@ -59,5 +82,5 @@ func (manager *TransactionManager) Update(existing *data.Transaction, req rest.T
 }
 
 func (manager *TransactionManager) Delete(id string) error {
-	return nil
+	return manager.store.Delete(id)
 }

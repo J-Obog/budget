@@ -19,11 +19,26 @@ func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 }
 
 func (manager *BudgetManager) GetByAccount(accountId string, q rest.BudgetQuery) ([]data.Budget, error) {
-	//filter := NewFilter[data.Budget]()
-	//filter.AddCheck(filterBudget(q))
-	//filtered := filter.Filter(budgets)
+	filtered := make([]data.Budget, 0)
 
-	return manager.store.GetByAccount(accountId)
+	budgets, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return filtered, err
+	}
+
+	for _, budget := range budgets {
+		if q.Month != nil && budget.Month != *q.Month {
+			continue
+		}
+
+		if q.Year != nil && budget.Year != *q.Year {
+			continue
+		}
+
+		filtered = append(filtered, budget)
+	}
+
+	return filtered, nil
 }
 
 func (manager *BudgetManager) Create(accountId string, req rest.BudgetCreateBody) error {
@@ -55,5 +70,5 @@ func (manager *BudgetManager) Update(existing *data.Budget, req rest.BudgetUpdat
 }
 
 func (manager *BudgetManager) Delete(id string) error {
-	return nil
+	return manager.store.Delete(id)
 }
