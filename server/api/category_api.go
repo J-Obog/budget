@@ -30,11 +30,14 @@ func (api *CategoryAPI) GetCategories(r *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) CreateCategory(r *rest.Request) *rest.Response {
-	if errResp := validateCategoryCreate(r); errResp != nil {
-		return errResp
+	reqBody, err := r.Body.CategoryCreateBody()
+	if err != nil {
+		return buildBadRequestError()
 	}
 
-	if err := api.categoryManager.Create(r.Account.Id, r.Body.CategoryCreateBody()); err != nil {
+	// check name doesnt already exist
+
+	if err := api.categoryManager.Create(r.Account.Id, reqBody); err != nil {
 		return buildServerError(err)
 	}
 
@@ -47,11 +50,14 @@ func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
 		return errRes
 	}
 
-	if errResp := validateCategoryUpdate(r); errResp != nil {
-		return errResp
+	reqBody, err := r.Body.CategoryUpdateBody()
+	if err != nil {
+		return buildBadRequestError()
 	}
 
-	if err := api.categoryManager.Update(&category, r.Body.CategoryUpdateBody()); err != nil {
+	// check name doesnt already exist
+
+	if err := api.categoryManager.Update(&category, reqBody); err != nil {
 		return buildServerError(err)
 	}
 

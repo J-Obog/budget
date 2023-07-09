@@ -14,11 +14,14 @@ func (api *AccountAPI) GetAccount(r *rest.Request) *rest.Response {
 }
 
 func (api *AccountAPI) UpdateAccount(r *rest.Request) *rest.Response {
-	if errResp := validateAccountUpdate(r); errResp != nil {
-		return errResp
+	reqBody, err := r.Body.AccountUpdateBody()
+	if err != nil {
+		return buildBadRequestError()
 	}
 
-	if err := api.accountManager.Update(r.Account, r.Body.AccountUpdateBody()); err != nil {
+	// check name length
+
+	if err := api.accountManager.Update(r.Account, reqBody); err != nil {
 		return buildServerError(err)
 	}
 

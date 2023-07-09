@@ -30,11 +30,20 @@ func (api *TransactionAPI) GetTransactions(r *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) CreateTransaction(r *rest.Request) *rest.Response {
-	if errResp := validateTransactionCreate(r); errResp != nil {
-		return errResp
+	reqBody, err := r.Body.TransactionCreateBody()
+	if err != nil {
+		return buildBadRequestError()
 	}
 
-	if err := api.transactionManager.Create(r.Account.Id, r.Body.TransactionCreateBody()); err != nil {
+	// check category exists if provided
+
+	// check description length
+
+	// check amount non-negative
+
+	//check date
+
+	if err := api.transactionManager.Create(r.Account.Id, reqBody); err != nil {
 		return buildServerError(err)
 	}
 
@@ -47,11 +56,20 @@ func (api *TransactionAPI) UpdateTransaction(r *rest.Request) *rest.Response {
 		return errResp
 	}
 
-	if errResp := validateTransactionUpdate(r); errResp != nil {
-		return errResp
+	reqBody, err := r.Body.TransactionUpdateBody()
+	if err != nil {
+		return buildBadRequestError()
 	}
 
-	if err := api.transactionManager.Update(&transaction, r.Body.TransactionUpdateBody()); err != nil {
+	// check category exists if provided
+
+	// check description length
+
+	// check amount non-negative
+
+	//check date
+
+	if err := api.transactionManager.Update(&transaction, reqBody); err != nil {
 		return buildServerError(err)
 	}
 

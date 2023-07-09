@@ -1,33 +1,26 @@
 package api
 
 import (
+	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
 )
 
-func validateAccountUpdate(r *rest.Request) *rest.Response {
+func validateAccountName(name string) error {
 	return nil
 }
 
-func validateBudgetUpdate(r *rest.Request) *rest.Response {
+func checkCategoryExists(categoryId string, accountId string, catManager *manager.CategoryManager) *rest.Response {
+	cat, err := catManager.Get(categoryId)
+	if err != nil {
+		return buildServerError(err)
+	}
+	if cat == nil || cat.AccountId != accountId {
+		return buildBadRequestError()
+	}
+
 	return nil
 }
 
-func validateBudgetCreate(r *rest.Request) *rest.Response {
-	return nil
-}
-
-func validateCategoryCreate(r *rest.Request) *rest.Response {
-	return nil
-}
-
-func validateCategoryUpdate(r *rest.Request) *rest.Response {
-	return nil
-}
-
-func validateTransactionCreate(r *rest.Request) *rest.Response {
-	return nil
-}
-
-func validateTransactionUpdate(r *rest.Request) *rest.Response {
+func isValidDate(month int, day int, year int) error {
 	return nil
 }

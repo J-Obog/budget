@@ -43,30 +43,30 @@ func (b JsonBody) Map() map[string]any {
 	return map[string]any{}
 }
 
-func (b JsonBody) AccountUpdateBody() AccountUpdateBody {
-	return AccountUpdateBody{}
+func (b JsonBody) AccountUpdateBody() (AccountUpdateBody, error) {
+	return AccountUpdateBody{}, nil
 }
 
-func (b JsonBody) CategoryCreateBody() CategoryCreateBody {
-	return CategoryCreateBody{}
+func (b JsonBody) CategoryCreateBody() (CategoryCreateBody, error) {
+	return CategoryCreateBody{}, nil
 }
 
-func (b JsonBody) CategoryUpdateBody() CategoryUpdateBody {
-	return CategoryUpdateBody{}
+func (b JsonBody) CategoryUpdateBody() (CategoryUpdateBody, error) {
+	return CategoryUpdateBody{}, nil
 }
 
-func (b JsonBody) TransactionCreateBody() TransactionCreateBody {
-	return TransactionCreateBody{}
+func (b JsonBody) TransactionCreateBody() (TransactionCreateBody, error) {
+	return TransactionCreateBody{}, nil
 }
 
-func (b JsonBody) TransactionUpdateBody() TransactionUpdateBody {
-	return TransactionUpdateBody{}
+func (b JsonBody) TransactionUpdateBody() (TransactionUpdateBody, error) {
+	return TransactionUpdateBody{}, nil
 }
 
-func (b JsonBody) BudgetCreateBody() BudgetCreateBody {
-	return BudgetCreateBody{}
+func (b JsonBody) BudgetCreateBody() (BudgetCreateBody, error) {
+	return BudgetCreateBody{}, nil
 }
 
-func (b JsonBody) BudgetUpdateBody() BudgetUpdateBody {
-	return BudgetUpdateBody{}
+func (b JsonBody) BudgetUpdateBody() (BudgetUpdateBody, error) {
+	return BudgetUpdateBody{}, nil
 }
