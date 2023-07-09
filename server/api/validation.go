@@ -5,10 +5,6 @@ import (
 	"github.com/J-Obog/paidoff/rest"
 )
 
-func validateAccountName(name string) error {
-	return nil
-}
-
 func checkCategoryExists(categoryId string, accountId string, catManager *manager.CategoryManager) *rest.Response {
 	cat, err := catManager.Get(categoryId)
 	if err != nil {

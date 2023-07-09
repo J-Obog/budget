@@ -35,7 +35,9 @@ func (api *CategoryAPI) CreateCategory(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	// check name doesnt already exist
+	if err := api.validateCreate(reqBody); err != nil {
+		return buildBadRequestError()
+	}
 
 	if err := api.categoryManager.Create(r.Account.Id, reqBody); err != nil {
 		return buildServerError(err)
@@ -55,7 +57,9 @@ func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	// check name doesnt already exist
+	if err := api.validateUpdate(reqBody); err != nil {
+		return buildBadRequestError()
+	}
 
 	if err := api.categoryManager.Update(&category, reqBody); err != nil {
 		return buildServerError(err)
@@ -88,4 +92,12 @@ func (api *CategoryAPI) categoryCtx(r *rest.Request) (data.Category, *rest.Respo
 	}
 
 	return *category, nil
+}
+
+func (api *CategoryAPI) validateCreate(reqBody rest.CategoryCreateBody) error {
+	return nil
+}
+
+func (api *CategoryAPI) validateUpdate(reqBody rest.CategoryUpdateBody) error {
+	return nil
 }

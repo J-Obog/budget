@@ -35,11 +35,9 @@ func (api *BudgetAPI) CreateBudget(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	//check month/year
-
-	//check category is not in use
-
-	//check category exists
+	if err := api.validateCreate(&reqBody, r.Account.Id); err != nil {
+		return buildBadRequestError()
+	}
 
 	if err := api.budgetManager.Create(r.Account.Id, reqBody); err != nil {
 		return buildServerError(err)
@@ -59,11 +57,9 @@ func (api *BudgetAPI) UpdateBudget(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	//check month/year
-
-	//check category is not in use
-
-	//check category exists
+	if err := api.validateUpdate(&reqBody, r.Account.Id); err != nil {
+		return buildBadRequestError()
+	}
 
 	if err := api.budgetManager.Update(&budget, reqBody); err != nil {
 		return buildServerError(err)
@@ -96,4 +92,12 @@ func (api *BudgetAPI) bugetCtx(r *rest.Request) (data.Budget, *rest.Response) {
 	}
 
 	return *budget, nil
+}
+
+func (api *BudgetAPI) validateCreate(reqBody *rest.BudgetCreateBody, accountId string) error {
+	return nil
+}
+
+func (api *BudgetAPI) validateUpdate(reqBody *rest.BudgetUpdateBody, accountId string) error {
+	return nil
 }

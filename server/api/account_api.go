@@ -19,7 +19,9 @@ func (api *AccountAPI) UpdateAccount(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	// check name length
+	if err := api.validateUpdate(reqBody); err != nil {
+		return buildBadRequestError()
+	}
 
 	if err := api.accountManager.Update(r.Account, reqBody); err != nil {
 		return buildServerError(err)
@@ -34,4 +36,8 @@ func (api *AccountAPI) DeleteAccount(r *rest.Request) *rest.Response {
 	}
 
 	return buildOKResponse(nil)
+}
+
+func (api *AccountAPI) validateUpdate(reqBody rest.AccountUpdateBody) error {
+	return nil
 }

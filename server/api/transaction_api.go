@@ -35,13 +35,9 @@ func (api *TransactionAPI) CreateTransaction(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	// check category exists if provided
-
-	// check description length
-
-	// check amount non-negative
-
-	//check date
+	if err := api.validateCreate(&reqBody, r.Account.Id); err != nil {
+		return nil
+	}
 
 	if err := api.transactionManager.Create(r.Account.Id, reqBody); err != nil {
 		return buildServerError(err)
@@ -61,13 +57,9 @@ func (api *TransactionAPI) UpdateTransaction(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	// check category exists if provided
-
-	// check description length
-
-	// check amount non-negative
-
-	//check date
+	if err := api.validateUpdate(&reqBody, r.Account.Id); err != nil {
+		return nil
+	}
 
 	if err := api.transactionManager.Update(&transaction, reqBody); err != nil {
 		return buildServerError(err)
@@ -100,4 +92,12 @@ func (api *TransactionAPI) transactionCtx(r *rest.Request) (data.Transaction, *r
 	}
 
 	return *transaction, nil
+}
+
+func (api *TransactionAPI) validateCreate(reqBody *rest.TransactionCreateBody, accountId string) error {
+	return nil
+}
+
+func (api *TransactionAPI) validateUpdate(reqBody *rest.TransactionUpdateBody, accountId string) error {
+	return nil
 }
