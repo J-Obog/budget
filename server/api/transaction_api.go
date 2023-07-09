@@ -12,7 +12,7 @@ type TransactionAPI struct {
 }
 
 func (api *TransactionAPI) getTransactionCtx(req *data.RestRequest) (data.Transaction, *data.RestResponse) {
-	transaction, err := api.transactionManager.Get(req.UrlParams["transactionId"].(string))
+	transaction, err := api.transactionManager.Get(req.Params["transactionId"].(string))
 
 	if err != nil {
 		return data.Transaction{}, buildServerError(err)

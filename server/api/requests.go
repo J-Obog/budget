@@ -3,7 +3,7 @@ package api
 import "github.com/J-Obog/paidoff/data"
 
 func getAccountCtx(req *data.RestRequest) data.Account {
-	return req.Meta["accountCtx"].(data.Account)
+	return *req.Account
 }
 
 func getAccountUpdateBody(req *data.RestRequest) (data.AccountUpdateRequest, error) {
@@ -19,7 +19,7 @@ func getBugetUpdateBody(req *data.RestRequest) (data.BudgetUpdateRequest, error)
 }
 
 func getBugetGetQuery(req *data.RestRequest) (data.BudgetQuery, error) {
-	return FromMap[data.BudgetQuery](req.QueryParams)
+	return FromMap[data.BudgetQuery](req.Query)
 }
 
 func getTransactionCreateBody(req *data.RestRequest) (data.TransactionCreateRequest, error) {
@@ -31,7 +31,7 @@ func getTransactionUpdateBody(req *data.RestRequest) (data.TransactionUpdateRequ
 }
 
 func getTransactionGetQuery(req *data.RestRequest) (data.TransactionQuery, error) {
-	return FromMap[data.TransactionQuery](req.QueryParams)
+	return FromMap[data.TransactionQuery](req.Query)
 }
 
 func getCategoryCreateBody(req *data.RestRequest) (data.CategoryCreateRequest, error) {

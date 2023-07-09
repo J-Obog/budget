@@ -10,7 +10,7 @@ type CategoryAPI struct {
 }
 
 func (api *CategoryAPI) getCategoryCtx(req *data.RestRequest) (data.Category, *data.RestResponse) {
-	category, err := api.categoryManager.Get(req.UrlParams["categoryId"].(string))
+	category, err := api.categoryManager.Get(req.Params["categoryId"].(string))
 
 	if err != nil {
 		return data.Category{}, buildServerError(err)

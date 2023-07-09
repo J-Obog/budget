@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
 	"github.com/J-Obog/paidoff/uid"
 )
@@ -17,7 +18,7 @@ func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 	return manager.store.Get(id)
 }
 
-func (manager *BudgetManager) GetByAccount(accountId string, q data.BudgetQuery) ([]data.Budget, error) {
+func (manager *BudgetManager) GetByAccount(accountId string, q rest.BudgetQuery) ([]data.Budget, error) {
 	//filter := NewFilter[data.Budget]()
 	//filter.AddCheck(filterBudget(q))
 	//filtered := filter.Filter(budgets)
@@ -25,7 +26,7 @@ func (manager *BudgetManager) GetByAccount(accountId string, q data.BudgetQuery)
 	return manager.store.GetByAccount(accountId)
 }
 
-func (manager *BudgetManager) Create(accountId string, req data.BudgetCreateRequest) error {
+func (manager *BudgetManager) Create(accountId string, req rest.BudgetCreateBody) error {
 	now := manager.clock.Now()
 
 	newBudget := data.Budget{
@@ -43,7 +44,7 @@ func (manager *BudgetManager) Create(accountId string, req data.BudgetCreateRequ
 	return manager.store.Insert(newBudget)
 }
 
-func (manager *BudgetManager) Update(existing *data.Budget, req data.BudgetUpdateRequest) error {
+func (manager *BudgetManager) Update(existing *data.Budget, req rest.BudgetUpdateBody) error {
 	existing.CategoryId = req.CategoryId
 	existing.Month = req.Month
 	existing.Year = req.Year

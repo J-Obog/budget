@@ -1,13 +1,11 @@
 package data
 
 type RestRequest struct {
-	Url         string
-	Headers     map[string]any
-	Meta        map[string]any
-	UrlParams   map[string]any
-	QueryParams map[string]any
-	Metadata    map[string]any
-	Body        []byte
+	Url     string
+	Account *Account
+	Params  map[string]any
+	Query   map[string]any
+	Body    []byte
 }
 
 type RestResponse struct {
