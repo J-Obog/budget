@@ -1,10 +1,10 @@
 package data
 
-type BudgetType uint
+type BudgetType string
 
 const (
-	BudgetType_INCOME  BudgetType = 0
-	BudgetType_EXPENSE BudgetType = 1
+	BudgetType_Income  BudgetType = "Income"
+	BudgetType_Expense BudgetType = "Expense"
 )
 
 type Account struct {
