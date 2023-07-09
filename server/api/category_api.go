@@ -30,7 +30,7 @@ func (api *CategoryAPI) GetCategories(r *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) CreateCategory(r *rest.Request) *rest.Response {
-	if errResp := api.validateCreate(r); errResp != nil {
+	if errResp := validateCategoryCreate(r); errResp != nil {
 		return errResp
 	}
 
@@ -47,7 +47,7 @@ func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
 		return errRes
 	}
 
-	if errResp := api.validateUpdate(r); errResp != nil {
+	if errResp := validateCategoryUpdate(r); errResp != nil {
 		return errResp
 	}
 
@@ -69,14 +69,6 @@ func (api *CategoryAPI) DeleteCategory(r *rest.Request) *rest.Response {
 	}
 
 	return buildOKResponse(nil)
-}
-
-func (api *CategoryAPI) validateCreate(r *rest.Request) *rest.Response {
-	return nil
-}
-
-func (api *CategoryAPI) validateUpdate(r *rest.Request) *rest.Response {
-	return nil
 }
 
 func (api *CategoryAPI) categoryCtx(r *rest.Request) (data.Category, *rest.Response) {

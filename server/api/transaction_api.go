@@ -21,10 +21,6 @@ func (api *TransactionAPI) GetTransaction(r *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) GetTransactions(r *rest.Request) *rest.Response {
-	if errResp := api.validateGets(r); errResp != nil {
-		return errResp
-	}
-
 	transactions, err := api.transactionManager.GetByAccount(r.Account.Id, r.Query.TransactionQuery())
 	if err != nil {
 		return buildServerError(err)
@@ -34,7 +30,7 @@ func (api *TransactionAPI) GetTransactions(r *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) CreateTransaction(r *rest.Request) *rest.Response {
-	if errResp := api.validateCreate(r); errResp != nil {
+	if errResp := validateTransactionCreate(r); errResp != nil {
 		return errResp
 	}
 
@@ -51,7 +47,7 @@ func (api *TransactionAPI) UpdateTransaction(r *rest.Request) *rest.Response {
 		return errResp
 	}
 
-	if errResp := api.validateUpdate(r); errResp != nil {
+	if errResp := validateTransactionUpdate(r); errResp != nil {
 		return errResp
 	}
 
@@ -73,18 +69,6 @@ func (api *TransactionAPI) DeleteTransaction(r *rest.Request) *rest.Response {
 	}
 
 	return buildOKResponse(nil)
-}
-
-func (api *TransactionAPI) validateCreate(r *rest.Request) *rest.Response {
-	return nil
-}
-
-func (api *TransactionAPI) validateUpdate(r *rest.Request) *rest.Response {
-	return nil
-}
-
-func (api *TransactionAPI) validateGets(r *rest.Request) *rest.Response {
-	return nil
 }
 
 func (api *TransactionAPI) transactionCtx(r *rest.Request) (data.Transaction, *rest.Response) {

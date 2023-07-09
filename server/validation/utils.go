@@ -35,6 +35,13 @@ func (f *fieldValidator) MinLen(minLen int) *fieldValidator {
 	return f
 }
 
+func (f *fieldValidator) MaxLen(maxLen int) *fieldValidator {
+	f.checks = append(f.checks, func(m map[string]any, s string) error {
+		return nil
+	})
+	return f
+}
+
 func Validate(m map[string]any, fields ...*fieldValidator) error {
 	for _, field := range fields {
 		for _, check := range field.checks {
