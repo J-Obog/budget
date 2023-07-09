@@ -39,5 +39,5 @@ func (api *AccountAPI) DeleteAccount(r *rest.Request) *rest.Response {
 }
 
 func (api *AccountAPI) validateUpdate(reqBody rest.AccountUpdateBody) error {
-	return nil
+	return checkAccountName(reqBody.Name)
 }

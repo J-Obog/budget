@@ -35,7 +35,7 @@ func (api *CategoryAPI) CreateCategory(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	if err := api.validateCreate(reqBody); err != nil {
+	if err := api.validateCreate(reqBody, r.Account.Id); err != nil {
 		return buildBadRequestError()
 	}
 
@@ -57,7 +57,7 @@ func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	if err := api.validateUpdate(reqBody); err != nil {
+	if err := api.validateUpdate(reqBody, r.Account.Id); err != nil {
 		return buildBadRequestError()
 	}
 
@@ -94,10 +94,14 @@ func (api *CategoryAPI) categoryCtx(r *rest.Request) (data.Category, *rest.Respo
 	return *category, nil
 }
 
-func (api *CategoryAPI) validateCreate(reqBody rest.CategoryCreateBody) error {
+func (api *CategoryAPI) validateCreate(reqBody rest.CategoryCreateBody, accountId string) error {
+	if err := checkCategoryNameNotUsed(reqBody.Name, accountId, api.categoryManager); err != nil {
+		return nil
+	}
+
 	return nil
 }
 
-func (api *CategoryAPI) validateUpdate(reqBody rest.CategoryUpdateBody) error {
-	return nil
+func (api *CategoryAPI) validateUpdate(reqBody rest.CategoryUpdateBody, accountId string) error {
+	return api.validateCreate(reqBody.CategoryCreateBody, accountId)
 }

@@ -18,18 +18,6 @@ func buildServerError(err error) *rest.Response {
 	}
 }
 
-func buildNotFoundError() *rest.Response {
-	return &rest.Response{
-		Status: http.StatusNotFound,
-	}
-}
-
-func buildForbiddenError() *rest.Response {
-	return &rest.Response{
-		Status: http.StatusForbidden,
-	}
-}
-
 func buildOKResponse(d interface{}) *rest.Response {
 	return &rest.Response{
 		Status: http.StatusOK,

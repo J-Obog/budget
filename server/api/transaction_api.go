@@ -95,9 +95,31 @@ func (api *TransactionAPI) transactionCtx(r *rest.Request) (data.Transaction, *r
 }
 
 func (api *TransactionAPI) validateCreate(reqBody *rest.TransactionCreateBody, accountId string) error {
+	month := reqBody.Month
+	year := reqBody.Year
+	day := reqBody.Day
+	categoryId := reqBody.CategoryId
+	description := reqBody.Description
+
+	if err := checkDate(month, day, year); err != nil {
+		return err
+	}
+
+	if categoryId != nil {
+		if err := checkCategoryExists(*categoryId, accountId, api.categoryManager); err != nil {
+			return err
+		}
+	}
+
+	if description != nil {
+		if err := checkBudgetDesciption(*description); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (api *TransactionAPI) validateUpdate(reqBody *rest.TransactionUpdateBody, accountId string) error {
-	return nil
+	return api.validateCreate(&reqBody.TransactionCreateBody, accountId)
 }

@@ -95,9 +95,25 @@ func (api *BudgetAPI) bugetCtx(r *rest.Request) (data.Budget, *rest.Response) {
 }
 
 func (api *BudgetAPI) validateCreate(reqBody *rest.BudgetCreateBody, accountId string) error {
+	month := reqBody.Month
+	year := reqBody.Year
+	categoryId := reqBody.CategoryId
+
+	if err := checkDate(month, 1, year); err != nil {
+		return err
+	}
+
+	if err := checkCategoryNotUsed(categoryId, month, year, api.budgetManager); err != nil {
+		return err
+	}
+
+	if err := checkCategoryExists(categoryId, accountId, api.categoryManager); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (api *BudgetAPI) validateUpdate(reqBody *rest.BudgetUpdateBody, accountId string) error {
-	return nil
+	return api.validateCreate(&reqBody.BudgetCreateBody, accountId)
 }
