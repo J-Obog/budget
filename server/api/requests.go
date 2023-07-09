@@ -2,22 +2,6 @@ package api
 
 import "github.com/J-Obog/paidoff/data"
 
-func getTaskId(req *data.RestRequest) string {
-	return req.UrlParams["taskId"].(string)
-}
-
-func getCategoryId(req *data.RestRequest) string {
-	return req.UrlParams["categoryId"].(string)
-}
-
-func getBudgetId(req *data.RestRequest) string {
-	return req.UrlParams["budgetId"].(string)
-}
-
-func getTransactionId(req *data.RestRequest) string {
-	return req.UrlParams["transactionId"].(string)
-}
-
 func getAccountCtx(req *data.RestRequest) data.Account {
 	return req.Meta["accountCtx"].(data.Account)
 }

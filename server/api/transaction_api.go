@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
+	"github.com/J-Obog/paidoff/validation"
 )
 
 type TransactionAPI struct {
@@ -50,16 +51,22 @@ func (api *TransactionAPI) GetTransactions(req *data.RestRequest) *data.RestResp
 }
 
 func (api *TransactionAPI) CreateTransaction(req *data.RestRequest) *data.RestResponse {
+	accountId := getAccountCtx(req).Id
+
+	if err := validation.ValidateTransactionCreateReq(req.Body); err != nil {
+		return buildBadRequestError()
+	}
+
 	createReq, err := getTransactionCreateBody(req)
 	if err != nil {
 		return buildServerError(err)
 	}
 
-	if errRes := validateCategoryId(createReq.CategoryId, req, api.categoryManager); errRes != nil {
+	if errRes := checkCategoryExists(createReq.CategoryId, accountId, api.categoryManager); errRes != nil {
 		return errRes
 	}
 
-	if err := api.transactionManager.Create(getAccountCtx(req).Id, createReq); err != nil {
+	if err := api.transactionManager.Create(accountId, createReq); err != nil {
 		return buildServerError(err)
 	}
 
@@ -67,6 +74,10 @@ func (api *TransactionAPI) CreateTransaction(req *data.RestRequest) *data.RestRe
 }
 
 func (api *TransactionAPI) UpdateTransaction(req *data.RestRequest) *data.RestResponse {
+	if err := validation.ValidateTransactionUpdateReq(req.Body); err != nil {
+		return buildBadRequestError()
+	}
+
 	transaction, errRes := api.getTransactionCtx(req)
 	if errRes != nil {
 		return errRes
@@ -77,7 +88,7 @@ func (api *TransactionAPI) UpdateTransaction(req *data.RestRequest) *data.RestRe
 		return buildServerError(err)
 	}
 
-	if errRes = validateCategoryId(updateReq.CategoryId, req, api.categoryManager); errRes != nil {
+	if errRes := checkCategoryExists(updateReq.CategoryId, transaction.AccountId, api.categoryManager); errRes != nil {
 		return errRes
 	}
 

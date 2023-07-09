@@ -32,7 +32,6 @@ func (manager *BudgetManager) Create(accountId string, req data.BudgetCreateRequ
 		Id:         manager.uid.GetId(),
 		AccountId:  accountId,
 		CategoryId: req.CategoryId,
-		Name:       req.Name,
 		Month:      req.Month,
 		Year:       req.Year,
 		Projected:  req.Projected,
@@ -46,7 +45,6 @@ func (manager *BudgetManager) Create(accountId string, req data.BudgetCreateRequ
 
 func (manager *BudgetManager) Update(existing *data.Budget, req data.BudgetUpdateRequest) error {
 	existing.CategoryId = req.CategoryId
-	existing.Name = req.Name
 	existing.Month = req.Month
 	existing.Year = req.Year
 	existing.Projected = req.Projected

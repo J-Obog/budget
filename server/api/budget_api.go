@@ -62,6 +62,10 @@ func (api *BudgetAPI) CreateBudget(req *data.RestRequest) *data.RestResponse {
 
 	accountId := getAccountCtx(req).Id
 
+	if errResp := checkCategoryExists(&createReq.CategoryId, accountId, api.categoryManager); errResp != nil {
+		return errResp
+	}
+
 	if err := api.budgetManager.Create(accountId, createReq); err != nil {
 		return buildServerError(err)
 	}
@@ -84,7 +88,7 @@ func (api *BudgetAPI) UpdateBudget(req *data.RestRequest) *data.RestResponse {
 		return buildServerError(err)
 	}
 
-	if errResp = validateCategoryId(updateReq.CategoryId, req, api.categoryManager); errResp != nil {
+	if errResp = checkCategoryExists(&updateReq.CategoryId, budget.AccountId, api.categoryManager); errResp != nil {
 		return errResp
 	}
 

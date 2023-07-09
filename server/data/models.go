@@ -21,8 +21,7 @@ type Account struct {
 type Budget struct {
 	Id         string  `json:"id"`
 	AccountId  string  `json:"accountId"`
-	CategoryId *string `json:"categoryId"`
-	Name       string  `json:"name"`
+	CategoryId string  `json:"categoryId"`
 	Month      int     `json:"month"`
 	Year       int     `json:"year"`
 	Projected  float64 `json:"projected"`
