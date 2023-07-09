@@ -2,10 +2,6 @@ package rest
 
 type Params map[string]any
 
-func (p Params) TaskId() string {
-	return p["taskId"].(string)
-}
-
 func (p Params) BudgetId() string {
 	return p["budgetId"].(string)
 }

@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
 	"github.com/J-Obog/paidoff/uid"
 )
@@ -17,7 +18,7 @@ func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
 	return manager.store.Get(id)
 }
 
-func (manager *TransactionManager) GetByAccount(accountId string, q data.TransactionQuery) ([]data.Transaction, error) {
+func (manager *TransactionManager) GetByAccount(accountId string, q rest.TransactionQuery) ([]data.Transaction, error) {
 	/*
 		filter := NewFilter[data.Transaction]()
 			filter.AddCheck(filterTransaction(q))
@@ -26,7 +27,7 @@ func (manager *TransactionManager) GetByAccount(accountId string, q data.Transac
 	return manager.store.GetByAccount(accountId)
 }
 
-func (manager *TransactionManager) Create(accountId string, req data.TransactionCreateRequest) error {
+func (manager *TransactionManager) Create(accountId string, req rest.TransactionCreateBody) error {
 	now := manager.clock.Now()
 
 	newTransaction := data.Transaction{
@@ -45,7 +46,7 @@ func (manager *TransactionManager) Create(accountId string, req data.Transaction
 	return manager.store.Insert(newTransaction)
 }
 
-func (manager *TransactionManager) Update(existing *data.Transaction, req data.TransactionUpdateRequest) error {
+func (manager *TransactionManager) Update(existing *data.Transaction, req rest.TransactionUpdateBody) error {
 	existing.CategoryId = req.CategoryId
 	existing.Description = req.Description
 	existing.Amount = req.Amount

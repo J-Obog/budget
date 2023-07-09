@@ -1,42 +1,38 @@
 package api
 
 import (
-	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
-	"github.com/J-Obog/paidoff/validation"
+	"github.com/J-Obog/paidoff/rest"
 )
 
 type AccountAPI struct {
 	accountManager *manager.AccountManager
 }
 
-func (api *AccountAPI) GetAccount(req *data.RestRequest) *data.RestResponse {
-	return buildOKResponse(getAccountCtx(req))
+func (api *AccountAPI) GetAccount(r *rest.Request) *rest.Response {
+	return buildOKResponse(r.Account)
 }
 
-func (api *AccountAPI) UpdateAccount(req *data.RestRequest) *data.RestResponse {
-	if err := validation.ValidateAccountUpdateReq(req.Body); err != nil {
-		return buildBadRequestError()
+func (api *AccountAPI) UpdateAccount(r *rest.Request) *rest.Response {
+	if errResp := api.validateUpdate(r); errResp != nil {
+		return errResp
 	}
 
-	account := getAccountCtx(req)
-	updateReq, err := getAccountUpdateBody(req)
-
-	if err != nil {
-		return buildServerError(err)
-	}
-
-	if err := api.accountManager.Update(&account, updateReq); err != nil {
+	if err := api.accountManager.Update(r.Account, r.Body.AccountUpdateBody()); err != nil {
 		return buildServerError(err)
 	}
 
 	return buildOKResponse(nil)
 }
 
-func (api *AccountAPI) DeleteAccount(req *data.RestRequest) *data.RestResponse {
-	if err := api.accountManager.Delete(getAccountCtx(req)); err != nil {
+func (api *AccountAPI) DeleteAccount(r *rest.Request) *rest.Response {
+	if err := api.accountManager.Delete(*r.Account); err != nil {
 		return buildServerError(err)
 	}
 
 	return buildOKResponse(nil)
+}
+
+func (api *AccountAPI) validateUpdate(r *rest.Request) *rest.Response {
+	return nil
 }

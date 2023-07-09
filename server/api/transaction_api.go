@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
-	"github.com/J-Obog/paidoff/validation"
+	"github.com/J-Obog/paidoff/rest"
 )
 
 type TransactionAPI struct {
@@ -11,21 +11,8 @@ type TransactionAPI struct {
 	categoryManager    *manager.CategoryManager
 }
 
-func (api *TransactionAPI) getTransactionCtx(req *data.RestRequest) (data.Transaction, *data.RestResponse) {
-	transaction, err := api.transactionManager.Get(req.Params["transactionId"].(string))
-
-	if err != nil {
-		return data.Transaction{}, buildServerError(err)
-	}
-	if transaction == nil || transaction.AccountId != getAccountCtx(req).Id {
-		return data.Transaction{}, buildBadRequestError()
-	}
-
-	return *transaction, nil
-}
-
-func (api *TransactionAPI) GetTransaction(req *data.RestRequest) *data.RestResponse {
-	transaction, errRes := api.getTransactionCtx(req)
+func (api *TransactionAPI) GetTransaction(r *rest.Request) *rest.Response {
+	transaction, errRes := api.transactionCtx(r)
 	if errRes != nil {
 		return errRes
 	}
@@ -33,16 +20,12 @@ func (api *TransactionAPI) GetTransaction(req *data.RestRequest) *data.RestRespo
 	return buildOKResponse(transaction)
 }
 
-func (api *TransactionAPI) GetTransactions(req *data.RestRequest) *data.RestResponse {
-	q, err := getTransactionGetQuery(req)
-
-	if err != nil {
-		return buildServerError(err)
+func (api *TransactionAPI) GetTransactions(r *rest.Request) *rest.Response {
+	if errResp := api.validateGets(r); errResp != nil {
+		return errResp
 	}
 
-	accountId := getAccountCtx(req).Id
-
-	transactions, err := api.transactionManager.GetByAccount(accountId, q)
+	transactions, err := api.transactionManager.GetByAccount(r.Account.Id, r.Query.TransactionQuery())
 	if err != nil {
 		return buildServerError(err)
 	}
@@ -50,57 +33,37 @@ func (api *TransactionAPI) GetTransactions(req *data.RestRequest) *data.RestResp
 	return buildOKResponse(transactions)
 }
 
-func (api *TransactionAPI) CreateTransaction(req *data.RestRequest) *data.RestResponse {
-	accountId := getAccountCtx(req).Id
-
-	if err := validation.ValidateTransactionCreateReq(req.Body); err != nil {
-		return buildBadRequestError()
+func (api *TransactionAPI) CreateTransaction(r *rest.Request) *rest.Response {
+	if errResp := api.validateCreate(r); errResp != nil {
+		return errResp
 	}
 
-	createReq, err := getTransactionCreateBody(req)
-	if err != nil {
-		return buildServerError(err)
-	}
-
-	if errRes := checkCategoryExists(createReq.CategoryId, accountId, api.categoryManager); errRes != nil {
-		return errRes
-	}
-
-	if err := api.transactionManager.Create(accountId, createReq); err != nil {
+	if err := api.transactionManager.Create(r.Account.Id, r.Body.TransactionCreateBody()); err != nil {
 		return buildServerError(err)
 	}
 
 	return buildOKResponse(nil)
 }
 
-func (api *TransactionAPI) UpdateTransaction(req *data.RestRequest) *data.RestResponse {
-	if err := validation.ValidateTransactionUpdateReq(req.Body); err != nil {
-		return buildBadRequestError()
+func (api *TransactionAPI) UpdateTransaction(r *rest.Request) *rest.Response {
+	transaction, errResp := api.transactionCtx(r)
+	if errResp != nil {
+		return errResp
 	}
 
-	transaction, errRes := api.getTransactionCtx(req)
-	if errRes != nil {
-		return errRes
+	if errResp := api.validateUpdate(r); errResp != nil {
+		return errResp
 	}
 
-	updateReq, err := getTransactionUpdateBody(req)
-	if err != nil {
-		return buildServerError(err)
-	}
-
-	if errRes := checkCategoryExists(updateReq.CategoryId, transaction.AccountId, api.categoryManager); errRes != nil {
-		return errRes
-	}
-
-	if err := api.transactionManager.Update(&transaction, updateReq); err != nil {
+	if err := api.transactionManager.Update(&transaction, r.Body.TransactionUpdateBody()); err != nil {
 		return buildServerError(err)
 	}
 
 	return buildOKResponse(nil)
 }
 
-func (api *TransactionAPI) DeleteTransaction(req *data.RestRequest) *data.RestResponse {
-	transaction, errRes := api.getTransactionCtx(req)
+func (api *TransactionAPI) DeleteTransaction(r *rest.Request) *rest.Response {
+	transaction, errRes := api.transactionCtx(r)
 	if errRes != nil {
 		return errRes
 	}
@@ -110,4 +73,29 @@ func (api *TransactionAPI) DeleteTransaction(req *data.RestRequest) *data.RestRe
 	}
 
 	return buildOKResponse(nil)
+}
+
+func (api *TransactionAPI) validateCreate(r *rest.Request) *rest.Response {
+	return nil
+}
+
+func (api *TransactionAPI) validateUpdate(r *rest.Request) *rest.Response {
+	return nil
+}
+
+func (api *TransactionAPI) validateGets(r *rest.Request) *rest.Response {
+	return nil
+}
+
+func (api *TransactionAPI) transactionCtx(r *rest.Request) (data.Transaction, *rest.Response) {
+	transaction, err := api.transactionManager.Get(r.Params.TransactionId())
+
+	if err != nil {
+		return data.Transaction{}, buildServerError(err)
+	}
+	if transaction == nil || transaction.AccountId != r.Account.Id {
+		return data.Transaction{}, buildBadRequestError()
+	}
+
+	return *transaction, nil
 }

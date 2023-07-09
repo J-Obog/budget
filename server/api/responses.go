@@ -3,35 +3,35 @@ package api
 import (
 	"net/http"
 
-	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/rest"
 )
 
-func buildBadRequestError() *data.RestResponse {
-	return &data.RestResponse{
+func buildBadRequestError() *rest.Response {
+	return &rest.Response{
 		Status: http.StatusBadRequest,
 	}
 }
 
-func buildServerError(err error) *data.RestResponse {
-	return &data.RestResponse{
+func buildServerError(err error) *rest.Response {
+	return &rest.Response{
 		Status: http.StatusInternalServerError,
 	}
 }
 
-func buildNotFoundError() *data.RestResponse {
-	return &data.RestResponse{
+func buildNotFoundError() *rest.Response {
+	return &rest.Response{
 		Status: http.StatusNotFound,
 	}
 }
 
-func buildForbiddenError() *data.RestResponse {
-	return &data.RestResponse{
+func buildForbiddenError() *rest.Response {
+	return &rest.Response{
 		Status: http.StatusForbidden,
 	}
 }
 
-func buildOKResponse(d interface{}) *data.RestResponse {
-	return &data.RestResponse{
+func buildOKResponse(d interface{}) *rest.Response {
+	return &rest.Response{
 		Status: http.StatusOK,
 		Data:   d,
 	}

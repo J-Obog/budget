@@ -3,27 +3,15 @@ package api
 import (
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
+	"github.com/J-Obog/paidoff/rest"
 )
 
 type CategoryAPI struct {
 	categoryManager *manager.CategoryManager
 }
 
-func (api *CategoryAPI) getCategoryCtx(req *data.RestRequest) (data.Category, *data.RestResponse) {
-	category, err := api.categoryManager.Get(req.Params["categoryId"].(string))
-
-	if err != nil {
-		return data.Category{}, buildServerError(err)
-	}
-	if category == nil || category.AccountId != getAccountCtx(req).Id {
-		return data.Category{}, buildBadRequestError()
-	}
-
-	return *category, nil
-}
-
-func (api *CategoryAPI) GetCategory(req *data.RestRequest) *data.RestResponse {
-	category, errRes := api.getCategoryCtx(req)
+func (api *CategoryAPI) GetCategory(r *rest.Request) *rest.Response {
+	category, errRes := api.categoryCtx(r)
 	if errRes != nil {
 		return errRes
 	}
@@ -31,9 +19,8 @@ func (api *CategoryAPI) GetCategory(req *data.RestRequest) *data.RestResponse {
 	return buildOKResponse(category)
 }
 
-func (api *CategoryAPI) GetCategories(req *data.RestRequest) *data.RestResponse {
-	accountId := getAccountCtx(req).Id
-	categories, err := api.categoryManager.GetByAccount(accountId)
+func (api *CategoryAPI) GetCategories(r *rest.Request) *rest.Response {
+	categories, err := api.categoryManager.GetByAccount(r.Account.Id)
 
 	if err != nil {
 		return buildServerError(err)
@@ -42,40 +29,37 @@ func (api *CategoryAPI) GetCategories(req *data.RestRequest) *data.RestResponse 
 	return buildOKResponse(categories)
 }
 
-func (api *CategoryAPI) CreateCategory(req *data.RestRequest) *data.RestResponse {
-	createReq, err := getCategoryCreateBody(req)
-	if err != nil {
-		return buildServerError(err)
+func (api *CategoryAPI) CreateCategory(r *rest.Request) *rest.Response {
+	if errResp := api.validateCreate(r); errResp != nil {
+		return errResp
 	}
 
-	if err := api.categoryManager.Create(getAccountCtx(req).Id, createReq); err != nil {
+	if err := api.categoryManager.Create(r.Account.Id, r.Body.CategoryCreateBody()); err != nil {
 		return buildServerError(err)
 	}
 
 	return buildOKResponse(nil)
 }
 
-func (api *CategoryAPI) UpdateCategory(req *data.RestRequest) *data.RestResponse {
-	category, errRes := api.getCategoryCtx(req)
+func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
+	category, errRes := api.categoryCtx(r)
 	if errRes != nil {
 		return errRes
 	}
 
-	updateReq, err := getCategoryUpdateBody(req)
-
-	if err != nil {
-		return buildServerError(err)
+	if errResp := api.validateUpdate(r); errResp != nil {
+		return errResp
 	}
 
-	if err := api.categoryManager.Update(&category, updateReq); err != nil {
+	if err := api.categoryManager.Update(&category, r.Body.CategoryUpdateBody()); err != nil {
 		return buildServerError(err)
 	}
 
 	return buildOKResponse(nil)
 }
 
-func (api *CategoryAPI) DeleteCategory(req *data.RestRequest) *data.RestResponse {
-	category, errRes := api.getCategoryCtx(req)
+func (api *CategoryAPI) DeleteCategory(r *rest.Request) *rest.Response {
+	category, errRes := api.categoryCtx(r)
 	if errRes != nil {
 		return errRes
 	}
@@ -85,4 +69,25 @@ func (api *CategoryAPI) DeleteCategory(req *data.RestRequest) *data.RestResponse
 	}
 
 	return buildOKResponse(nil)
+}
+
+func (api *CategoryAPI) validateCreate(r *rest.Request) *rest.Response {
+	return nil
+}
+
+func (api *CategoryAPI) validateUpdate(r *rest.Request) *rest.Response {
+	return nil
+}
+
+func (api *CategoryAPI) categoryCtx(r *rest.Request) (data.Category, *rest.Response) {
+	category, err := api.categoryManager.Get(r.Params.CategoryId())
+
+	if err != nil {
+		return data.Category{}, buildServerError(err)
+	}
+	if category == nil || category.AccountId != r.Account.Id {
+		return data.Category{}, buildBadRequestError()
+	}
+
+	return *category, nil
 }

@@ -11,7 +11,7 @@ type BudgetAPI struct {
 	categoryManager *manager.CategoryManager
 }
 
-func (api *BudgetAPI) GetBudget(r *rest.Request) *data.RestResponse {
+func (api *BudgetAPI) GetBudget(r *rest.Request) *rest.Response {
 	budget, errResp := api.bugetCtx(r)
 	if errResp != nil {
 		return errResp
@@ -20,9 +20,8 @@ func (api *BudgetAPI) GetBudget(r *rest.Request) *data.RestResponse {
 	return buildOKResponse(budget)
 }
 
-func (api *BudgetAPI) GetBudgets(r *rest.Request) *data.RestResponse {
-	errResp := api.validateGetsRequest(r)
-	if errResp != nil {
+func (api *BudgetAPI) GetBudgets(r *rest.Request) *rest.Response {
+	if errResp := api.validateGetsRequest(r); errResp != nil {
 		return errResp
 	}
 
@@ -34,9 +33,8 @@ func (api *BudgetAPI) GetBudgets(r *rest.Request) *data.RestResponse {
 	return buildOKResponse(budgets)
 }
 
-func (api *BudgetAPI) CreateBudget(r *rest.Request) *data.RestResponse {
-	errResp := api.validateCreateRequest(r)
-	if errResp != nil {
+func (api *BudgetAPI) CreateBudget(r *rest.Request) *rest.Response {
+	if errResp := api.validateCreateRequest(r); errResp != nil {
 		return errResp
 	}
 
@@ -47,14 +45,13 @@ func (api *BudgetAPI) CreateBudget(r *rest.Request) *data.RestResponse {
 	return buildOKResponse(nil)
 }
 
-func (api *BudgetAPI) UpdateBudget(r *rest.Request) *data.RestResponse {
+func (api *BudgetAPI) UpdateBudget(r *rest.Request) *rest.Response {
 	budget, errResp := api.bugetCtx(r)
 	if errResp != nil {
 		return errResp
 	}
 
-	errResp = api.validateUpdateRequest(r)
-	if errResp != nil {
+	if errResp = api.validateUpdateRequest(r); errResp != nil {
 		return errResp
 	}
 
@@ -65,7 +62,7 @@ func (api *BudgetAPI) UpdateBudget(r *rest.Request) *data.RestResponse {
 	return buildOKResponse(nil)
 }
 
-func (api *BudgetAPI) DeleteBudget(r *rest.Request) *data.RestResponse {
+func (api *BudgetAPI) DeleteBudget(r *rest.Request) *rest.Response {
 	budget, errResp := api.bugetCtx(r)
 	if errResp != nil {
 		return errResp
@@ -78,19 +75,19 @@ func (api *BudgetAPI) DeleteBudget(r *rest.Request) *data.RestResponse {
 	return buildOKResponse(nil)
 }
 
-func (api *BudgetAPI) validateUpdateRequest(req *rest.Request) *data.RestResponse {
+func (api *BudgetAPI) validateUpdateRequest(req *rest.Request) *rest.Response {
 	return nil
 }
 
-func (api *BudgetAPI) validateCreateRequest(req *rest.Request) *data.RestResponse {
+func (api *BudgetAPI) validateCreateRequest(req *rest.Request) *rest.Response {
 	return nil
 }
 
-func (api *BudgetAPI) validateGetsRequest(req *rest.Request) *data.RestResponse {
+func (api *BudgetAPI) validateGetsRequest(req *rest.Request) *rest.Response {
 	return nil
 }
 
-func (api *BudgetAPI) bugetCtx(r *rest.Request) (data.Budget, *data.RestResponse) {
+func (api *BudgetAPI) bugetCtx(r *rest.Request) (data.Budget, *rest.Response) {
 	budget, err := api.budgetManager.Get(r.Params.BudgetId())
 
 	if err != nil {

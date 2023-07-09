@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
 )
 
@@ -15,7 +16,7 @@ func (manager *AccountManager) Get(id string) (*data.Account, error) {
 	return manager.store.Get(id)
 }
 
-func (manager *AccountManager) Update(existing *data.Account, req data.AccountUpdateRequest) error {
+func (manager *AccountManager) Update(existing *data.Account, req rest.AccountUpdateBody) error {
 	existing.UpdatedAt = manager.clock.Now()
 	existing.Name = req.Name
 

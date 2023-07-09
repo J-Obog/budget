@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
 	"github.com/J-Obog/paidoff/uid"
 )
@@ -21,7 +22,7 @@ func (manager *CategoryManager) GetByAccount(accountId string) ([]data.Category,
 	return manager.store.GetByAccount(accountId)
 }
 
-func (manager *CategoryManager) Create(accountId string, req data.CategoryCreateRequest) error {
+func (manager *CategoryManager) Create(accountId string, req rest.CategoryCreateBody) error {
 	now := manager.clock.Now()
 
 	newCategory := data.Category{
@@ -35,7 +36,7 @@ func (manager *CategoryManager) Create(accountId string, req data.CategoryCreate
 	return manager.store.Insert(newCategory)
 }
 
-func (manager *CategoryManager) Update(existing *data.Category, req data.CategoryUpdateRequest) error {
+func (manager *CategoryManager) Update(existing *data.Category, req rest.CategoryUpdateBody) error {
 	existing.Color = req.Color
 	existing.Name = req.Name
 	existing.UpdatedAt = manager.clock.Now()
