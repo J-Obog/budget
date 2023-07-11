@@ -39,8 +39,16 @@ func (manager *BudgetManager) CategoryInPeriod(id string, accountId string, mont
 	return false, nil
 }
 
-func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
-	return manager.store.Get(id)
+func (manager *BudgetManager) Get(id string, accountId string) (*data.Budget, error) {
+	budget, err := manager.store.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if budget == nil || budget.AccountId != accountId {
+		return nil, nil
+	}
+
+	return budget, nil
 }
 
 func (manager *BudgetManager) Filter(accountId string, q rest.BudgetQuery) ([]data.Budget, error) {

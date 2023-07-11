@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
 )
@@ -11,9 +10,12 @@ type CategoryAPI struct {
 }
 
 func (api *CategoryAPI) GetCategory(r *rest.Request) *rest.Response {
-	category, errRes := api.categoryCtx(r)
-	if errRes != nil {
-		return errRes
+	category, err := api.categoryManager.Get(r.Params.CategoryId(), r.Account.Id)
+	if err != nil {
+		return buildServerError(err)
+	}
+	if category == nil {
+		return buildBadRequestError()
 	}
 
 	return buildOKResponse(category)
@@ -47,9 +49,12 @@ func (api *CategoryAPI) CreateCategory(r *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
-	category, errRes := api.categoryCtx(r)
-	if errRes != nil {
-		return errRes
+	category, err := api.categoryManager.Get(r.Params.CategoryId(), r.Account.Id)
+	if err != nil {
+		return buildServerError(err)
+	}
+	if category == nil {
+		return buildBadRequestError()
 	}
 
 	reqBody, err := r.Body.CategoryUpdateBody()
@@ -61,7 +66,7 @@ func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	if err := api.categoryManager.Update(&category, reqBody); err != nil {
+	if err := api.categoryManager.Update(category, reqBody); err != nil {
 		return buildServerError(err)
 	}
 
@@ -69,9 +74,12 @@ func (api *CategoryAPI) UpdateCategory(r *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) DeleteCategory(r *rest.Request) *rest.Response {
-	category, errRes := api.categoryCtx(r)
-	if errRes != nil {
-		return errRes
+	category, err := api.categoryManager.Get(r.Params.CategoryId(), r.Account.Id)
+	if err != nil {
+		return buildServerError(err)
+	}
+	if category == nil {
+		return buildBadRequestError()
 	}
 
 	if err := api.categoryManager.Delete(category.Id); err != nil {
@@ -79,19 +87,6 @@ func (api *CategoryAPI) DeleteCategory(r *rest.Request) *rest.Response {
 	}
 
 	return buildOKResponse(nil)
-}
-
-func (api *CategoryAPI) categoryCtx(r *rest.Request) (data.Category, *rest.Response) {
-	category, err := api.categoryManager.Get(r.Params.CategoryId())
-
-	if err != nil {
-		return data.Category{}, buildServerError(err)
-	}
-	if category == nil || category.AccountId != r.Account.Id {
-		return data.Category{}, buildBadRequestError()
-	}
-
-	return *category, nil
 }
 
 func (api *CategoryAPI) validateCreate(reqBody rest.CategoryCreateBody, accountId string) error {

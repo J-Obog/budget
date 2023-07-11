@@ -42,8 +42,16 @@ func (manager *CategoryManager) Exists(id string, accountId string) (bool, error
 	return true, nil
 }
 
-func (manager *CategoryManager) Get(id string) (*data.Category, error) {
-	return manager.store.Get(id)
+func (manager *CategoryManager) Get(id string, accountId string) (*data.Category, error) {
+	category, err := manager.store.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if category == nil || category.AccountId != accountId {
+		return nil, nil
+	}
+
+	return category, nil
 }
 
 func (manager *CategoryManager) GetByAccount(accountId string) ([]data.Category, error) {

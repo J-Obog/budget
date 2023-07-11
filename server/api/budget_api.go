@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
 )
@@ -12,9 +11,12 @@ type BudgetAPI struct {
 }
 
 func (api *BudgetAPI) GetBudget(r *rest.Request) *rest.Response {
-	budget, errResp := api.bugetCtx(r)
-	if errResp != nil {
-		return errResp
+	budget, err := api.budgetManager.Get(r.Params.BudgetId(), r.Account.Id)
+	if err != nil {
+		return buildServerError(err)
+	}
+	if budget == nil {
+		return buildBadRequestError() //BUGET NOT EXISTS ERR
 	}
 
 	return buildOKResponse(budget)
@@ -47,9 +49,12 @@ func (api *BudgetAPI) CreateBudget(r *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) UpdateBudget(r *rest.Request) *rest.Response {
-	budget, errResp := api.bugetCtx(r)
-	if errResp != nil {
-		return errResp
+	budget, err := api.budgetManager.Get(r.Params.BudgetId(), r.Account.Id)
+	if err != nil {
+		return buildServerError(err)
+	}
+	if budget == nil {
+		return buildBadRequestError() //BUGET NOT EXISTS ERR
 	}
 
 	reqBody, err := r.Body.BudgetUpdateBody()
@@ -61,7 +66,7 @@ func (api *BudgetAPI) UpdateBudget(r *rest.Request) *rest.Response {
 		return buildBadRequestError()
 	}
 
-	if err := api.budgetManager.Update(&budget, reqBody); err != nil {
+	if err := api.budgetManager.Update(budget, reqBody); err != nil {
 		return buildServerError(err)
 	}
 
@@ -69,9 +74,12 @@ func (api *BudgetAPI) UpdateBudget(r *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) DeleteBudget(r *rest.Request) *rest.Response {
-	budget, errResp := api.bugetCtx(r)
-	if errResp != nil {
-		return errResp
+	budget, err := api.budgetManager.Get(r.Params.BudgetId(), r.Account.Id)
+	if err != nil {
+		return buildServerError(err)
+	}
+	if budget == nil {
+		return buildBadRequestError() //BUGET NOT EXISTS ERR
 	}
 
 	if err := api.budgetManager.Delete(budget.Id); err != nil {
@@ -79,19 +87,6 @@ func (api *BudgetAPI) DeleteBudget(r *rest.Request) *rest.Response {
 	}
 
 	return buildOKResponse(nil)
-}
-
-func (api *BudgetAPI) bugetCtx(r *rest.Request) (data.Budget, *rest.Response) {
-	budget, err := api.budgetManager.Get(r.Params.BudgetId())
-
-	if err != nil {
-		return data.Budget{}, buildServerError(err)
-	}
-	if budget == nil || budget.AccountId != r.Account.Id {
-		return data.Budget{}, buildBadRequestError()
-	}
-
-	return *budget, nil
 }
 
 func (api *BudgetAPI) validateCreate(reqBody *rest.BudgetCreateBody, accountId string) error {

@@ -14,8 +14,16 @@ type TransactionManager struct {
 	uid   uid.UIDProvider
 }
 
-func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
-	return manager.store.Get(id)
+func (manager *TransactionManager) Get(id string, accountId string) (*data.Transaction, error) {
+	transaction, err := manager.store.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if transaction == nil || transaction.AccountId != accountId {
+		return nil, nil
+	}
+
+	return transaction, nil
 }
 
 func (manager *TransactionManager) Filter(accountId string, q rest.TransactionQuery) ([]data.Transaction, error) {
