@@ -15,23 +15,13 @@ type BudgetManager struct {
 }
 
 func (manager *BudgetManager) CategoryInPeriod(id string, accountId string, month int, year int) (bool, error) {
-	filtered := make([]data.Budget, 0)
-
-	budgets, err := manager.store.GetByAccount(accountId)
+	budgets, err := manager.filterByPeriod(accountId, month, year)
 	if err != nil {
-		return false, err
+		return false, nil
 	}
 
 	for _, budget := range budgets {
-		if budget.Year != month || budget.Year != year {
-			continue
-		}
-
-		filtered = append(filtered, budget)
-	}
-
-	for _, b := range filtered {
-		if b.CategoryId == id {
+		if budget.CategoryId == id {
 			return true, err
 		}
 	}
@@ -52,26 +42,7 @@ func (manager *BudgetManager) Get(id string, accountId string) (*data.Budget, er
 }
 
 func (manager *BudgetManager) Filter(accountId string, q rest.BudgetQuery) ([]data.Budget, error) {
-	filtered := make([]data.Budget, 0)
-
-	budgets, err := manager.store.GetByAccount(accountId)
-	if err != nil {
-		return filtered, err
-	}
-
-	for _, budget := range budgets {
-		if q.Month != nil && budget.Month != *q.Month {
-			continue
-		}
-
-		if q.Year != nil && budget.Year != *q.Year {
-			continue
-		}
-
-		filtered = append(filtered, budget)
-	}
-
-	return filtered, nil
+	return manager.filterByQuery(accountId, q)
 }
 
 func (manager *BudgetManager) Create(accountId string, req rest.BudgetCreateBody) error {
@@ -104,4 +75,37 @@ func (manager *BudgetManager) Update(existing *data.Budget, req rest.BudgetUpdat
 
 func (manager *BudgetManager) Delete(id string) error {
 	return manager.store.Delete(id)
+}
+
+func (manager *BudgetManager) filterByQuery(accountId string, query rest.BudgetQuery) ([]data.Budget, error) {
+	budgets, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return budgets, err
+	}
+
+	filtered := filter[data.Budget](budgets, func(b *data.Budget) bool {
+		if query.Month != nil && b.Month != *query.Month {
+			return false
+		}
+
+		if query.Year != nil && b.Year != *query.Year {
+			return false
+		}
+		return true
+	})
+
+	return filtered, nil
+}
+
+func (manager *BudgetManager) filterByPeriod(accountId string, month int, year int) ([]data.Budget, error) {
+	budgets, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return budgets, err
+	}
+
+	filtered := filter[data.Budget](budgets, func(b *data.Budget) bool {
+		return b.Month == month && b.Year == year
+	})
+
+	return filtered, nil
 }

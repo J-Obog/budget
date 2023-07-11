@@ -27,35 +27,7 @@ func (manager *TransactionManager) Get(id string, accountId string) (*data.Trans
 }
 
 func (manager *TransactionManager) Filter(accountId string, q rest.TransactionQuery) ([]data.Transaction, error) {
-	filtered := make([]data.Transaction, 0)
-
-	transactions, err := manager.store.GetByAccount(accountId)
-	if err != nil {
-		return filtered, err
-	}
-
-	for _, transaction := range transactions {
-		if q.CreatedBefore != nil && transaction.CreatedAt >= *q.CreatedBefore {
-			continue
-		}
-
-		if q.CreatedAfter != nil && transaction.CreatedAt <= *q.CreatedAfter {
-			continue
-		}
-
-		if q.AmountGte != nil && transaction.Amount < *q.AmountGte {
-			continue
-		}
-
-		if q.AmountLte != nil && transaction.Amount > *q.AmountLte {
-			continue
-		}
-
-		filtered = append(filtered, transaction)
-
-	}
-
-	return filtered, nil
+	return manager.filterByQuery(accountId, q)
 }
 
 func (manager *TransactionManager) Create(accountId string, req rest.TransactionCreateBody) error {
@@ -91,4 +63,33 @@ func (manager *TransactionManager) Update(existing *data.Transaction, req rest.T
 
 func (manager *TransactionManager) Delete(id string) error {
 	return manager.store.Delete(id)
+}
+
+func (manager *TransactionManager) filterByQuery(accountId string, query rest.TransactionQuery) ([]data.Transaction, error) {
+	transactions, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return transactions, err
+	}
+
+	filtered := filter[data.Transaction](transactions, func(t *data.Transaction) bool {
+		if query.CreatedBefore != nil && t.CreatedAt >= *query.CreatedBefore {
+			return false
+		}
+
+		if query.CreatedAfter != nil && t.CreatedAt <= *query.CreatedAfter {
+			return false
+		}
+
+		if query.AmountGte != nil && t.Amount < *query.AmountGte {
+			return false
+		}
+
+		if query.AmountLte != nil && t.Amount > *query.AmountLte {
+			return false
+		}
+		return true
+
+	})
+
+	return filtered, nil
 }
