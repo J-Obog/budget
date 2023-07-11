@@ -14,6 +14,34 @@ type CategoryManager struct {
 	uid   uid.UIDProvider
 }
 
+func (manager *CategoryManager) NameExists(accountId string, name string) (bool, error) {
+	categories, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return false, err
+	}
+
+	for _, category := range categories {
+		if category.Name == name {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (manager *CategoryManager) Exists(id string, accountId string) (bool, error) {
+	category, err := manager.store.Get(id)
+	if err != nil {
+		return false, err
+	}
+
+	if category == nil || category.AccountId != accountId {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func (manager *CategoryManager) Get(id string) (*data.Category, error) {
 	return manager.store.Get(id)
 }

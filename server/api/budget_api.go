@@ -103,12 +103,20 @@ func (api *BudgetAPI) validateCreate(reqBody *rest.BudgetCreateBody, accountId s
 		return err
 	}
 
-	if err := checkCategoryNotUsed(categoryId, month, year, api.budgetManager); err != nil {
+	ok, err := api.budgetManager.CategoryInPeriod(categoryId, accountId, month, year)
+	if err != nil {
 		return err
 	}
+	if ok {
+		return nil //UPDATE TO SOME BAD REQ ERROR
+	}
 
-	if err := checkCategoryExists(categoryId, accountId, api.categoryManager); err != nil {
+	ok, err = api.categoryManager.Exists(categoryId, accountId)
+	if err != nil {
 		return err
+	}
+	if !ok {
+		return nil //UPDATE TO SOME BAD REQ ERROR
 	}
 
 	return nil

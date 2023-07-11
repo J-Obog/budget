@@ -106,8 +106,12 @@ func (api *TransactionAPI) validateCreate(reqBody *rest.TransactionCreateBody, a
 	}
 
 	if categoryId != nil {
-		if err := checkCategoryExists(*categoryId, accountId, api.categoryManager); err != nil {
+		ok, err := api.categoryManager.Exists(*categoryId, accountId)
+		if err != nil {
 			return err
+		}
+		if !ok {
+			return nil //UPDATE TO SOME BAD REQ ERROR
 		}
 	}
 

@@ -14,3 +14,6 @@ type Response struct {
 	Data   any
 	Status int
 }
+
+type RestError struct {
+}

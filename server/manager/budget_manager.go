@@ -14,6 +14,31 @@ type BudgetManager struct {
 	uid   uid.UIDProvider
 }
 
+func (manager *BudgetManager) CategoryInPeriod(id string, accountId string, month int, year int) (bool, error) {
+	filtered := make([]data.Budget, 0)
+
+	budgets, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return false, err
+	}
+
+	for _, budget := range budgets {
+		if budget.Year != month || budget.Year != year {
+			continue
+		}
+
+		filtered = append(filtered, budget)
+	}
+
+	for _, b := range filtered {
+		if b.CategoryId == id {
+			return true, err
+		}
+	}
+
+	return false, nil
+}
+
 func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 	return manager.store.Get(id)
 }

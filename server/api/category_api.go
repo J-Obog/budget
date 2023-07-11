@@ -95,8 +95,12 @@ func (api *CategoryAPI) categoryCtx(r *rest.Request) (data.Category, *rest.Respo
 }
 
 func (api *CategoryAPI) validateCreate(reqBody rest.CategoryCreateBody, accountId string) error {
-	if err := checkCategoryNameNotUsed(reqBody.Name, accountId, api.categoryManager); err != nil {
-		return nil
+	ok, err := api.categoryManager.NameExists(accountId, reqBody.Name)
+	if err != nil {
+		return err
+	}
+	if ok {
+		return nil //RETURN SOME BAD REQ ERROR
 	}
 
 	return nil
