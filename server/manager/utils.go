@@ -30,6 +30,22 @@ func newCategory(body rest.CategoryCreateBody, id string, accountId string, time
 	}
 }
 
+func newTransaction(body rest.TransactionCreateBody, id string, accountId string, timestamp int64) data.Transaction {
+	return data.Transaction{
+		Id:          id,
+		AccountId:   accountId,
+		CategoryId:  body.CategoryId,
+		Description: body.Description,
+		Amount:      body.Amount,
+		Month:       body.Month,
+		Day:         body.Day,
+		Year:        body.Year,
+		CreatedAt:   timestamp,
+		UpdatedAt:   timestamp,
+	}
+
+}
+
 func updateCategory(body rest.CategoryUpdateBody, category *data.Category, timestamp int64) {
 	category.Color = body.Color
 	category.Name = body.Name
@@ -42,4 +58,14 @@ func updateBudget(body rest.BudgetUpdateBody, budget *data.Budget, timestamp int
 	budget.Year = body.Year
 	budget.Projected = body.Projected
 	budget.UpdatedAt = timestamp
+}
+
+func updateTransaction(body rest.TransactionUpdateBody, transaction *data.Transaction, timestamp int64) {
+	transaction.CategoryId = body.CategoryId
+	transaction.Description = body.Description
+	transaction.Amount = body.Amount
+	transaction.Month = body.Month
+	transaction.Day = body.Day
+	transaction.Year = body.Year
+	transaction.UpdatedAt = timestamp
 }

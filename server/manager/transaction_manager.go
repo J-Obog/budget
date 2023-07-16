@@ -9,66 +9,51 @@ import (
 )
 
 type TransactionManager struct {
-	store store.TransactionStore
-	clock clock.Clock
-	uid   uid.UIDProvider
+	store           store.TransactionStore
+	categoryManager *CategoryManager
+	clock           clock.Clock
+	uid             uid.UIDProvider
 }
 
-func (manager *TransactionManager) Get(id string, accountId string) (*data.Transaction, error) {
+type transactionValidateCommon struct {
+	description *string
+	month       int
+	day         int
+	year        int
+	categoryId  string
+	accountId   string
+}
+
+func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
 	transaction, err := manager.store.Get(id)
 	if err != nil {
 		return nil, err
-	}
-	if transaction == nil || transaction.AccountId != accountId {
-		return nil, nil
 	}
 
 	return transaction, nil
 }
 
-func (manager *TransactionManager) Filter(accountId string, q rest.TransactionQuery) ([]data.Transaction, error) {
-	return manager.filterByQuery(accountId, q)
-}
+func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Response) {
+	accountId := req.Account.Id
+	id := req.Params.BudgetId()
 
-func (manager *TransactionManager) Create(accountId string, req rest.TransactionCreateBody) error {
-	now := manager.clock.Now()
+	transaction := manager.getTransactionByAccount(res, id, accountId)
 
-	newTransaction := data.Transaction{
-		Id:          manager.uid.GetId(),
-		AccountId:   accountId,
-		CategoryId:  req.CategoryId,
-		Description: req.Description,
-		Amount:      req.Amount,
-		Month:       req.Month,
-		Day:         req.Day,
-		Year:        req.Year,
-		CreatedAt:   now,
-		UpdatedAt:   now,
+	if res.IsErr() {
+		return
 	}
 
-	return manager.store.Insert(newTransaction)
+	res.Ok(transaction)
 }
 
-func (manager *TransactionManager) Update(existing *data.Transaction, req rest.TransactionUpdateBody) error {
-	existing.CategoryId = req.CategoryId
-	existing.Description = req.Description
-	existing.Amount = req.Amount
-	existing.Month = req.Month
-	existing.Day = req.Day
-	existing.Year = req.Year
-	existing.UpdatedAt = manager.clock.Now()
+func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
+	query := req.Query.TransactionQuery()
+	accountId := req.Account.Id
 
-	return manager.store.Update(*existing)
-}
-
-func (manager *TransactionManager) Delete(id string) error {
-	return manager.store.Delete(id)
-}
-
-func (manager *TransactionManager) filterByQuery(accountId string, query rest.TransactionQuery) ([]data.Transaction, error) {
 	transactions, err := manager.store.GetByAccount(accountId)
 	if err != nil {
-		return transactions, err
+		res.ErrInternal(err)
+		return
 	}
 
 	filtered := filter[data.Transaction](transactions, func(t *data.Transaction) bool {
@@ -91,5 +76,139 @@ func (manager *TransactionManager) filterByQuery(accountId string, query rest.Tr
 
 	})
 
-	return filtered, nil
+	res.Ok(filtered)
+}
+
+func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.Response) {
+	body, err := req.Body.TransactionCreateBody()
+	if err != nil {
+		res.ErrBadRequest()
+		return
+	}
+
+	validateCommon := transactionValidateCommon{
+		description: body.Description,
+		month:       body.Month,
+		day:         body.Day,
+		year:        body.Year,
+		categoryId:  *body.CategoryId,
+		accountId:   req.Account.Id,
+	}
+
+	manager.validate(res, validateCommon)
+	if res.IsErr() {
+		return
+	}
+
+	now := manager.clock.Now()
+	id := manager.uid.GetId()
+
+	newTransaction := newTransaction(body, id, req.Account.Id, now)
+
+	if err := manager.store.Insert(newTransaction); err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	res.Ok(nil)
+}
+
+func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
+	accountId := req.Account.Id
+	id := req.Params.TransactionId()
+
+	transaction := manager.getTransactionByAccount(res, id, accountId)
+	if res.IsErr() {
+		return
+	}
+
+	body, err := req.Body.TransactionUpdateBody()
+	if err != nil {
+		res.ErrBadRequest()
+		return
+	}
+
+	validateCommon := transactionValidateCommon{
+		description: body.Description,
+		month:       body.Month,
+		day:         body.Day,
+		year:        body.Year,
+		categoryId:  *body.CategoryId,
+		accountId:   req.Account.Id,
+	}
+
+	manager.validate(res, validateCommon)
+	if res.IsErr() {
+		return
+	}
+
+	now := manager.clock.Now()
+	updateTransaction(body, transaction, now)
+
+	if err = manager.store.Update(*transaction); err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	res.Ok(nil)
+}
+
+func (manager *TransactionManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
+	accountId := req.Account.Id
+	id := req.Params.TransactionId()
+
+	manager.getTransactionByAccount(res, id, accountId)
+	if res.IsErr() {
+		return
+	}
+
+	if err := manager.store.Delete(id); err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	res.Ok(nil)
+}
+
+func (manager *TransactionManager) getTransactionByAccount(
+	res *rest.Response,
+	id string,
+	accountId string,
+) *data.Transaction {
+	transaction, err := manager.Get(id)
+
+	if err != nil {
+		res.ErrInternal(err)
+		return nil
+	}
+
+	if transaction == nil || transaction.AccountId != accountId {
+		res.ErrTransactionNotFound()
+		return nil
+	}
+
+	return transaction
+}
+
+func (manager *TransactionManager) validate(res *rest.Response, validateCom transactionValidateCommon) {
+	categoryId := validateCom.categoryId
+	accountId := validateCom.accountId
+	//month := validateCom.month
+	//year := validateCom.year
+	//day := validateCom.day
+
+	//check if date is valid
+
+	ok, err := manager.categoryManager.Exists(categoryId, accountId)
+	if err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	if !ok {
+		res.ErrCategoryNotFound()
+		return
+	}
+
+	//check description
 }

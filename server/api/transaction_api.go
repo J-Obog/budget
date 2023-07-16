@@ -7,118 +7,24 @@ import (
 
 type TransactionAPI struct {
 	transactionManager *manager.TransactionManager
-	categoryManager    *manager.CategoryManager
 }
 
-func (api *TransactionAPI) GetTransaction(r *rest.Request) *rest.Response {
-	transaction, err := api.transactionManager.Get(r.Params.TransactionId(), r.Account.Id)
-	if err != nil {
-		return buildServerError(err)
-	}
-	if transaction == nil {
-		return buildBadRequestError()
-	}
-
-	return buildOKResponse(transaction)
+func (api *TransactionAPI) GetTransaction(req *rest.Request, res *rest.Response) {
+	api.transactionManager.GetByRequest(req, res)
 }
 
-func (api *TransactionAPI) GetTransactions(r *rest.Request) *rest.Response {
-	transactions, err := api.transactionManager.Filter(r.Account.Id, r.Query.TransactionQuery())
-	if err != nil {
-		return buildServerError(err)
-	}
-
-	return buildOKResponse(transactions)
+func (api *TransactionAPI) GetTransactions(req *rest.Request, res *rest.Response) {
+	api.transactionManager.GetAllByRequest(req, res)
 }
 
-func (api *TransactionAPI) CreateTransaction(r *rest.Request) *rest.Response {
-	reqBody, err := r.Body.TransactionCreateBody()
-	if err != nil {
-		return buildBadRequestError()
-	}
-
-	if err := api.validateCreate(&reqBody, r.Account.Id); err != nil {
-		return nil
-	}
-
-	if err := api.transactionManager.Create(r.Account.Id, reqBody); err != nil {
-		return buildServerError(err)
-	}
-
-	return buildOKResponse(nil)
+func (api *TransactionAPI) CreateTransaction(req *rest.Request, res *rest.Response) {
+	api.transactionManager.CreateByRequest(req, res)
 }
 
-func (api *TransactionAPI) UpdateTransaction(r *rest.Request) *rest.Response {
-	transaction, err := api.transactionManager.Get(r.Params.TransactionId(), r.Account.Id)
-	if err != nil {
-		return buildServerError(err)
-	}
-	if transaction == nil {
-		return buildBadRequestError()
-	}
-
-	reqBody, err := r.Body.TransactionUpdateBody()
-	if err != nil {
-		return buildBadRequestError()
-	}
-
-	if err := api.validateUpdate(&reqBody, r.Account.Id); err != nil {
-		return nil
-	}
-
-	if err := api.transactionManager.Update(transaction, reqBody); err != nil {
-		return buildServerError(err)
-	}
-
-	return buildOKResponse(nil)
+func (api *TransactionAPI) UpdateTransaction(req *rest.Request, res *rest.Response) {
+	api.transactionManager.UpdateByRequest(req, res)
 }
 
-func (api *TransactionAPI) DeleteTransaction(r *rest.Request) *rest.Response {
-	transaction, err := api.transactionManager.Get(r.Params.TransactionId(), r.Account.Id)
-	if err != nil {
-		return buildServerError(err)
-	}
-	if transaction == nil {
-		return buildBadRequestError()
-	}
-
-	if err := api.transactionManager.Delete(transaction.Id); err != nil {
-		return buildServerError(err)
-	}
-
-	return buildOKResponse(nil)
-}
-
-func (api *TransactionAPI) validateCreate(reqBody *rest.TransactionCreateBody, accountId string) error {
-	month := reqBody.Month
-	year := reqBody.Year
-	day := reqBody.Day
-	categoryId := reqBody.CategoryId
-	description := reqBody.Description
-
-	if err := checkDate(month, day, year); err != nil {
-		return err
-	}
-
-	if categoryId != nil {
-		ok, err := api.categoryManager.Exists(*categoryId, accountId)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			return nil //UPDATE TO SOME BAD REQ ERROR
-		}
-	}
-
-	if description != nil {
-		if err := checkBudgetDesciption(*description); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (api *TransactionAPI) validateUpdate(reqBody *rest.TransactionUpdateBody, accountId string) error {
-	return api.validateCreate(&reqBody.TransactionCreateBody, accountId)
+func (api *TransactionAPI) DeleteTransaction(req *rest.Request, res *rest.Response) {
+	api.transactionManager.DeleteByRequest(req, res)
 }
