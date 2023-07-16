@@ -69,3 +69,8 @@ func updateTransaction(body rest.TransactionUpdateBody, transaction *data.Transa
 	transaction.Year = body.Year
 	transaction.UpdatedAt = timestamp
 }
+
+func updateAccount(body rest.AccountUpdateBody, account *data.Account, timestamp int64) {
+	account.Name = body.Name
+	account.UpdatedAt = timestamp
+}

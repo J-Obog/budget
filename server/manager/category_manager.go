@@ -41,6 +41,7 @@ func (manager *CategoryManager) GetAllByRequest(req *rest.Request, res *rest.Res
 	res.Ok(categories)
 }
 
+// TODO: return Json error instead of generic bad request
 func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Response) {
 	body, err := req.Body.CategoryCreateBody()
 	if err != nil {
@@ -66,6 +67,7 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Res
 	res.Ok(nil)
 }
 
+// TODO: return Json error instead of generic bad request
 func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	accountId := req.Account.Id
 	id := req.Params.CategoryId()
@@ -98,6 +100,8 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 	res.Ok(nil)
 }
 
+// TODO: Check that category is not being used
+// TODO: Submit category.deleted message
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
 	accountId := req.Account.Id
 	id := req.Params.CategoryId()
@@ -106,10 +110,6 @@ func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Res
 	if res.IsErr() {
 		return
 	}
-
-	// check that category is not being used
-
-	// submit category.deleted message
 }
 
 func (manager *CategoryManager) Exists(id string, accountId string) (bool, error) {

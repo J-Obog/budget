@@ -34,9 +34,7 @@ func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response) {
 	accountId := req.Account.Id
 	budgetId := req.Params.BudgetId()
-
 	budget := manager.getBudgetByAccount(res, budgetId, accountId)
-
 	if res.IsErr() {
 		return
 	}
@@ -47,7 +45,6 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response
 func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
 	query := req.Query.BudgetQuery()
 	accountId := req.Account.Id
-
 	budgets, err := manager.store.GetByAccount(accountId)
 	if err != nil {
 		res.ErrInternal(err)
@@ -68,6 +65,7 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Respo
 	res.Ok(filtered)
 }
 
+// TODO: return Json error instead of generic bad request
 func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Response) {
 	body, err := req.Body.BudgetCreateBody()
 	if err != nil {
@@ -94,6 +92,8 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Respo
 
 	res.Ok(nil)
 }
+
+// TODO: return Json error instead of generic bad request
 
 func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	accountId := req.Account.Id
@@ -164,9 +164,8 @@ func (manager *BudgetManager) categoryInPeriod(id string, accountId string, mont
 	return false, nil
 }
 
+// TODO: check if date is valid
 func (manager *BudgetManager) validate(res *rest.Response, validateCom budgetValidateCommon) {
-	//check if date is valid
-
 	categoryId := validateCom.categoryId
 	accountId := validateCom.accountId
 	month := validateCom.month

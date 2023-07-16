@@ -79,6 +79,7 @@ func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.
 	res.Ok(filtered)
 }
 
+// TODO: return Json error instead of generic bad request
 func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.Response) {
 	body, err := req.Body.TransactionCreateBody()
 	if err != nil {
@@ -113,6 +114,7 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.
 	res.Ok(nil)
 }
 
+// TODO: return Json error instead of generic bad request
 func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	accountId := req.Account.Id
 	id := req.Params.TransactionId()
