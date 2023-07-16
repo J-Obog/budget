@@ -13,25 +13,18 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
-type accountValidateCommon struct {
-	name string
-}
-
 func (manager *AccountManager) Get(id string) (*data.Account, error) {
 	return manager.store.Get(id)
 }
 
 func (manager *AccountManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.AccountUpdateBody)
+	timestamp := manager.clock.Now()
+	updateAccount(body, req.Account, timestamp)
 
-	validateCom := accountValidateCommon{name: body.Name}
-	manager.validate(res, validateCom)
-	if res.IsErr() {
+	if manager.validate(res, body.Name); res.IsErr() {
 		return
 	}
-
-	now := manager.clock.Now()
-	updateAccount(body, req.Account, now)
 
 	if err := manager.store.Update(*req.Account); err != nil {
 		res.ErrInternal(err)
@@ -48,8 +41,8 @@ func (manager *AccountManager) DeleteByRequest(req *rest.Request, res *rest.Resp
 }
 
 // TODO: return account name error instead of bad request
-func (manager *AccountManager) validate(res *rest.Response, validateCom accountValidateCommon) {
-	nameLen := len(validateCom.name)
+func (manager *AccountManager) validate(res *rest.Response, name string) {
+	nameLen := len(name)
 
 	if !(nameLen >= config.LimitMinAccountNameChars && nameLen <= config.LimitMaxAccountNameChars) {
 		res.ErrBadRequest()

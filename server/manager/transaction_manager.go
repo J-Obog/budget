@@ -15,15 +15,6 @@ type TransactionManager struct {
 	uid             uid.UIDProvider
 }
 
-type transactionValidateCommon struct {
-	description *string
-	month       int
-	day         int
-	year        int
-	categoryId  string
-	accountId   string
-}
-
 func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
 	transaction, err := manager.store.Get(id)
 	if err != nil {
@@ -34,10 +25,9 @@ func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
 }
 
 func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
 	id := req.Params.BudgetId()
 
-	transaction := manager.getTransactionByAccount(res, id, accountId)
+	transaction := manager.getTransactionByAccount(res, id, req.Account.Id)
 
 	if res.IsErr() {
 		return
@@ -48,9 +38,8 @@ func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Res
 
 func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
 	query := req.Query.(rest.TransactionQuery)
-	accountId := req.Account.Id
 
-	transactions, err := manager.store.GetByAccount(accountId)
+	transactions, err := manager.store.GetByAccount(req.Account.Id)
 	if err != nil {
 		res.ErrInternal(err)
 		return
@@ -81,25 +70,13 @@ func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.
 
 func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.TransactionCreateBody)
+	timestamp := manager.clock.Now()
+	id := manager.uid.GetId()
+	newTransaction := newTransaction(body, id, req.Account.Id, timestamp)
 
-	validateCommon := transactionValidateCommon{
-		description: body.Description,
-		month:       body.Month,
-		day:         body.Day,
-		year:        body.Year,
-		categoryId:  *body.CategoryId,
-		accountId:   req.Account.Id,
-	}
-
-	manager.validate(res, validateCommon)
-	if res.IsErr() {
+	if manager.validate(res, body.Description, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
 		return
 	}
-
-	now := manager.clock.Now()
-	id := manager.uid.GetId()
-
-	newTransaction := newTransaction(body, id, req.Account.Id, now)
 
 	if err := manager.store.Insert(newTransaction); err != nil {
 		res.ErrInternal(err)
@@ -110,31 +87,19 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.
 }
 
 func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
 	id := req.Params.TransactionId()
-
-	transaction := manager.getTransactionByAccount(res, id, accountId)
-	if res.IsErr() {
-		return
-	}
-
+	now := manager.clock.Now()
 	body := req.Body.(rest.TransactionUpdateBody)
 
-	validateCommon := transactionValidateCommon{
-		description: body.Description,
-		month:       body.Month,
-		day:         body.Day,
-		year:        body.Year,
-		categoryId:  *body.CategoryId,
-		accountId:   req.Account.Id,
-	}
-
-	manager.validate(res, validateCommon)
+	transaction := manager.getTransactionByAccount(res, id, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
 
-	now := manager.clock.Now()
+	if manager.validate(res, body.Description, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
+		return
+	}
+
 	updateTransaction(body, transaction, now)
 
 	if err := manager.store.Update(*transaction); err != nil {
@@ -146,10 +111,9 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.
 }
 
 func (manager *TransactionManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
 	id := req.Params.TransactionId()
 
-	manager.getTransactionByAccount(res, id, accountId)
+	manager.getTransactionByAccount(res, id, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -162,11 +126,7 @@ func (manager *TransactionManager) DeleteByRequest(req *rest.Request, res *rest.
 	res.Ok(nil)
 }
 
-func (manager *TransactionManager) getTransactionByAccount(
-	res *rest.Response,
-	id string,
-	accountId string,
-) *data.Transaction {
+func (manager *TransactionManager) getTransactionByAccount(res *rest.Response, id string, accountId string) *data.Transaction {
 	transaction, err := manager.Get(id)
 
 	if err != nil {
@@ -182,15 +142,9 @@ func (manager *TransactionManager) getTransactionByAccount(
 	return transaction
 }
 
-func (manager *TransactionManager) validate(res *rest.Response, validateCom transactionValidateCommon) {
-	categoryId := validateCom.categoryId
-	accountId := validateCom.accountId
-	//month := validateCom.month
-	//year := validateCom.year
-	//day := validateCom.day
-
-	//check if date is valid
-
+// TODO: Check date is valid
+// TODO: Check if description is valid
+func (manager *TransactionManager) validate(res *rest.Response, description *string, month int, day int, year int, categoryId string, accountId string) {
 	ok, err := manager.categoryManager.Exists(categoryId, accountId)
 	if err != nil {
 		res.ErrInternal(err)
@@ -201,6 +155,4 @@ func (manager *TransactionManager) validate(res *rest.Response, validateCom tran
 		res.ErrCategoryNotFound()
 		return
 	}
-
-	//check description
 }

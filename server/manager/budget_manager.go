@@ -15,13 +15,6 @@ type BudgetManager struct {
 	uid             uid.UIDProvider
 }
 
-type budgetValidateCommon struct {
-	month      int
-	year       int
-	accountId  string
-	categoryId string
-}
-
 func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 	budget, err := manager.store.Get(id)
 	if err != nil {
@@ -32,9 +25,9 @@ func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 }
 
 func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
 	budgetId := req.Params.BudgetId()
-	budget := manager.getBudgetByAccount(res, budgetId, accountId)
+	budget := manager.getBudgetByAccount(res, budgetId, req.Account.Id)
+
 	if res.IsErr() {
 		return
 	}
@@ -44,9 +37,8 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response
 
 func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
 	query := req.Query.(rest.BudgetQuery)
-	accountId := req.Account.Id
 
-	budgets, err := manager.store.GetByAccount(accountId)
+	budgets, err := manager.store.GetByAccount(req.Account.Id)
 	if err != nil {
 		res.ErrInternal(err)
 		return
@@ -68,17 +60,13 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Respo
 
 func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.BudgetCreateBody)
+	timestamp := manager.clock.Now()
+	id := manager.uid.GetId()
+	newBudget := newBudget(body, id, req.Account.Id, timestamp)
 
-	validateCommon := budgetValidateCommon{month: body.Month, year: body.Year, categoryId: body.CategoryId, accountId: req.Account.Id}
-	manager.validate(res, validateCommon)
-	if res.IsErr() {
+	if manager.validate(res, body.Month, body.Year, body.CategoryId, req.Account.Id); res.IsErr() {
 		return
 	}
-
-	now := manager.clock.Now()
-	id := manager.uid.GetId()
-
-	newBudget := newBudget(body, id, req.Account.Id, now)
 
 	if err := manager.store.Insert(newBudget); err != nil {
 		res.ErrInternal(err)
@@ -88,27 +76,21 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Respo
 	res.Ok(nil)
 }
 
-// TODO: return Json error instead of generic bad request
-
 func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
-	budgetId := req.Params.BudgetId()
-
-	budget := manager.getBudgetByAccount(res, budgetId, accountId)
-	if res.IsErr() {
-		return
-	}
-
 	body := req.Body.(rest.BudgetUpdateBody)
-	validateCommon := budgetValidateCommon{month: body.Month, year: body.Year, categoryId: body.CategoryId, accountId: req.Account.Id}
+	budgetId := req.Params.BudgetId()
+	timestamp := manager.clock.Now()
 
-	manager.validate(res, validateCommon)
+	budget := manager.getBudgetByAccount(res, budgetId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
 
-	now := manager.clock.Now()
-	updateBudget(body, budget, now)
+	updateBudget(body, budget, timestamp)
+
+	if manager.validate(res, body.Month, body.Year, body.CategoryId, req.Account.Id); res.IsErr() {
+		return
+	}
 
 	if err := manager.store.Update(*budget); err != nil {
 		res.ErrInternal(err)
@@ -119,11 +101,9 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Respo
 }
 
 func (manager *BudgetManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
 	budgetId := req.Params.BudgetId()
 
-	manager.getBudgetByAccount(res, budgetId, accountId)
-	if res.IsErr() {
+	if manager.getBudgetByAccount(res, budgetId, req.Account.Id); res.IsErr() {
 		return
 	}
 
@@ -155,12 +135,7 @@ func (manager *BudgetManager) categoryInPeriod(id string, accountId string, mont
 }
 
 // TODO: check if date is valid
-func (manager *BudgetManager) validate(res *rest.Response, validateCom budgetValidateCommon) {
-	categoryId := validateCom.categoryId
-	accountId := validateCom.accountId
-	month := validateCom.month
-	year := validateCom.year
-
+func (manager *BudgetManager) validate(res *rest.Response, month int, year int, accountId string, categoryId string) {
 	ok, err := manager.categoryManager.Exists(categoryId, accountId)
 	if err != nil {
 		res.ErrInternal(err)

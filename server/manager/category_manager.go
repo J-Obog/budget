@@ -14,16 +14,10 @@ type CategoryManager struct {
 	uid   uid.UIDProvider
 }
 
-type categoryValidateCommon struct {
-	name      string
-	accountId string
-}
-
 func (manager *CategoryManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
 	id := req.Params.CategoryId()
 
-	category := manager.getCategoryByAccount(res, id, accountId)
+	category := manager.getCategoryByAccount(res, id, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -43,16 +37,13 @@ func (manager *CategoryManager) GetAllByRequest(req *rest.Request, res *rest.Res
 
 func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.CategoryCreateBody)
+	timestamp := manager.clock.Now()
+	id := manager.uid.GetId()
+	category := newCategory(body, id, req.Account.Id, timestamp)
 
-	validateCommon := categoryValidateCommon{name: body.Name}
-	manager.validate(res, validateCommon)
-	if res.IsErr() {
+	if manager.validate(res, body.Name, req.Account.Id); res.IsErr() {
 		return
 	}
-
-	now := manager.clock.Now()
-	id := manager.uid.GetId()
-	category := newCategory(body, id, req.Account.Id, now)
 
 	if err := manager.store.Insert(category); err != nil {
 		res.ErrInternal(err)
@@ -63,24 +54,20 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Res
 }
 
 func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
-	id := req.Params.CategoryId()
-
-	category := manager.getCategoryByAccount(res, id, accountId)
-	if res.IsErr() {
-		return
-	}
-
 	body := req.Body.(rest.CategoryUpdateBody)
+	id := req.Params.CategoryId()
+	timestamp := manager.clock.Now()
 
-	validateCommon := categoryValidateCommon{name: body.Name}
-	manager.validate(res, validateCommon)
+	category := manager.getCategoryByAccount(res, id, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
 
-	now := manager.clock.Now()
-	updateCategory(body, category, now)
+	if manager.validate(res, body.Name, req.Account.Id); res.IsErr() {
+		return
+	}
+
+	updateCategory(body, category, timestamp)
 
 	if err := manager.store.Update(*category); err != nil {
 		res.ErrInternal(err)
@@ -93,10 +80,9 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 // TODO: Check that category is not being used
 // TODO: Submit category.deleted message
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	accountId := req.Account.Id
 	id := req.Params.CategoryId()
 
-	manager.getCategoryByAccount(res, id, accountId)
+	manager.getCategoryByAccount(res, id, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -159,8 +145,8 @@ func (manager *CategoryManager) nameUsed(accountId string, name string) (bool, e
 	return false, nil
 }
 
-func (manager *CategoryManager) validate(res *rest.Response, validateCom categoryValidateCommon) {
-	ok, err := manager.nameUsed(validateCom.accountId, validateCom.name)
+func (manager *CategoryManager) validate(res *rest.Response, name string, accountId string) {
+	ok, err := manager.nameUsed(accountId, name)
 	if err != nil {
 		res.ErrInternal(err)
 		return
