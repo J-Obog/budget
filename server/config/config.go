@@ -12,6 +12,12 @@ const (
 	EnvType_LOCAL EnvType = 0
 )
 
+const (
+	LimitMaxAccountNameChars       = 100
+	LimitMinAccountNameChars       = 1
+	LimitMaxBudgetDescriptionChars = 200
+)
+
 type AppConfig struct {
 	PostgresUrl string `json:"postgresUrl"`
 	RabbitMqUrl string `json:"rabbitMqUrl"`
