@@ -43,8 +43,9 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response
 }
 
 func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
-	query := req.Query.BudgetQuery()
+	query := req.Query.(rest.BudgetQuery)
 	accountId := req.Account.Id
+
 	budgets, err := manager.store.GetByAccount(accountId)
 	if err != nil {
 		res.ErrInternal(err)
@@ -65,16 +66,10 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Respo
 	res.Ok(filtered)
 }
 
-// TODO: return Json error instead of generic bad request
 func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Response) {
-	body, err := req.Body.BudgetCreateBody()
-	if err != nil {
-		res.ErrBadRequest()
-		return
-	}
+	body := req.Body.(rest.BudgetCreateBody)
 
 	validateCommon := budgetValidateCommon{month: body.Month, year: body.Year, categoryId: body.CategoryId, accountId: req.Account.Id}
-
 	manager.validate(res, validateCommon)
 	if res.IsErr() {
 		return
@@ -104,12 +99,7 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Respo
 		return
 	}
 
-	body, err := req.Body.BudgetUpdateBody()
-	if err != nil {
-		res.ErrBadRequest()
-		return
-	}
-
+	body := req.Body.(rest.BudgetUpdateBody)
 	validateCommon := budgetValidateCommon{month: body.Month, year: body.Year, categoryId: body.CategoryId, accountId: req.Account.Id}
 
 	manager.validate(res, validateCommon)
@@ -120,7 +110,7 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Respo
 	now := manager.clock.Now()
 	updateBudget(body, budget, now)
 
-	if err = manager.store.Update(*budget); err != nil {
+	if err := manager.store.Update(*budget); err != nil {
 		res.ErrInternal(err)
 		return
 	}

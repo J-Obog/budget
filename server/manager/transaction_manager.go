@@ -47,7 +47,7 @@ func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Res
 }
 
 func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
-	query := req.Query.TransactionQuery()
+	query := req.Query.(rest.TransactionQuery)
 	accountId := req.Account.Id
 
 	transactions, err := manager.store.GetByAccount(accountId)
@@ -79,13 +79,8 @@ func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.
 	res.Ok(filtered)
 }
 
-// TODO: return Json error instead of generic bad request
 func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.Response) {
-	body, err := req.Body.TransactionCreateBody()
-	if err != nil {
-		res.ErrBadRequest()
-		return
-	}
+	body := req.Body.(rest.TransactionCreateBody)
 
 	validateCommon := transactionValidateCommon{
 		description: body.Description,
@@ -114,7 +109,6 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.
 	res.Ok(nil)
 }
 
-// TODO: return Json error instead of generic bad request
 func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	accountId := req.Account.Id
 	id := req.Params.TransactionId()
@@ -124,11 +118,7 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.
 		return
 	}
 
-	body, err := req.Body.TransactionUpdateBody()
-	if err != nil {
-		res.ErrBadRequest()
-		return
-	}
+	body := req.Body.(rest.TransactionUpdateBody)
 
 	validateCommon := transactionValidateCommon{
 		description: body.Description,
@@ -147,7 +137,7 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.
 	now := manager.clock.Now()
 	updateTransaction(body, transaction, now)
 
-	if err = manager.store.Update(*transaction); err != nil {
+	if err := manager.store.Update(*transaction); err != nil {
 		res.ErrInternal(err)
 		return
 	}

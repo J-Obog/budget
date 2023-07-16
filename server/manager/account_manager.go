@@ -21,13 +21,8 @@ func (manager *AccountManager) Get(id string) (*data.Account, error) {
 	return manager.store.Get(id)
 }
 
-// TODO: return Json error instead of generic bad request
 func (manager *AccountManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
-	body, err := req.Body.AccountUpdateBody()
-	if err != nil {
-		res.ErrBadRequest()
-		return
-	}
+	body := req.Body.(rest.AccountUpdateBody)
 
 	validateCom := accountValidateCommon{name: body.Name}
 	manager.validate(res, validateCom)

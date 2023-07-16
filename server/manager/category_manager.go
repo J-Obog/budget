@@ -41,13 +41,8 @@ func (manager *CategoryManager) GetAllByRequest(req *rest.Request, res *rest.Res
 	res.Ok(categories)
 }
 
-// TODO: return Json error instead of generic bad request
 func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Response) {
-	body, err := req.Body.CategoryCreateBody()
-	if err != nil {
-		res.ErrBadRequest()
-		return
-	}
+	body := req.Body.(rest.CategoryCreateBody)
 
 	validateCommon := categoryValidateCommon{name: body.Name}
 	manager.validate(res, validateCommon)
@@ -59,7 +54,7 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Res
 	id := manager.uid.GetId()
 	category := newCategory(body, id, req.Account.Id, now)
 
-	if err = manager.store.Insert(category); err != nil {
+	if err := manager.store.Insert(category); err != nil {
 		res.ErrInternal(err)
 		return
 	}
@@ -67,7 +62,6 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Res
 	res.Ok(nil)
 }
 
-// TODO: return Json error instead of generic bad request
 func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	accountId := req.Account.Id
 	id := req.Params.CategoryId()
@@ -77,11 +71,7 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 		return
 	}
 
-	body, err := req.Body.CategoryUpdateBody()
-	if err != nil {
-		res.ErrBadRequest()
-		return
-	}
+	body := req.Body.(rest.CategoryUpdateBody)
 
 	validateCommon := categoryValidateCommon{name: body.Name}
 	manager.validate(res, validateCommon)
@@ -92,7 +82,7 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 	now := manager.clock.Now()
 	updateCategory(body, category, now)
 
-	if err = manager.store.Update(*category); err != nil {
+	if err := manager.store.Update(*category); err != nil {
 		res.ErrInternal(err)
 		return
 	}
