@@ -44,14 +44,10 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Respo
 	}
 
 	filtered := filter[data.Budget](budgets, func(b *data.Budget) bool {
-		if query.Month != nil && b.Month != *query.Month {
-			return false
-		}
-		if query.Year != nil && b.Year != *query.Year {
-			return false
-		}
+		monthsMatch := query.Month == nil || b.Month != *query.Month
+		yearsMatch := query.Year == nil || b.Year == *query.Year
 
-		return true
+		return monthsMatch && yearsMatch
 	})
 
 	res.Ok(filtered)
@@ -112,23 +108,30 @@ func (manager *BudgetManager) DeleteByRequest(req *rest.Request, res *rest.Respo
 	res.Ok(nil)
 }
 
+func (manager *BudgetManager) IsCategoryUsed(id string, accountId string) (bool, error) {
+	budgets, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return false, err
+	}
+
+	ok := find[data.Budget](budgets, func(b *data.Budget) bool {
+		return b.CategoryId == id && b.AccountId == accountId
+	})
+
+	return ok, nil
+}
+
 func (manager *BudgetManager) categoryInPeriod(id string, accountId string, month int, year int) (bool, error) {
 	budgets, err := manager.store.GetByAccount(accountId)
 	if err != nil {
 		return false, err
 	}
 
-	filtered := filter[data.Budget](budgets, func(b *data.Budget) bool {
-		return b.Month == month && b.Year == year
+	ok := find[data.Budget](budgets, func(b *data.Budget) bool {
+		return b.Month == month && b.Year == year && b.CategoryId == id
 	})
 
-	for _, budget := range filtered {
-		if budget.CategoryId == id {
-			return true, nil
-		}
-	}
-
-	return false, nil
+	return ok, nil
 }
 
 func (manager *BudgetManager) validate(res *rest.Response, month int, year int, accountId string, categoryId string) {

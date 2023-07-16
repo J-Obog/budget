@@ -78,3 +78,27 @@ func updateAccount(body rest.AccountUpdateBody, account *data.Account, timestamp
 	account.Name = body.Name
 	account.UpdatedAt = timestamp
 }
+
+func filter[T any](items []T, filterFn func(t *T) bool) []T {
+	end := 0
+	for _, item := range items {
+		ok := filterFn(&item)
+		if ok {
+			items[end] = item
+			end += 1
+		}
+	}
+
+	return items[:end-1]
+}
+
+func find[T any](items []T, findFn func(t *T) bool) bool {
+	for _, item := range items {
+		ok := findFn(&item)
+		if ok {
+			return true
+		}
+	}
+
+	return false
+}

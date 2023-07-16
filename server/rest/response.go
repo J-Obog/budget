@@ -68,3 +68,7 @@ func (r *Response) ErrInvalidDate() {
 func (r *Response) ErrInvalidTransactionNote() {
 	r.Status = statusBadReq
 }
+
+func (r *Response) ErrCategoryIsCurrentlyUsed() {
+	r.Status = statusBadReq
+}

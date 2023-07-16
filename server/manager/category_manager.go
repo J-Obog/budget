@@ -9,9 +9,10 @@ import (
 )
 
 type CategoryManager struct {
-	store store.CategoryStore
-	clock clock.Clock
-	uid   uid.UIDProvider
+	store         store.CategoryStore
+	budgetManager *BudgetManager
+	clock         clock.Clock
+	uid           uid.UIDProvider
 }
 
 func (manager *CategoryManager) GetByRequest(req *rest.Request, res *rest.Response) {
@@ -74,13 +75,29 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 	res.Ok(nil)
 }
 
-// TODO: Check that category is not being used
 // TODO: Submit category.deleted message
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id)
-	if res.IsErr() {
+	if manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id); res.IsErr() {
 		return
 	}
+
+	ok, err := manager.budgetManager.IsCategoryUsed(req.ResourceId, req.Account.Id)
+	if err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	if ok {
+		res.ErrCategoryIsCurrentlyUsed()
+		return
+	}
+
+	if err := manager.store.Delete(req.ResourceId); err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	res.Ok(nil)
 }
 
 func (manager *CategoryManager) Exists(id string, accountId string) (bool, error) {
