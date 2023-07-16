@@ -16,14 +16,21 @@ func (manager *AccountManager) Get(id string) (*data.Account, error) {
 	return manager.store.Get(id)
 }
 
-func (manager *AccountManager) Update(existing *data.Account, req rest.AccountUpdateBody) error {
-	existing.UpdatedAt = manager.clock.Now()
-	existing.Name = req.Name
+func (manager *AccountManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
+	account := req.Account
+	account.UpdatedAt = manager.clock.Now()
+	//account.Name = req.Name
 
-	return manager.store.Update(*existing)
+	if err := manager.store.Update(*account); err != nil {
+		res.ErrInternal(err)
+	}
 }
 
-func (manager *AccountManager) Delete(account data.Account) error {
+func (manager *AccountManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
+	account := req.Account
 	account.IsDeleted = true
-	return manager.store.Update(account)
+
+	if err := manager.store.Update(*account); err != nil {
+		res.ErrInternal(err)
+	}
 }

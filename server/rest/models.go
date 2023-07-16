@@ -9,11 +9,3 @@ type Request struct {
 	Query   Query
 	Body    JsonBody
 }
-
-type Response struct {
-	Data   any
-	Status int
-}
-
-type RestError struct {
-}
