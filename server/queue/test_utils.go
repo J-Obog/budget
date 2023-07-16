@@ -7,8 +7,7 @@ const (
 func testMessage() Message {
 
 	return Message{
-		Id:        "123456",
-		Data:      "hello world",
-		Timestamp: 123456,
+		Id:   "123456",
+		Data: "hello world",
 	}
 }

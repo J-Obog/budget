@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/queue"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
 	"github.com/J-Obog/paidoff/uid"
@@ -13,6 +14,7 @@ type CategoryManager struct {
 	budgetManager *BudgetManager
 	clock         clock.Clock
 	uid           uid.UIDProvider
+	queue         queue.Queue
 }
 
 func (manager *CategoryManager) GetByRequest(req *rest.Request, res *rest.Response) {
@@ -75,7 +77,6 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 	res.Ok(nil)
 }
 
-// TODO: Submit category.deleted message
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
 	if manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id); res.IsErr() {
 		return
@@ -89,6 +90,11 @@ func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Res
 
 	if ok {
 		res.ErrCategoryIsCurrentlyUsed()
+		return
+	}
+
+	if err := manager.sendMsg(req.ResourceId); err != nil {
+		res.ErrInternal(err)
 		return
 	}
 
@@ -168,4 +174,22 @@ func (manager *CategoryManager) validate(res *rest.Response, name string, accoun
 		res.ErrCategoryNameAlreadyUsed()
 		return
 	}
+}
+
+// TODO: better msg id?
+func (manager *CategoryManager) sendMsg(id string) error {
+	msgId := manager.uid.GetId()
+
+	msg := queue.Message{
+		Id: msgId,
+		Data: queue.CategoryDeletedMessage{
+			CategoryId: id,
+		},
+	}
+
+	if err := manager.queue.Push(msg, queue.QueueName_CategoryDeleted); err != nil {
+		return err
+	}
+
+	return nil
 }

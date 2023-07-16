@@ -1,17 +1,10 @@
 package queue
 
 type Message struct {
-	Id        string      `json:"id"`
-	Data      interface{} `json:"data"`
-	Timestamp int64       `json:"timestamp"`
+	Id   string      `json:"id"`
+	Data interface{} `json:"data"`
 }
 
-type EntityDeletionMessage struct {
-	EntityId string `json:"entityId"`
-}
-
-type TransactionsModifiedMessage struct {
-	AccountId string `json:"accountId"`
-	Month     int    `json:"month"`
-	Year      int    `json:"year"`
+type CategoryDeletedMessage struct {
+	CategoryId string `json:"categoryId"`
 }
