@@ -14,19 +14,102 @@ type CategoryManager struct {
 	uid   uid.UIDProvider
 }
 
-func (manager *CategoryManager) NameExists(accountId string, name string) (bool, error) {
-	categories, err := manager.store.GetByAccount(accountId)
+type categoryValidateCommon struct {
+	name      string
+	accountId string
+}
+
+func (manager *CategoryManager) GetByRequest(req *rest.Request, res *rest.Response) {
+	accountId := req.Account.Id
+	id := req.Params.CategoryId()
+
+	category := manager.getCategoryByAccount(res, id, accountId)
+	if res.IsErr() {
+		return
+	}
+
+	res.Ok(category)
+}
+
+func (manager *CategoryManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
+	categories, err := manager.store.GetByAccount(req.Account.Id)
 	if err != nil {
-		return false, err
+		res.ErrInternal(err)
+		return
 	}
 
-	for _, category := range categories {
-		if category.Name == name {
-			return true, nil
-		}
+	res.Ok(categories)
+}
+
+func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Response) {
+	body, err := req.Body.CategoryCreateBody()
+	if err != nil {
+		res.ErrBadRequest()
+		return
 	}
 
-	return false, nil
+	validateCommon := categoryValidateCommon{name: body.Name}
+	manager.validate(res, validateCommon)
+	if res.IsErr() {
+		return
+	}
+
+	now := manager.clock.Now()
+	id := manager.uid.GetId()
+	category := newCategory(body, id, req.Account.Id, now)
+
+	if err = manager.store.Insert(category); err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	res.Ok(nil)
+}
+
+func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
+	accountId := req.Account.Id
+	id := req.Params.CategoryId()
+
+	category := manager.getCategoryByAccount(res, id, accountId)
+	if res.IsErr() {
+		return
+	}
+
+	body, err := req.Body.CategoryUpdateBody()
+	if err != nil {
+		res.ErrBadRequest()
+		return
+	}
+
+	validateCommon := categoryValidateCommon{name: body.Name}
+	manager.validate(res, validateCommon)
+	if res.IsErr() {
+		return
+	}
+
+	now := manager.clock.Now()
+	updateCategory(body, category, now)
+
+	if err = manager.store.Update(*category); err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	res.Ok(nil)
+}
+
+func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
+	accountId := req.Account.Id
+	id := req.Params.CategoryId()
+
+	manager.getCategoryByAccount(res, id, accountId)
+	if res.IsErr() {
+		return
+	}
+
+	// check that category is not being used
+
+	// submit category.deleted message
 }
 
 func (manager *CategoryManager) Exists(id string, accountId string) (bool, error) {
@@ -42,13 +125,10 @@ func (manager *CategoryManager) Exists(id string, accountId string) (bool, error
 	return true, nil
 }
 
-func (manager *CategoryManager) Get(id string, accountId string) (*data.Category, error) {
+func (manager *CategoryManager) Get(id string) (*data.Category, error) {
 	category, err := manager.store.Get(id)
 	if err != nil {
 		return nil, err
-	}
-	if category == nil || category.AccountId != accountId {
-		return nil, nil
 	}
 
 	return category, nil
@@ -58,28 +138,46 @@ func (manager *CategoryManager) GetByAccount(accountId string) ([]data.Category,
 	return manager.store.GetByAccount(accountId)
 }
 
-func (manager *CategoryManager) Create(accountId string, req rest.CategoryCreateBody) error {
-	now := manager.clock.Now()
+func (manager *CategoryManager) getCategoryByAccount(res *rest.Response, id string, accountId string) *data.Category {
+	category, err := manager.Get(id)
 
-	newCategory := data.Category{
-		Id:        manager.uid.GetId(),
-		AccountId: accountId,
-		Name:      req.Name,
-		Color:     req.Color,
-		UpdatedAt: now,
-		CreatedAt: now,
+	if err != nil {
+		res.ErrInternal(err)
+		return nil
 	}
-	return manager.store.Insert(newCategory)
+
+	if category == nil || category.AccountId != accountId {
+		res.ErrBudgetNotFound()
+		return nil
+	}
+
+	return category
 }
 
-func (manager *CategoryManager) Update(existing *data.Category, req rest.CategoryUpdateBody) error {
-	existing.Color = req.Color
-	existing.Name = req.Name
-	existing.UpdatedAt = manager.clock.Now()
+func (manager *CategoryManager) nameUsed(accountId string, name string) (bool, error) {
+	categories, err := manager.store.GetByAccount(accountId)
+	if err != nil {
+		return false, err
+	}
 
-	return manager.store.Update(*existing)
+	for _, category := range categories {
+		if category.Name == name {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
-func (manager *CategoryManager) Delete(id string) error {
-	return manager.store.Delete(id)
+func (manager *CategoryManager) validate(res *rest.Response, validateCom categoryValidateCommon) {
+	ok, err := manager.nameUsed(validateCom.accountId, validateCom.name)
+	if err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	if ok {
+		res.ErrCategoryNameAlreadyUsed()
+		return
+	}
 }

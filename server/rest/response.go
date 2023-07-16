@@ -48,6 +48,10 @@ func (r *Response) ErrCategoryInBudgetPeriod() {
 	r.Status = statusBadReq
 }
 
+func (r *Response) ErrCategoryNameAlreadyUsed() {
+	r.Status = statusBadReq
+}
+
 func (r *Response) ErrBadRequest() {
 	r.Status = statusBadReq
 }
