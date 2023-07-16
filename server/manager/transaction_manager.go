@@ -25,9 +25,7 @@ func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
 }
 
 func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	id := req.Params.BudgetId()
-
-	transaction := manager.getTransactionByAccount(res, id, req.Account.Id)
+	transaction := manager.getTransactionByAccount(res, req.ResourceId, req.Account.Id)
 
 	if res.IsErr() {
 		return
@@ -87,11 +85,10 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.
 }
 
 func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
-	id := req.Params.TransactionId()
 	now := manager.clock.Now()
 	body := req.Body.(rest.TransactionUpdateBody)
 
-	transaction := manager.getTransactionByAccount(res, id, req.Account.Id)
+	transaction := manager.getTransactionByAccount(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -111,14 +108,12 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.
 }
 
 func (manager *TransactionManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	id := req.Params.TransactionId()
-
-	manager.getTransactionByAccount(res, id, req.Account.Id)
+	manager.getTransactionByAccount(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
 
-	if err := manager.store.Delete(id); err != nil {
+	if err := manager.store.Delete(req.ResourceId); err != nil {
 		res.ErrInternal(err)
 		return
 	}

@@ -15,9 +15,7 @@ type CategoryManager struct {
 }
 
 func (manager *CategoryManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	id := req.Params.CategoryId()
-
-	category := manager.getCategoryByAccount(res, id, req.Account.Id)
+	category := manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -55,10 +53,9 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request, res *rest.Res
 
 func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.CategoryUpdateBody)
-	id := req.Params.CategoryId()
 	timestamp := manager.clock.Now()
 
-	category := manager.getCategoryByAccount(res, id, req.Account.Id)
+	category := manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -80,9 +77,7 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 // TODO: Check that category is not being used
 // TODO: Submit category.deleted message
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	id := req.Params.CategoryId()
-
-	manager.getCategoryByAccount(res, id, req.Account.Id)
+	manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}

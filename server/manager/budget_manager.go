@@ -25,8 +25,7 @@ func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
 }
 
 func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	budgetId := req.Params.BudgetId()
-	budget := manager.getBudgetByAccount(res, budgetId, req.Account.Id)
+	budget := manager.getBudgetByAccount(res, req.ResourceId, req.Account.Id)
 
 	if res.IsErr() {
 		return
@@ -78,10 +77,9 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Respo
 
 func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.BudgetUpdateBody)
-	budgetId := req.Params.BudgetId()
 	timestamp := manager.clock.Now()
 
-	budget := manager.getBudgetByAccount(res, budgetId, req.Account.Id)
+	budget := manager.getBudgetByAccount(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -101,13 +99,12 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Respo
 }
 
 func (manager *BudgetManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	budgetId := req.Params.BudgetId()
 
-	if manager.getBudgetByAccount(res, budgetId, req.Account.Id); res.IsErr() {
+	if manager.getBudgetByAccount(res, req.ResourceId, req.Account.Id); res.IsErr() {
 		return
 	}
 
-	if err := manager.store.Delete(budgetId); err != nil {
+	if err := manager.store.Delete(req.ResourceId); err != nil {
 		res.ErrInternal(err)
 		return
 	}
