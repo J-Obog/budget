@@ -10,15 +10,15 @@ import (
 )
 
 type CategoryManager struct {
-	store         store.CategoryStore
-	budgetManager *BudgetManager
-	clock         clock.Clock
-	uid           uid.UIDProvider
-	queue         queue.Queue
+	store       store.CategoryStore
+	budgetStore store.BudgetStore
+	clock       clock.Clock
+	uid         uid.UIDProvider
+	queue       queue.Queue
 }
 
 func (manager *CategoryManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	category := manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id)
+	category := manager.getCategory(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -27,7 +27,8 @@ func (manager *CategoryManager) GetByRequest(req *rest.Request, res *rest.Respon
 }
 
 func (manager *CategoryManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
-	categories, err := manager.store.GetByAccount(req.Account.Id)
+	filter := data.CategoryFilter{AccountId: &req.Account.Id}
+	categories, err := manager.store.GetBy(filter)
 	if err != nil {
 		res.ErrInternal(err)
 		return
@@ -58,7 +59,7 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 	body := req.Body.(rest.CategoryUpdateBody)
 	timestamp := manager.clock.Now()
 
-	category := manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id)
+	category := manager.getCategory(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -78,17 +79,18 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 }
 
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	if manager.getCategoryByAccount(res, req.ResourceId, req.Account.Id); res.IsErr() {
+	if manager.getCategory(res, req.ResourceId, req.Account.Id); res.IsErr() {
 		return
 	}
 
-	ok, err := manager.budgetManager.IsCategoryUsed(req.ResourceId, req.Account.Id)
+	filter := data.BudgetFilter{CategoryId: &req.ResourceId, AccountId: &req.Account.Id}
+	budgets, err := manager.budgetStore.GetBy(filter)
 	if err != nil {
 		res.ErrInternal(err)
 		return
 	}
 
-	if ok {
+	if len(budgets) != 0 {
 		res.ErrCategoryIsCurrentlyUsed()
 		return
 	}
@@ -106,41 +108,15 @@ func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Res
 	res.Ok(nil)
 }
 
-func (manager *CategoryManager) Exists(id string, accountId string) (bool, error) {
-	category, err := manager.store.Get(id)
-	if err != nil {
-		return false, err
-	}
-
-	if category == nil || category.AccountId != accountId {
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func (manager *CategoryManager) Get(id string) (*data.Category, error) {
-	category, err := manager.store.Get(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return category, nil
-}
-
-func (manager *CategoryManager) GetByAccount(accountId string) ([]data.Category, error) {
-	return manager.store.GetByAccount(accountId)
-}
-
-func (manager *CategoryManager) getCategoryByAccount(res *rest.Response, id string, accountId string) *data.Category {
-	category, err := manager.Get(id)
+func (manager *CategoryManager) getCategory(res *rest.Response, id string, accountId string) *data.Category {
+	category, err := manager.store.Get(id, accountId)
 
 	if err != nil {
 		res.ErrInternal(err)
 		return nil
 	}
 
-	if category == nil || category.AccountId != accountId {
+	if category == nil {
 		res.ErrBudgetNotFound()
 		return nil
 	}
@@ -148,29 +124,15 @@ func (manager *CategoryManager) getCategoryByAccount(res *rest.Response, id stri
 	return category
 }
 
-func (manager *CategoryManager) nameUsed(accountId string, name string) (bool, error) {
-	categories, err := manager.store.GetByAccount(accountId)
-	if err != nil {
-		return false, err
-	}
-
-	for _, category := range categories {
-		if category.Name == name {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 func (manager *CategoryManager) validate(res *rest.Response, name string, accountId string) {
-	ok, err := manager.nameUsed(accountId, name)
+	filter := data.CategoryFilter{AccountId: &accountId, Name: &name}
+	category, err := manager.store.GetBy(filter)
 	if err != nil {
 		res.ErrInternal(err)
 		return
 	}
 
-	if ok {
+	if category != nil {
 		res.ErrCategoryNameAlreadyUsed()
 		return
 	}

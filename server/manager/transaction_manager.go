@@ -10,23 +10,14 @@ import (
 )
 
 type TransactionManager struct {
-	store           store.TransactionStore
-	categoryManager *CategoryManager
-	clock           clock.Clock
-	uid             uid.UIDProvider
-}
-
-func (manager *TransactionManager) Get(id string) (*data.Transaction, error) {
-	transaction, err := manager.store.Get(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return transaction, nil
+	store         store.TransactionStore
+	categoryStore store.CategoryStore
+	clock         clock.Clock
+	uid           uid.UIDProvider
 }
 
 func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	transaction := manager.getTransactionByAccount(res, req.ResourceId, req.Account.Id)
+	transaction := manager.getTransaction(res, req.ResourceId, req.Account.Id)
 
 	if res.IsErr() {
 		return
@@ -35,36 +26,22 @@ func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Res
 	res.Ok(transaction)
 }
 
+// TODO: convert timestamps in query to dates
 func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
 	query := req.Query.(rest.TransactionQuery)
 
-	transactions, err := manager.store.GetByAccount(req.Account.Id)
+	filter := data.TransactionFilter{
+		GreaterThan: query.AmountGte,
+		LessThan:    query.AmountLte,
+	}
+
+	transactions, err := manager.store.GetBy(filter)
 	if err != nil {
 		res.ErrInternal(err)
 		return
 	}
 
-	filtered := filter[data.Transaction](transactions, func(t *data.Transaction) bool {
-		if query.CreatedBefore != nil && t.CreatedAt >= *query.CreatedBefore {
-			return false
-		}
-
-		if query.CreatedAfter != nil && t.CreatedAt <= *query.CreatedAfter {
-			return false
-		}
-
-		if query.AmountGte != nil && t.Amount < *query.AmountGte {
-			return false
-		}
-
-		if query.AmountLte != nil && t.Amount > *query.AmountLte {
-			return false
-		}
-		return true
-
-	})
-
-	res.Ok(filtered)
+	res.Ok(transactions)
 }
 
 func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.Response) {
@@ -89,7 +66,7 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.
 	now := manager.clock.Now()
 	body := req.Body.(rest.TransactionUpdateBody)
 
-	transaction := manager.getTransactionByAccount(res, req.ResourceId, req.Account.Id)
+	transaction := manager.getTransaction(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -109,7 +86,7 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.
 }
 
 func (manager *TransactionManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	manager.getTransactionByAccount(res, req.ResourceId, req.Account.Id)
+	manager.getTransaction(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -122,15 +99,15 @@ func (manager *TransactionManager) DeleteByRequest(req *rest.Request, res *rest.
 	res.Ok(nil)
 }
 
-func (manager *TransactionManager) getTransactionByAccount(res *rest.Response, id string, accountId string) *data.Transaction {
-	transaction, err := manager.Get(id)
+func (manager *TransactionManager) getTransaction(res *rest.Response, id string, accountId string) *data.Transaction {
+	transaction, err := manager.store.Get(id, accountId)
 
 	if err != nil {
 		res.ErrInternal(err)
 		return nil
 	}
 
-	if transaction == nil || transaction.AccountId != accountId {
+	if transaction == nil {
 		res.ErrTransactionNotFound()
 		return nil
 	}
@@ -152,13 +129,13 @@ func (manager *TransactionManager) validate(res *rest.Response, note *string, mo
 		return
 	}
 
-	ok, err := manager.categoryManager.Exists(categoryId, accountId)
+	category, err := manager.categoryStore.Get(categoryId, accountId)
 	if err != nil {
 		res.ErrInternal(err)
 		return
 	}
 
-	if !ok {
+	if category == nil {
 		res.ErrCategoryNotFound()
 		return
 	}

@@ -11,8 +11,8 @@ type AccountStore interface {
 }
 
 type CategoryStore interface {
-	Get(id string) (*data.Category, error)
-	GetByAccount(accountId string) ([]data.Category, error)
+	Get(id string, accountId string) (*data.Category, error)
+	GetBy(filter data.CategoryFilter) (data.CategoryList, error)
 	Insert(category data.Category) error
 	Update(category data.Category) error
 	Delete(id string) error
@@ -20,8 +20,8 @@ type CategoryStore interface {
 }
 
 type BudgetStore interface {
-	Get(id string) (*data.Budget, error)
-	GetByAccount(accountId string) ([]data.Budget, error)
+	Get(id string, accountId string) (*data.Budget, error)
+	GetBy(filter data.BudgetFilter) (data.BudgetList, error)
 	Insert(budget data.Budget) error
 	Update(budget data.Budget) error
 	Delete(id string) error
@@ -29,8 +29,8 @@ type BudgetStore interface {
 }
 
 type TransactionStore interface {
-	Get(id string) (*data.Transaction, error)
-	GetByAccount(accountId string) ([]data.Transaction, error)
+	Get(id string, accountId string) (*data.Transaction, error)
+	GetBy(filter data.TransactionFilter) (data.TransactionList, error)
 	Insert(transaction data.Transaction) error
 	Update(transaction data.Transaction) error
 	Delete(id string) error

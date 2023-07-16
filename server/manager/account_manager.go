@@ -20,6 +20,7 @@ func (manager *AccountManager) Get(id string) (*data.Account, error) {
 func (manager *AccountManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.AccountUpdateBody)
 	timestamp := manager.clock.Now()
+
 	updateAccount(body, req.Account, timestamp)
 
 	if manager.validate(res, body.Name); res.IsErr() {

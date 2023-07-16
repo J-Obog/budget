@@ -9,23 +9,14 @@ import (
 )
 
 type BudgetManager struct {
-	store           store.BudgetStore
-	categoryManager *CategoryManager
-	clock           clock.Clock
-	uid             uid.UIDProvider
-}
-
-func (manager *BudgetManager) Get(id string) (*data.Budget, error) {
-	budget, err := manager.store.Get(id)
-	if err != nil {
-		return nil, err
-	}
-
-	return budget, nil
+	store         store.BudgetStore
+	categoryStore store.CategoryStore
+	clock         clock.Clock
+	uid           uid.UIDProvider
 }
 
 func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	budget := manager.getBudgetByAccount(res, req.ResourceId, req.Account.Id)
+	budget := manager.getBudget(res, req.ResourceId, req.Account.Id)
 
 	if res.IsErr() {
 		return
@@ -37,20 +28,19 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response
 func (manager *BudgetManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
 	query := req.Query.(rest.BudgetQuery)
 
-	budgets, err := manager.store.GetByAccount(req.Account.Id)
+	filter := data.BudgetFilter{
+		AccountId: &req.Account.Id,
+		Month:     query.Month,
+		Year:      query.Year,
+	}
+
+	budgets, err := manager.store.GetBy(filter)
 	if err != nil {
 		res.ErrInternal(err)
 		return
 	}
 
-	filtered := filter[data.Budget](budgets, func(b *data.Budget) bool {
-		monthsMatch := query.Month == nil || b.Month != *query.Month
-		yearsMatch := query.Year == nil || b.Year == *query.Year
-
-		return monthsMatch && yearsMatch
-	})
-
-	res.Ok(filtered)
+	res.Ok(budgets)
 }
 
 func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Response) {
@@ -75,7 +65,7 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Respo
 	body := req.Body.(rest.BudgetUpdateBody)
 	timestamp := manager.clock.Now()
 
-	budget := manager.getBudgetByAccount(res, req.ResourceId, req.Account.Id)
+	budget := manager.getBudget(res, req.ResourceId, req.Account.Id)
 	if res.IsErr() {
 		return
 	}
@@ -95,8 +85,7 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Respo
 }
 
 func (manager *BudgetManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-
-	if manager.getBudgetByAccount(res, req.ResourceId, req.Account.Id); res.IsErr() {
+	if manager.getBudget(res, req.ResourceId, req.Account.Id); res.IsErr() {
 		return
 	}
 
@@ -108,71 +97,51 @@ func (manager *BudgetManager) DeleteByRequest(req *rest.Request, res *rest.Respo
 	res.Ok(nil)
 }
 
-func (manager *BudgetManager) IsCategoryUsed(id string, accountId string) (bool, error) {
-	budgets, err := manager.store.GetByAccount(accountId)
-	if err != nil {
-		return false, err
-	}
-
-	ok := find[data.Budget](budgets, func(b *data.Budget) bool {
-		return b.CategoryId == id && b.AccountId == accountId
-	})
-
-	return ok, nil
-}
-
-func (manager *BudgetManager) categoryInPeriod(id string, accountId string, month int, year int) (bool, error) {
-	budgets, err := manager.store.GetByAccount(accountId)
-	if err != nil {
-		return false, err
-	}
-
-	ok := find[data.Budget](budgets, func(b *data.Budget) bool {
-		return b.Month == month && b.Year == year && b.CategoryId == id
-	})
-
-	return ok, nil
-}
-
 func (manager *BudgetManager) validate(res *rest.Response, month int, year int, accountId string, categoryId string) {
 	if ok := isDateValid(month, 1, year); !ok {
 		res.ErrInvalidDate()
 		return
 	}
 
-	ok, err := manager.categoryManager.Exists(categoryId, accountId)
+	category, err := manager.categoryStore.Get(categoryId, accountId)
 	if err != nil {
 		res.ErrInternal(err)
 		return
 	}
 
-	if !ok {
+	if category == nil {
 		res.ErrCategoryNotFound()
 		return
 	}
 
-	ok, err = manager.categoryInPeriod(categoryId, accountId, month, year)
+	filter := data.BudgetFilter{
+		CategoryId: &categoryId,
+		AccountId:  &accountId,
+		Month:      &month,
+		Year:       &year,
+	}
 
+	budgets, err := manager.store.GetBy(filter)
 	if err != nil {
 		res.ErrInternal(err)
 		return
 	}
 
-	if ok {
+	if budgets.First() != nil {
 		res.ErrCategoryInBudgetPeriod()
 		return
 	}
 }
 
-func (manager *BudgetManager) getBudgetByAccount(res *rest.Response, id string, accountId string) *data.Budget {
-	budget, err := manager.Get(id)
+func (manager *BudgetManager) getBudget(res *rest.Response, id string, accountId string) *data.Budget {
+	budget, err := manager.store.Get(id, accountId)
 
 	if err != nil {
 		res.ErrInternal(err)
 		return nil
 	}
 
-	if budget == nil || budget.AccountId != accountId {
+	if budget == nil {
 		res.ErrBudgetNotFound()
 		return nil
 	}
