@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     "id" VARCHAR PRIMARY KEY,
 	"account_id" VARCHAR NOT NULL,
 	"category_id" VARCHAR NULL,
-	"description" VARCHAR NULL,
+	"note" VARCHAR NULL,
 	"type" SMALLINT NOT NULL, 
 	"amount" FLOAT NOT NULL,
 	"month" INTEGER NOT NULL,

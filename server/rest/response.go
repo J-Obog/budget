@@ -2,6 +2,7 @@ package rest
 
 import "net/http"
 
+// TODO: actually implement errors
 type Response struct {
 	Data        any
 	Status      int
@@ -53,5 +54,17 @@ func (r *Response) ErrCategoryNameAlreadyUsed() {
 }
 
 func (r *Response) ErrBadRequest() {
+	r.Status = statusBadReq
+}
+
+func (r *Response) ErrInvalidAccountName() {
+	r.Status = statusBadReq
+}
+
+func (r *Response) ErrInvalidDate() {
+	r.Status = statusBadReq
+}
+
+func (r *Response) ErrInvalidTransactionNote() {
 	r.Status = statusBadReq
 }

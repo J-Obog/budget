@@ -13,9 +13,9 @@ const (
 )
 
 const (
-	LimitMaxAccountNameChars       = 100
-	LimitMinAccountNameChars       = 1
-	LimitMaxBudgetDescriptionChars = 200
+	LimitMaxAccountNameChars     = 100
+	LimitMinAccountNameChars     = 1
+	LimitMaxTransactionNoteChars = 200
 )
 
 type AppConfig struct {

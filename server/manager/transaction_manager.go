@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/J-Obog/paidoff/clock"
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
@@ -72,7 +73,7 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.
 	id := manager.uid.GetId()
 	newTransaction := newTransaction(body, id, req.Account.Id, timestamp)
 
-	if manager.validate(res, body.Description, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
+	if manager.validate(res, body.Note, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
 		return
 	}
 
@@ -93,7 +94,7 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.
 		return
 	}
 
-	if manager.validate(res, body.Description, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
+	if manager.validate(res, body.Note, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
 		return
 	}
 
@@ -137,9 +138,20 @@ func (manager *TransactionManager) getTransactionByAccount(res *rest.Response, i
 	return transaction
 }
 
-// TODO: Check date is valid
-// TODO: Check if description is valid
-func (manager *TransactionManager) validate(res *rest.Response, description *string, month int, day int, year int, categoryId string, accountId string) {
+func (manager *TransactionManager) validate(res *rest.Response, note *string, month int, day int, year int, categoryId string, accountId string) {
+	if note != nil {
+		noteLen := len(*note)
+		if noteLen > config.LimitMaxTransactionNoteChars {
+			res.ErrInvalidTransactionNote()
+			return
+		}
+	}
+
+	if ok := isDateValid(month, day, year); !ok {
+		res.ErrInvalidDate()
+		return
+	}
+
 	ok, err := manager.categoryManager.Exists(categoryId, accountId)
 	if err != nil {
 		res.ErrInternal(err)

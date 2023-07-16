@@ -26,12 +26,12 @@ type CategoryUpdateBody struct {
 }
 
 type TransactionCreateBody struct {
-	CategoryId  *string `json:"categoryId"`
-	Description *string `json:"description"`
-	Amount      float64 `json:"amount"`
-	Month       int     `json:"month"`
-	Day         int     `json:"day"`
-	Year        int     `json:"year"`
+	CategoryId *string `json:"categoryId"`
+	Note       *string `json:"note"`
+	Amount     float64 `json:"amount"`
+	Month      int     `json:"month"`
+	Day        int     `json:"day"`
+	Year       int     `json:"year"`
 }
 
 type TransactionUpdateBody struct {

@@ -40,12 +40,11 @@ func (manager *AccountManager) DeleteByRequest(req *rest.Request, res *rest.Resp
 	}
 }
 
-// TODO: return account name error instead of bad request
 func (manager *AccountManager) validate(res *rest.Response, name string) {
 	nameLen := len(name)
 
 	if !(nameLen >= config.LimitMinAccountNameChars && nameLen <= config.LimitMaxAccountNameChars) {
-		res.ErrBadRequest()
+		res.ErrInvalidAccountName()
 		return
 	}
 }

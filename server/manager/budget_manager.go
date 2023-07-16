@@ -131,8 +131,12 @@ func (manager *BudgetManager) categoryInPeriod(id string, accountId string, mont
 	return false, nil
 }
 
-// TODO: check if date is valid
 func (manager *BudgetManager) validate(res *rest.Response, month int, year int, accountId string, categoryId string) {
+	if ok := isDateValid(month, 1, year); !ok {
+		res.ErrInvalidDate()
+		return
+	}
+
 	ok, err := manager.categoryManager.Exists(categoryId, accountId)
 	if err != nil {
 		res.ErrInternal(err)
