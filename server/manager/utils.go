@@ -13,7 +13,6 @@ func newBudget(body rest.BudgetCreateBody, id string, accountId string, timestam
 		Month:      body.Month,
 		Year:       body.Year,
 		Projected:  body.Projected,
-		Actual:     0,
 		CreatedAt:  timestamp,
 		UpdatedAt:  timestamp,
 	}

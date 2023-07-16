@@ -25,9 +25,12 @@ type Budget struct {
 	Month      int     `json:"month"`
 	Year       int     `json:"year"`
 	Projected  float64 `json:"projected"`
-	Actual     float64 `json:"actual"`
 	CreatedAt  int64   `json:"createdAt"`
 	UpdatedAt  int64   `json:"updatedAt"`
+}
+
+type BudgetMaterialized struct {
+	Actual float64 `json:"actual"`
 }
 
 type Category struct {
