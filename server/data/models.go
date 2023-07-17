@@ -13,6 +13,14 @@ type Date struct {
 	Year  int
 }
 
+func NewDate(month int, day int, year int) Date {
+	return Date{
+		Month: month,
+		Day:   day,
+		Year:  year,
+	}
+}
+
 type Account struct {
 	Id          string `json:"id"`
 	Name        string `json:"name"`
@@ -22,6 +30,19 @@ type Account struct {
 	IsDeleted   bool  `json:"isDeleted"`
 	CreatedAt   int64 `json:"createdAt"`
 	UpdatedAt   int64 `json:"updatedAt"`
+}
+
+type AccountFilter struct {
+	Email *string
+}
+
+type AccountUpdate struct {
+	Name        *string
+	Email       *string
+	Password    *string
+	IsActivated *bool
+	IsDeleted   *bool
+	UpdatedAt   *int64
 }
 
 type BudgetList []Budget
@@ -37,11 +58,17 @@ type Budget struct {
 	Id         string  `json:"id"`
 	AccountId  string  `json:"accountId"`
 	CategoryId string  `json:"categoryId"`
-	Month      int     `json:"month"`
-	Year       int     `json:"year"`
+	Period     int64   `json:"period"`
 	Projected  float64 `json:"projected"`
 	CreatedAt  int64   `json:"createdAt"`
 	UpdatedAt  int64   `json:"updatedAt"`
+}
+
+type BudgetUpdate struct {
+	CategoryId *string
+	Period     *int64
+	Projected  *float64
+	UpdatedAt  *int64
 }
 
 type BudgetFilter struct {
@@ -78,6 +105,12 @@ type CategoryFilter struct {
 	Name      *string
 }
 
+type CategoryUpdate struct {
+	Name      *string
+	Color     *uint
+	UpdatedAt *int64
+}
+
 type TransactionList []Transaction
 
 func (arr TransactionList) First() *Transaction {
@@ -94,9 +127,7 @@ type Transaction struct {
 	Note       *string    `json:"note"`
 	Type       BudgetType `json:"budgetType"`
 	Amount     float64    `json:"amount"`
-	Month      int        `json:"month"`
-	Day        int        `json:"day"`
-	Year       int        `json:"year"`
+	Period     int64      `json:"period"`
 	CreatedAt  int64      `json:"createdAt"`
 	UpdatedAt  int64      `json:"updatedAt"`
 }
@@ -108,4 +139,16 @@ type TransactionFilter struct {
 	LessThan    *float64
 	CategoryId  *string
 	AccountId   *string
+}
+
+type TransactionUpdate struct {
+	IsCategoryIdSet bool
+	IsNoteSet       bool
+
+	CategoryId *string
+	Note       *string
+	Type       BudgetType
+	Amount     float64
+	Period     int64
+	UpdatedAt  int64
 }

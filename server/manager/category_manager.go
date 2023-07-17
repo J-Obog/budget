@@ -79,10 +79,6 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request, res *rest.Res
 }
 
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	if manager.getCategory(res, req.ResourceId, req.Account.Id); res.IsErr() {
-		return
-	}
-
 	filter := data.BudgetFilter{CategoryId: &req.ResourceId, AccountId: &req.Account.Id}
 	budgets, err := manager.budgetStore.GetBy(filter)
 	if err != nil {
@@ -100,8 +96,15 @@ func (manager *CategoryManager) DeleteByRequest(req *rest.Request, res *rest.Res
 		return
 	}
 
-	if err := manager.store.Delete(req.ResourceId); err != nil {
+	ok, err := manager.store.Delete(req.ResourceId, req.Account.Id)
+
+	if err != nil {
 		res.ErrInternal(err)
+		return
+	}
+
+	if !ok {
+		res.ErrCategoryNotFound()
 		return
 	}
 

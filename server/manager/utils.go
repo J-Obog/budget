@@ -5,18 +5,18 @@ import (
 	"github.com/J-Obog/paidoff/rest"
 )
 
-// TODO: implement
-func isDateValid(month int, day int, year int) bool {
-	return false
+func boolPtr(v bool) *bool {
+	b := new(bool)
+	*b = v
+	return b
 }
 
-func newBudget(body rest.BudgetCreateBody, id string, accountId string, timestamp int64) data.Budget {
+func newBudget(body rest.BudgetCreateBody, id string, accountId string, timestamp int64, period int64) data.Budget {
 	return data.Budget{
 		Id:         id,
 		AccountId:  accountId,
 		CategoryId: body.CategoryId,
-		Month:      body.Month,
-		Year:       body.Year,
+		Period:     period,
 		Projected:  body.Projected,
 		CreatedAt:  timestamp,
 		UpdatedAt:  timestamp,
@@ -34,16 +34,14 @@ func newCategory(body rest.CategoryCreateBody, id string, accountId string, time
 	}
 }
 
-func newTransaction(body rest.TransactionCreateBody, id string, accountId string, timestamp int64) data.Transaction {
+func newTransaction(body rest.TransactionCreateBody, id string, accountId string, timestamp int64, period int64) data.Transaction {
 	return data.Transaction{
 		Id:         id,
 		AccountId:  accountId,
 		CategoryId: body.CategoryId,
 		Note:       body.Note,
 		Amount:     body.Amount,
-		Month:      body.Month,
-		Day:        body.Day,
-		Year:       body.Year,
+		Period:     period,
 		CreatedAt:  timestamp,
 		UpdatedAt:  timestamp,
 	}
@@ -58,19 +56,15 @@ func updateCategory(body rest.CategoryUpdateBody, category *data.Category, times
 
 func updateBudget(body rest.BudgetUpdateBody, budget *data.Budget, timestamp int64) {
 	budget.CategoryId = body.CategoryId
-	budget.Month = body.Month
-	budget.Year = body.Year
 	budget.Projected = body.Projected
 	budget.UpdatedAt = timestamp
 }
 
-func updateTransaction(body rest.TransactionUpdateBody, transaction *data.Transaction, timestamp int64) {
+func updateTransaction(body rest.TransactionUpdateBody, transaction *data.Transaction, timestamp int64, period int64) {
 	transaction.CategoryId = body.CategoryId
 	transaction.Note = body.Note
 	transaction.Amount = body.Amount
-	transaction.Month = body.Month
-	transaction.Day = body.Day
-	transaction.Year = body.Year
+	transaction.Period = period
 	transaction.UpdatedAt = timestamp
 }
 

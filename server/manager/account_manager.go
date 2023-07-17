@@ -13,30 +13,28 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
-func (manager *AccountManager) Get(id string) (*data.Account, error) {
-	return manager.store.Get(id)
-}
-
 func (manager *AccountManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.AccountUpdateBody)
 	timestamp := manager.clock.Now()
-
-	updateAccount(body, req.Account, timestamp)
+	update := data.AccountUpdate{
+		Name: &body.Name, UpdatedAt: &timestamp,
+	}
 
 	if manager.validate(res, body.Name); res.IsErr() {
 		return
 	}
 
-	if err := manager.store.Update(*req.Account); err != nil {
+	if _, err := manager.store.Update(req.Account.Id, update); err != nil {
 		res.ErrInternal(err)
 	}
 }
 
 func (manager *AccountManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	account := req.Account
-	account.IsDeleted = true
+	update := data.AccountUpdate{
+		IsDeleted: boolPtr(true),
+	}
 
-	if err := manager.store.Update(*account); err != nil {
+	if _, err := manager.store.Update(req.Account.Id, update); err != nil {
 		res.ErrInternal(err)
 	}
 }

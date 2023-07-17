@@ -11,10 +11,9 @@ type PostgresTransactionStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresTransactionStore) Get(id string) (*data.Transaction, error) {
+func (pg *PostgresTransactionStore) Get(id string, accountId string) (*data.Transaction, error) {
 	transaction := new(data.Transaction)
-
-	err := pg.db.Where(data.Transaction{Id: id}).First(transaction).Error
+	err := pg.db.Where(data.Transaction{Id: id, AccountId: accountId}).First(transaction).Error
 	if err == nil {
 		return transaction, nil
 	}
@@ -26,10 +25,17 @@ func (pg *PostgresTransactionStore) Get(id string) (*data.Transaction, error) {
 	return nil, err
 }
 
-func (pg *PostgresTransactionStore) GetByAccount(accountId string) ([]data.Transaction, error) {
-	transactions := make([]data.Transaction, 0)
+// TODO: implement
+func (pg *PostgresTransactionStore) GetBy(filter data.TransactionFilter) (data.TransactionList, error) {
+	transactions := make(data.TransactionList, 0)
 
-	err := pg.db.Where(data.Transaction{AccountId: accountId}).Find(&transactions).Error
+	q := pg.db
+
+	if filter.AccountId != nil {
+		q = q.Where(data.Category{AccountId: *filter.AccountId})
+	}
+
+	err := q.Find(&transactions).Error
 	if err == nil {
 		return transactions, nil
 	}
@@ -41,14 +47,14 @@ func (pg *PostgresTransactionStore) Insert(transaction data.Transaction) error {
 	return pg.db.Create(&transaction).Error
 }
 
-func (pg *PostgresTransactionStore) Update(transaction data.Transaction) error {
-	err := pg.db.UpdateColumns(&transaction).Error
-	return err
+func (pg *PostgresTransactionStore) Update(id string, transaction data.Transaction) (bool, error) {
+	res := pg.db.UpdateColumns(&transaction)
+	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresTransactionStore) Delete(id string) error {
-	err := pg.db.Delete(data.Transaction{Id: id}).Error
-	return err
+func (pg *PostgresTransactionStore) Delete(id string) (bool, error) {
+	res := pg.db.Delete(data.Transaction{Id: id})
+	return (res.RowsAffected == 1), res.Error
 }
 
 func (pg *PostgresTransactionStore) DeleteAll() error {

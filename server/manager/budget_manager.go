@@ -16,9 +16,15 @@ type BudgetManager struct {
 }
 
 func (manager *BudgetManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	budget := manager.getBudget(res, req.ResourceId, req.Account.Id)
+	budget, err := manager.store.Get(req.ResourceId, req.Account.Id)
 
-	if res.IsErr() {
+	if err != nil {
+		res.ErrInternal(err)
+		return
+	}
+
+	if budget == nil {
+		res.ErrBudgetNotFound()
 		return
 	}
 
@@ -47,9 +53,16 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Respo
 	body := req.Body.(rest.BudgetCreateBody)
 	timestamp := manager.clock.Now()
 	id := manager.uid.GetId()
-	newBudget := newBudget(body, id, req.Account.Id, timestamp)
+	bodyDate := data.NewDate(body.Month, 1, body.Year)
+	period := manager.clock.FromDate(bodyDate)
+	newBudget := newBudget(body, id, req.Account.Id, timestamp, period)
 
-	if manager.validate(res, body.Month, body.Year, body.CategoryId, req.Account.Id); res.IsErr() {
+	if ok := manager.clock.IsDateValid(bodyDate); !ok {
+		res.ErrInvalidDate()
+		return
+	}
+
+	if manager.validate(res, body.CategoryId, req.Account.Id); res.IsErr() {
 		return
 	}
 
@@ -64,20 +77,24 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request, res *rest.Respo
 func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
 	body := req.Body.(rest.BudgetUpdateBody)
 	timestamp := manager.clock.Now()
-
-	budget := manager.getBudget(res, req.ResourceId, req.Account.Id)
-	if res.IsErr() {
-		return
+	update := data.BudgetUpdate{
+		Projected: &body.Projected,
+		UpdatedAt: &timestamp,
 	}
-
-	updateBudget(body, budget, timestamp)
 
 	if manager.validate(res, body.Month, body.Year, body.CategoryId, req.Account.Id); res.IsErr() {
 		return
 	}
 
-	if err := manager.store.Update(*budget); err != nil {
+	ok, err := manager.store.Update(req.ResourceId, update)
+
+	if err != nil {
 		res.ErrInternal(err)
+		return
+	}
+
+	if !ok {
+		res.ErrBudgetNotFound()
 		return
 	}
 
@@ -85,24 +102,21 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request, res *rest.Respo
 }
 
 func (manager *BudgetManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	if manager.getBudget(res, req.ResourceId, req.Account.Id); res.IsErr() {
+	ok, err := manager.store.Delete(req.ResourceId, req.Account.Id)
+	if err != nil {
+		res.ErrInternal(err)
 		return
 	}
 
-	if err := manager.store.Delete(req.ResourceId); err != nil {
-		res.ErrInternal(err)
+	if !ok {
+		res.ErrBudgetNotFound()
 		return
 	}
 
 	res.Ok(nil)
 }
 
-func (manager *BudgetManager) validate(res *rest.Response, month int, year int, accountId string, categoryId string) {
-	if ok := isDateValid(month, 1, year); !ok {
-		res.ErrInvalidDate()
-		return
-	}
-
+func (manager *BudgetManager) validate(res *rest.Response, accountId string, categoryId string) {
 	category, err := manager.categoryStore.Get(categoryId, accountId)
 	if err != nil {
 		res.ErrInternal(err)
@@ -131,20 +145,4 @@ func (manager *BudgetManager) validate(res *rest.Response, month int, year int, 
 		res.ErrCategoryInBudgetPeriod()
 		return
 	}
-}
-
-func (manager *BudgetManager) getBudget(res *rest.Response, id string, accountId string) *data.Budget {
-	budget, err := manager.store.Get(id, accountId)
-
-	if err != nil {
-		res.ErrInternal(err)
-		return nil
-	}
-
-	if budget == nil {
-		res.ErrBudgetNotFound()
-		return nil
-	}
-
-	return budget
 }
