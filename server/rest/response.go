@@ -1,74 +1,37 @@
 package rest
 
-import "net/http"
+import (
+	"errors"
+)
 
 // TODO: actually implement errors
+var (
+	ErrCategoryAlreadyInBudgetPeriod = errors.New("")
+	ErrCategoryNameAlreadyExists     = errors.New("")
+	ErrBadRequest                    = errors.New("")
+	ErrInvalidAccountName            = errors.New("")
+	ErrInvalidDate                   = errors.New("")
+	ErrCategoryCurrentlyInUse        = errors.New("")
+	ErrTransactionNote               = errors.New("")
+	ErrInvalidBudgetId               = errors.New("")
+	ErrInvalidCategoryId             = errors.New("")
+	ErrInvalidTransactionId          = errors.New("")
+)
+
 type Response struct {
 	Data        any
 	Status      int
 	InternalErr error
 }
 
-const (
-	statusOk          = http.StatusOK
-	statusBadReq      = http.StatusBadRequest
-	statusInternalErr = http.StatusInternalServerError
-)
-
-func (r *Response) IsErr() bool {
-	return r.Status == statusBadReq || r.Status == statusInternalErr
+func Ok(v any) *Response {
+	return &Response{}
 }
 
-func (r *Response) Ok(v any) {
-	r.Data = v
-	r.Status = http.StatusOK
+func Success() *Response {
+	return &Response{}
 }
 
-func (r *Response) ErrInternal(err error) {
-	r.Status = statusInternalErr
-	r.InternalErr = err
-}
-
-func (r *Response) ErrAccountNotFound() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrCategoryNotFound() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrBudgetNotFound() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrTransactionNotFound() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrCategoryInBudgetPeriod() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrCategoryNameAlreadyUsed() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrBadRequest() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrInvalidAccountName() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrInvalidDate() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrInvalidTransactionNote() {
-	r.Status = statusBadReq
-}
-
-func (r *Response) ErrCategoryIsCurrentlyUsed() {
-	r.Status = statusBadReq
+func Err(err error) *Response {
+	return &Response{}
 }

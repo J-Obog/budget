@@ -2,7 +2,6 @@ package manager
 
 import (
 	"github.com/J-Obog/paidoff/clock"
-	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
@@ -16,127 +15,102 @@ type TransactionManager struct {
 	uid           uid.UIDProvider
 }
 
-func (manager *TransactionManager) GetByRequest(req *rest.Request, res *rest.Response) {
-	transaction := manager.getTransaction(res, req.ResourceId, req.Account.Id)
-
-	if res.IsErr() {
-		return
+func (manager *TransactionManager) GetByRequest(req *rest.Request) *rest.Response {
+	transaction, err := manager.store.Get(req.ResourceId, req.Account.Get().Id)
+	if err != nil {
+		return rest.Err(err)
 	}
 
-	res.Ok(transaction)
+	if transaction.Empty() {
+		return rest.Err(rest.ErrInvalidTransactionId)
+	}
+
+	return rest.Ok(transaction)
 }
 
 // TODO: convert timestamps in query to dates
-func (manager *TransactionManager) GetAllByRequest(req *rest.Request, res *rest.Response) {
+func (manager *TransactionManager) GetAllByRequest(req *rest.Request) *rest.Response {
 	query := req.Query.(rest.TransactionQuery)
+	accountId := req.Account.Get().Id
+	filter := getFilterForTransactionQuery(query)
 
-	filter := data.TransactionFilter{
-		GreaterThan: query.AmountGte,
-		LessThan:    query.AmountLte,
-	}
-
-	transactions, err := manager.store.GetBy(filter)
+	transactions, err := manager.store.GetBy(accountId, filter)
 	if err != nil {
-		res.ErrInternal(err)
-		return
+		return rest.Err(err)
 	}
 
-	res.Ok(transactions)
+	return rest.Ok(transactions)
 }
 
-func (manager *TransactionManager) CreateByRequest(req *rest.Request, res *rest.Response) {
-	body := req.Body.(rest.TransactionCreateBody)
+func (manager *TransactionManager) CreateByRequest(req *rest.Request) *rest.Response {
+	body := req.Body.(rest.TransactionSetBody)
+	accountId := req.Account.Get().Id
+
+	if err := manager.validateSet(accountId, body, false); err != nil {
+		return rest.Err(err)
+	}
+
+	transaction := manager.getTransactionForCreate(accountId, body)
+
+	if err := manager.store.Insert(transaction); err != nil {
+		return rest.Err(err)
+	}
+
+	return rest.Success()
+}
+
+func (manager *TransactionManager) UpdateByRequest(req *rest.Request) *rest.Response {
+	body := req.Body.(rest.TransactionSetBody)
+	accountId := req.Account.Get().Id
+	transactionId := req.ResourceId
+
 	timestamp := manager.clock.Now()
-	id := manager.uid.GetId()
-	newTransaction := newTransaction(body, id, req.Account.Id, timestamp)
+	update := getUpdateForTransactionUpdate(body)
 
-	if manager.validate(res, body.Note, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
-		return
+	if err := manager.validateSet(accountId, body, true); err != nil {
+		return rest.Err(err)
 	}
 
-	if err := manager.store.Insert(newTransaction); err != nil {
-		res.ErrInternal(err)
-		return
-	}
-
-	res.Ok(nil)
-}
-
-func (manager *TransactionManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
-	now := manager.clock.Now()
-	body := req.Body.(rest.TransactionUpdateBody)
-
-	transaction := manager.getTransaction(res, req.ResourceId, req.Account.Id)
-	if res.IsErr() {
-		return
-	}
-
-	if manager.validate(res, body.Note, body.Month, body.Day, body.Year, *body.CategoryId, req.Account.Id); res.IsErr() {
-		return
-	}
-
-	updateTransaction(body, transaction, now)
-
-	if err := manager.store.Update(*transaction); err != nil {
-		res.ErrInternal(err)
-		return
-	}
-
-	res.Ok(nil)
-}
-
-func (manager *TransactionManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	manager.getTransaction(res, req.ResourceId, req.Account.Id)
-	if res.IsErr() {
-		return
-	}
-
-	if err := manager.store.Delete(req.ResourceId); err != nil {
-		res.ErrInternal(err)
-		return
-	}
-
-	res.Ok(nil)
-}
-
-func (manager *TransactionManager) getTransaction(res *rest.Response, id string, accountId string) *data.Transaction {
-	transaction, err := manager.store.Get(id, accountId)
-
+	ok, err := manager.store.Update(transactionId, accountId, update, timestamp)
 	if err != nil {
-		res.ErrInternal(err)
-		return nil
+		return rest.Err(err)
 	}
 
-	if transaction == nil {
-		res.ErrTransactionNotFound()
-		return nil
+	if !ok {
+		return rest.Err(rest.ErrInvalidTransactionId)
 	}
 
-	return transaction
+	return rest.Success()
 }
 
-func (manager *TransactionManager) validate(res *rest.Response, note *string, month int, day int, year int, categoryId string, accountId string) {
-	if note != nil {
-		noteLen := len(*note)
-		if noteLen > config.LimitMaxTransactionNoteChars {
-			res.ErrInvalidTransactionNote()
-			return
-		}
-	}
+func (manager *TransactionManager) DeleteByRequest(req *rest.Request) *rest.Response {
+	transactionId := req.ResourceId
+	accountId := req.Account.Get().Id
 
-	if ok := isDateValid(month, day, year); !ok {
-		res.ErrInvalidDate()
-		return
-	}
-
-	category, err := manager.categoryStore.Get(categoryId, accountId)
+	ok, err := manager.store.Delete(transactionId, accountId)
 	if err != nil {
-		res.ErrInternal(err)
-		return
+		return rest.Err(err)
 	}
 
-	if category == nil {
-		res.ErrCategoryNotFound()
-		return
+	if !ok {
+		return rest.Err(rest.ErrInvalidTransactionId)
 	}
+
+	return rest.Success()
+}
+
+func (manager *TransactionManager) validateSet(accountId string, body rest.TransactionSetBody, isUpdate bool) error {
+	return nil
+}
+
+func (manager *TransactionManager) getTransactionForCreate(accountId string, body rest.TransactionSetBody) data.Transaction {
+	return data.Transaction{}
+}
+
+func getFilterForTransactionQuery(q rest.TransactionQuery) data.TransactionFilter {
+	return data.TransactionFilter{}
+}
+
+func getUpdateForTransactionUpdate(body rest.TransactionSetBody) data.TransactionUpdate {
+	return data.TransactionUpdate{}
 }

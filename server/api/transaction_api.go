@@ -9,22 +9,22 @@ type TransactionAPI struct {
 	transactionManager *manager.TransactionManager
 }
 
-func (api *TransactionAPI) GetTransaction(req *rest.Request, res *rest.Response) {
-	api.transactionManager.GetByRequest(req, res)
+func (api *TransactionAPI) GetTransaction(req *rest.Request) *rest.Response {
+	return api.transactionManager.GetByRequest(req)
 }
 
-func (api *TransactionAPI) GetTransactions(req *rest.Request, res *rest.Response) {
-	api.transactionManager.GetAllByRequest(req, res)
+func (api *TransactionAPI) GetTransactions(req *rest.Request) *rest.Response {
+	return api.transactionManager.GetAllByRequest(req)
 }
 
-func (api *TransactionAPI) CreateTransaction(req *rest.Request, res *rest.Response) {
-	api.transactionManager.CreateByRequest(req, res)
+func (api *TransactionAPI) CreateTransaction(req *rest.Request) *rest.Response {
+	return api.transactionManager.CreateByRequest(req)
 }
 
-func (api *TransactionAPI) UpdateTransaction(req *rest.Request, res *rest.Response) {
-	api.transactionManager.UpdateByRequest(req, res)
+func (api *TransactionAPI) UpdateTransaction(req *rest.Request) *rest.Response {
+	return api.transactionManager.UpdateByRequest(req)
 }
 
-func (api *TransactionAPI) DeleteTransaction(req *rest.Request, res *rest.Response) {
-	api.transactionManager.DeleteByRequest(req, res)
+func (api *TransactionAPI) DeleteTransaction(req *rest.Request) *rest.Response {
+	return api.transactionManager.DeleteByRequest(req)
 }

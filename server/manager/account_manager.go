@@ -13,37 +13,38 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
-func (manager *AccountManager) UpdateByRequest(req *rest.Request, res *rest.Response) {
-	body := req.Body.(rest.AccountUpdateBody)
+func (manager *AccountManager) UpdateByRequest(req *rest.Request) *rest.Response {
+	body := req.Body.(rest.AccountSetBody)
+	accountId := req.Account.Get().Id
+
+	if err := manager.validateSet(body); err != nil {
+		return rest.Err(err)
+	}
+
+	update := data.AccountUpdate{Name: body.Name}
 	timestamp := manager.clock.Now()
-	update := data.AccountUpdate{
-		Name: &body.Name, UpdatedAt: &timestamp,
+
+	if _, err := manager.store.Update(accountId, update, timestamp); err != nil {
+		return rest.Err(err)
 	}
 
-	if manager.validate(res, body.Name); res.IsErr() {
-		return
-	}
-
-	if _, err := manager.store.Update(req.Account.Id, update); err != nil {
-		res.ErrInternal(err)
-	}
+	return rest.Success()
 }
 
-func (manager *AccountManager) DeleteByRequest(req *rest.Request, res *rest.Response) {
-	update := data.AccountUpdate{
-		IsDeleted: boolPtr(true),
+func (manager *AccountManager) DeleteByRequest(req *rest.Request) *rest.Response {
+	if _, err := manager.store.UpdateDeleted(req.Account.Get().Id, true); err != nil {
+		return rest.Err(err)
 	}
 
-	if _, err := manager.store.Update(req.Account.Id, update); err != nil {
-		res.ErrInternal(err)
-	}
+	return rest.Success()
 }
 
-func (manager *AccountManager) validate(res *rest.Response, name string) {
-	nameLen := len(name)
+func (manager *AccountManager) validateSet(body rest.AccountSetBody) error {
+	nameLen := len(body.Name)
 
 	if !(nameLen >= config.LimitMinAccountNameChars && nameLen <= config.LimitMaxAccountNameChars) {
-		res.ErrInvalidAccountName()
-		return
+		return rest.ErrInvalidAccountName
 	}
+
+	return nil
 }

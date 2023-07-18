@@ -9,14 +9,14 @@ type AccountAPI struct {
 	accountManager *manager.AccountManager
 }
 
-func (api *AccountAPI) GetAccount(req *rest.Request, res *rest.Response) {
-	res.Ok(req.Account)
+func (api *AccountAPI) GetAccount(req *rest.Request) *rest.Response {
+	return rest.Ok(req.Account)
 }
 
-func (api *AccountAPI) UpdateAccount(req *rest.Request, res *rest.Response) {
-	api.accountManager.UpdateByRequest(req, res)
+func (api *AccountAPI) UpdateAccount(req *rest.Request) *rest.Response {
+	return api.accountManager.UpdateByRequest(req)
 }
 
-func (api *AccountAPI) DeleteAccount(req *rest.Request, res *rest.Response) {
-	api.accountManager.DeleteByRequest(req, res)
+func (api *AccountAPI) DeleteAccount(req *rest.Request) *rest.Response {
+	return api.accountManager.DeleteByRequest(req)
 }

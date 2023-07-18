@@ -9,22 +9,22 @@ type CategoryAPI struct {
 	categoryManager *manager.CategoryManager
 }
 
-func (api *CategoryAPI) GetCategory(req *rest.Request, res *rest.Response) {
-	api.categoryManager.GetByRequest(req, res)
+func (api *CategoryAPI) GetCategory(req *rest.Request) *rest.Response {
+	return api.categoryManager.GetByRequest(req)
 }
 
-func (api *CategoryAPI) GetCategories(req *rest.Request, res *rest.Response) {
-	api.categoryManager.GetAllByRequest(req, res)
+func (api *CategoryAPI) GetCategories(req *rest.Request) *rest.Response {
+	return api.categoryManager.GetAllByRequest(req)
 }
 
-func (api *CategoryAPI) CreateCategory(req *rest.Request, res *rest.Response) {
-	api.categoryManager.CreateByRequest(req, res)
+func (api *CategoryAPI) CreateCategory(req *rest.Request) *rest.Response {
+	return api.categoryManager.CreateByRequest(req)
 }
 
-func (api *CategoryAPI) UpdateCategory(req *rest.Request, res *rest.Response) {
-	api.categoryManager.UpdateByRequest(req, res)
+func (api *CategoryAPI) UpdateCategory(req *rest.Request) *rest.Response {
+	return api.categoryManager.UpdateByRequest(req)
 }
 
-func (api *CategoryAPI) DeleteCategory(req *rest.Request, res *rest.Response) {
-	api.categoryManager.DeleteByRequest(req, res)
+func (api *CategoryAPI) DeleteCategory(req *rest.Request) *rest.Response {
+	return api.categoryManager.DeleteByRequest(req)
 }
