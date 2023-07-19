@@ -16,6 +16,7 @@ var (
 	ErrInvalidBudgetId               = errors.New("")
 	ErrInvalidCategoryId             = errors.New("")
 	ErrInvalidTransactionId          = errors.New("")
+	ErrInvalidCategoryName           = errors.New("")
 )
 
 type Response struct {

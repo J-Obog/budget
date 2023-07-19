@@ -21,8 +21,6 @@ type Budget struct {
 type BudgetUpdate struct {
 	CategoryId string
 	Projected  float64
-	Month      int
-	Year       int
 }
 
 type BudgetFilter struct {

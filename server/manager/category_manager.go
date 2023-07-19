@@ -2,6 +2,7 @@ package manager
 
 import (
 	"github.com/J-Obog/paidoff/clock"
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/queue"
 	"github.com/J-Obog/paidoff/rest"
@@ -41,12 +42,12 @@ func (manager *CategoryManager) GetAllByRequest(req *rest.Request) *rest.Respons
 }
 
 func (manager *CategoryManager) CreateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.CategorySetBody)
+	body := req.Body.(rest.CategoryCreateBody)
 	accountId := req.Account.Get().Id
 
 	category := manager.getCategoryForCreate(accountId, body)
 
-	if err := manager.validateSet(body, true); err != nil {
+	if err := manager.validateCreate(body, accountId); err != nil {
 		return rest.Err(err)
 	}
 
@@ -58,11 +59,11 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request) *rest.Respons
 }
 
 func (manager *CategoryManager) UpdateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.CategorySetBody)
+	body := req.Body.(rest.CategoryUpdateBody)
 	categoryId := req.ResourceId
 	accountId := req.Account.Get().Id
 
-	if err := manager.validateSet(body, true); err != nil {
+	if err := manager.validateUpdate(body, accountId); err != nil {
 		return rest.Err(err)
 	}
 
@@ -112,21 +113,30 @@ func (manager *CategoryManager) DeleteByRequest(req *rest.Request) *rest.Respons
 	return rest.Success()
 }
 
-func (manager *CategoryManager) validateSet(body rest.CategorySetBody, isUpdate bool) error {
-	return nil
-}
+func (manager *CategoryManager) validateSet(body rest.CategorySetBody, accountId string) error {
+	nameLen := len(body.Name)
 
-func (manager *CategoryManager) isNameUnique(accountId string, name string) (bool, error) {
-	category, err := manager.store.GetByName(accountId, name)
+	if nameLen > config.LimitMaxCategoryNameChars {
+		return rest.ErrInvalidCategoryName
+	}
+
+	category, err := manager.store.GetByName(accountId, body.Name)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if category.NotEmpty() {
-		return false, nil
+		return rest.ErrCategoryNameAlreadyExists
 	}
 
-	return true, nil
+	return nil
+}
+
+func (manager *CategoryManager) validateUpdate(body rest.CategoryUpdateBody, accountId string) error {
+	return manager.validateSet(body.CategorySetBody, accountId)
+}
+func (manager *CategoryManager) validateCreate(body rest.CategoryCreateBody, accountId string) error {
+	return manager.validateSet(body.CategorySetBody, accountId)
 }
 
 // TODO: better msg id?
@@ -147,10 +157,23 @@ func (manager *CategoryManager) sendMsg(id string) error {
 	return nil
 }
 
-func (manager *CategoryManager) getCategoryForCreate(accountId string, body rest.CategorySetBody) data.Category {
-	return data.Category{}
+func (manager *CategoryManager) getCategoryForCreate(accountId string, body rest.CategoryCreateBody) data.Category {
+	id := manager.uid.GetId()
+	timestamp := manager.clock.Now()
+
+	return data.Category{
+		Id:        id,
+		AccountId: accountId,
+		Name:      body.Name,
+		Color:     body.Color,
+		UpdatedAt: timestamp,
+		CreatedAt: timestamp,
+	}
 }
 
-func getUpdateForCategoryUpdate(body rest.CategorySetBody) data.CategoryUpdate {
-	return data.CategoryUpdate{}
+func getUpdateForCategoryUpdate(body rest.CategoryUpdateBody) data.CategoryUpdate {
+	return data.CategoryUpdate{
+		Name:  body.Name,
+		Color: body.Color,
+	}
 }

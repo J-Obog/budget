@@ -25,6 +25,14 @@ type CategorySetBody struct {
 	Color uint   `json:"color"`
 }
 
+type CategoryUpdateBody struct {
+	CategorySetBody
+}
+
+type CategoryCreateBody struct {
+	CategorySetBody
+}
+
 type TransactionSetBody struct {
 	CategoryId types.Optional[string] `json:"categoryId"`
 	Note       types.Optional[string] `json:"note"`
@@ -35,14 +43,14 @@ type TransactionSetBody struct {
 }
 
 type BudgetSetBody struct {
-	Month     int     `json:"month"`
-	Year      int     `json:"year"`
-	Projected float64 `json:"projected"`
+	CategoryId string  `json:"categoryId"`
+	Projected  float64 `json:"projected"`
 }
 
 type BudgetCreateBody struct {
 	BudgetSetBody
-	CategoryId string `json:"categoryId"`
+	Month int `json:"month"`
+	Year  int `json:"year"`
 }
 
 type BudgetUpdateBody struct {

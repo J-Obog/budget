@@ -71,7 +71,7 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request) *rest.Response 
 	timestamp := manager.clock.Now()
 	update := getUpdateForBudgetUpdate(body)
 
-	if err := manager.validateUpdate(body, accountId); err != nil {
+	if err := manager.validateUpdate(body, budgetId, accountId); err != nil {
 		return rest.Err(err)
 	}
 
@@ -100,35 +100,43 @@ func (manager *BudgetManager) DeleteByRequest(req *rest.Request) *rest.Response 
 	return rest.Success()
 }
 
-func (manager *BudgetManager) validateSet(body rest.BudgetSetBody, accountId string) error {
-	period := data.NewDate(body.Month, 1, body.Year)
+func (manager *BudgetManager) validateSet(body rest.BudgetSetBody, accountId string, month int, year int) error {
+	if err := manager.checkCategoryExists(body.CategoryId, accountId); err != nil {
+		return err
+	}
 
-	if ok := manager.clock.IsDateValid(period); !ok {
-		return rest.ErrInvalidDate
+	if err := manager.checkCategoryIsUnique(body.CategoryId, accountId, month, year); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (manager *BudgetManager) validateCreate(body rest.BudgetCreateBody, accountId string) error {
+	period := data.NewDate(body.Month, 1, body.Year)
 
-	if err := manager.validateSet(body.BudgetSetBody, accountId); err != nil {
-		return err
+	if ok := manager.clock.IsDateValid(period); !ok {
+		return rest.ErrInvalidDate
 	}
 
-	if err := manager.checkCategoryExists(body.CategoryId, accountId); err != nil {
-		return err
-	}
-
-	if err := manager.checkCategoryIsUnique(body.CategoryId, accountId, body.Month, body.Year); err != nil {
+	if err := manager.validateSet(body.BudgetSetBody, accountId, period.Month, period.Year); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (manager *BudgetManager) validateUpdate(body rest.BudgetUpdateBody, accountId string) error {
-	return manager.validateSet(body.BudgetSetBody, accountId)
+func (manager *BudgetManager) validateUpdate(body rest.BudgetUpdateBody, budgetId string, accountId string) error {
+	budget, err := manager.store.Get(budgetId, accountId)
+	if err != nil {
+		return err
+	}
+
+	if budget.Empty() {
+		return rest.ErrInvalidBudgetId
+	}
+
+	return manager.validateSet(body.BudgetSetBody, accountId, budget.Get().Month, budget.Get().Year)
 }
 
 func (manager *BudgetManager) checkCategoryIsUnique(categoryId string, accountId string, month int, year int) error {
@@ -182,8 +190,7 @@ func (manager *BudgetManager) getFilterForBudgetQuery(q rest.BudgetQuery) data.B
 
 func getUpdateForBudgetUpdate(body rest.BudgetUpdateBody) data.BudgetUpdate {
 	return data.BudgetUpdate{
-		Projected: body.Projected,
-		Month:     body.Month,
-		Year:      body.Year,
+		CategoryId: body.CategoryId,
+		Projected:  body.Projected,
 	}
 }
