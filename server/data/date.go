@@ -1,9 +1,9 @@
 package data
 
 type Date struct {
-	Month int `json:"month"`
-	Day   int `json:"day"`
-	Year  int `json:"year"`
+	Month int
+	Day   int
+	Year  int
 }
 
 func NewDate(month int, day int, year int) Date {

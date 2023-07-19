@@ -8,4 +8,7 @@ type Clock interface {
 	MonthStart(timestamp int64) int64
 	IsDateValid(date data.Date) bool
 	FromDate(date data.Date) int64
+	CurrentMonth() int
+	CurrentYear() int
+	DateFromStamp(timestamp int64) data.Date
 }

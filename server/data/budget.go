@@ -11,7 +11,8 @@ type Budget struct {
 	Id         string  `json:"id"`
 	AccountId  string  `json:"accountId"`
 	CategoryId string  `json:"categoryId"`
-	Period     int64   `json:"period"`
+	Month      int     `json:"month"`
+	Year       int     `json:"year"`
 	Projected  float64 `json:"projected"`
 	CreatedAt  int64   `json:"createdAt"`
 	UpdatedAt  int64   `json:"updatedAt"`
@@ -19,13 +20,14 @@ type Budget struct {
 
 type BudgetUpdate struct {
 	CategoryId string
-	Period     int64
 	Projected  float64
+	Month      int
+	Year       int
 }
 
 type BudgetFilter struct {
-	CategoryId string
-	Period     int64
+	Month int
+	Year  int
 }
 
 type BudgetMaterialized struct {

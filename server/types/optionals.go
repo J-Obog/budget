@@ -32,6 +32,14 @@ func (o *Optional[T]) Get() T {
 	return *o.val
 }
 
+func (o *Optional[T]) GetOr(fallback T) T {
+	if o.val == nil {
+		return fallback
+	}
+
+	return o.Get()
+}
+
 func (o *Optional[T]) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, &o.val)
 }

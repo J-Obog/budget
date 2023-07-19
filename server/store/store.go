@@ -26,7 +26,7 @@ type CategoryStore interface {
 
 type BudgetStore interface {
 	Get(id string, accountId string) (types.Optional[data.Budget], error)
-	GetByPeriodCategory(accountId string, categoryId string, start int64, end int64) (types.Optional[data.Budget], error)
+	GetByPeriodCategory(accountId string, categoryId string, month int, year int) (types.Optional[data.Budget], error)
 	GetByCategory(accountId string, categoryId string) ([]data.Budget, error)
 	GetBy(accountId string, filter data.BudgetFilter) ([]data.Budget, error)
 	Insert(budget data.Budget) error

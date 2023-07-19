@@ -35,7 +35,8 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response 
 	accountId := req.Account.Get().Id
 
 	query := req.Query.(rest.BudgetQuery)
-	filter := getFilterForBudgetQuery(query)
+
+	filter := manager.getFilterForBudgetQuery(query)
 
 	budgets, err := manager.store.GetBy(accountId, filter)
 	if err != nil {
@@ -46,14 +47,13 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response 
 }
 
 func (manager *BudgetManager) CreateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.BudgetSetBody)
+	body := req.Body.(rest.BudgetCreateBody)
 	accountId := req.Account.Get().Id
 
-	/*bodyDate := data.NewDate(body.Month, 1, body.Year)
+	if err := manager.validateCreate(body, accountId); err != nil {
+		return rest.Err(err)
+	}
 
-	periodStart := manager.clock.FromDate(bodyDate)
-	periodEnd := manager.clock.MonthEnd(periodStart)
-	*/
 	budget := manager.getBudgetForCreate(accountId, body)
 
 	if err := manager.store.Insert(budget); err != nil {
@@ -64,12 +64,16 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request) *rest.Response 
 }
 
 func (manager *BudgetManager) UpdateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.BudgetSetBody)
+	body := req.Body.(rest.BudgetUpdateBody)
 	accountId := req.Account.Get().Id
 	budgetId := req.ResourceId
 
 	timestamp := manager.clock.Now()
 	update := getUpdateForBudgetUpdate(body)
+
+	if err := manager.validateUpdate(body, accountId); err != nil {
+		return rest.Err(err)
+	}
 
 	ok, err := manager.store.Update(budgetId, accountId, update, timestamp)
 	if err != nil {
@@ -96,12 +100,52 @@ func (manager *BudgetManager) DeleteByRequest(req *rest.Request) *rest.Response 
 	return rest.Success()
 }
 
-func (manager *BudgetManager) validateSet(body rest.BudgetSetBody, accountId string, isUpdate bool) error {
-	/*if ok := manager.clock.IsDateValid(bodyDate); !ok {
-		return res.ErrInvalidDate()
-	}*/
+func (manager *BudgetManager) validateSet(body rest.BudgetSetBody, accountId string) error {
+	period := data.NewDate(body.Month, 1, body.Year)
 
-	category, err := manager.categoryStore.Get(body.CategoryId, accountId)
+	if ok := manager.clock.IsDateValid(period); !ok {
+		return rest.ErrInvalidDate
+	}
+
+	return nil
+}
+
+func (manager *BudgetManager) validateCreate(body rest.BudgetCreateBody, accountId string) error {
+
+	if err := manager.validateSet(body.BudgetSetBody, accountId); err != nil {
+		return err
+	}
+
+	if err := manager.checkCategoryExists(body.CategoryId, accountId); err != nil {
+		return err
+	}
+
+	if err := manager.checkCategoryIsUnique(body.CategoryId, accountId, body.Month, body.Year); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (manager *BudgetManager) validateUpdate(body rest.BudgetUpdateBody, accountId string) error {
+	return manager.validateSet(body.BudgetSetBody, accountId)
+}
+
+func (manager *BudgetManager) checkCategoryIsUnique(categoryId string, accountId string, month int, year int) error {
+	budget, err := manager.store.GetByPeriodCategory(accountId, categoryId, month, year)
+	if err != nil {
+		return err
+	}
+
+	if budget.Empty() {
+		return rest.ErrCategoryAlreadyInBudgetPeriod
+	}
+
+	return nil
+}
+
+func (manager *BudgetManager) checkCategoryExists(categoryId string, accountId string) error {
+	category, err := manager.categoryStore.Get(categoryId, accountId)
 	if err != nil {
 		return err
 	}
@@ -110,26 +154,36 @@ func (manager *BudgetManager) validateSet(body rest.BudgetSetBody, accountId str
 		return rest.ErrInvalidCategoryId
 	}
 
-	budgets, err := manager.store.GetByPeriodCategory(accountId, body.CategoryId, periodStart, periodEnd)
-	if err != nil {
-		return err
-	}
-
-	if budgets.NotEmpty() {
-		return rest.ErrCategoryAlreadyInBudgetPeriod
-	}
-
 	return nil
 }
 
-func (manager *BudgetManager) getBudgetForCreate(accountId string, body rest.BudgetSetBody) data.Budget {
-	return data.Budget{}
+func (manager *BudgetManager) getBudgetForCreate(accountId string, body rest.BudgetCreateBody) data.Budget {
+	id := manager.uid.GetId()
+	timestamp := manager.clock.Now()
+
+	return data.Budget{
+		Id:         id,
+		AccountId:  accountId,
+		CategoryId: body.CategoryId,
+		Month:      body.Month,
+		Year:       body.Year,
+		Projected:  body.Projected,
+		CreatedAt:  timestamp,
+		UpdatedAt:  timestamp,
+	}
 }
 
-func getFilterForBudgetQuery(q rest.BudgetQuery) data.BudgetFilter {
-	return data.BudgetFilter{}
+func (manager *BudgetManager) getFilterForBudgetQuery(q rest.BudgetQuery) data.BudgetFilter {
+	return data.BudgetFilter{
+		Month: q.Month.GetOr(manager.clock.CurrentMonth()),
+		Year:  q.Year.GetOr(manager.clock.CurrentYear()),
+	}
 }
 
-func getUpdateForBudgetUpdate(body rest.BudgetSetBody) data.BudgetUpdate {
-	return data.BudgetUpdate{}
+func getUpdateForBudgetUpdate(body rest.BudgetUpdateBody) data.BudgetUpdate {
+	return data.BudgetUpdate{
+		Projected: body.Projected,
+		Month:     body.Month,
+		Year:      body.Year,
+	}
 }

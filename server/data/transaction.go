@@ -9,7 +9,9 @@ type Transaction struct {
 	Note       types.Optional[string] `json:"note"`
 	Type       BudgetType             `json:"budgetType"`
 	Amount     float64                `json:"amount"`
-	Period     int64                  `json:"period"`
+	Month      int                    `json:"month"`
+	Day        int                    `json:"day"`
+	Year       int                    `json:"year"`
 	CreatedAt  int64                  `json:"createdAt"`
 	UpdatedAt  int64                  `json:"updatedAt"`
 }
@@ -26,5 +28,7 @@ type TransactionUpdate struct {
 	Note       types.Optional[string]
 	Type       BudgetType
 	Amount     float64
-	Period     int64
+	Month      int
+	Day        int
+	Year       int
 }
