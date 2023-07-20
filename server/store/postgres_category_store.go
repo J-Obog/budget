@@ -57,13 +57,20 @@ func (pg *PostgresCategoryStore) Insert(category data.Category) error {
 	return pg.db.Create(&category).Error
 }
 
-func (pg *PostgresCategoryStore) Update(id string, category data.Category) (bool, error) {
-	res := pg.db.UpdateColumns(&category)
+func (pg *PostgresCategoryStore) Update(id string, accountId string, update data.CategoryUpdate, timestamp int64) (bool, error) {
+	q := pg.db.Where("id = ?", id)
+	q = q.Where("accountId = ?", accountId)
+
+	res := q.UpdateColumns(&data.Category{
+		Name:  update.Name,
+		Color: update.Color,
+	})
+
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresCategoryStore) Delete(id string) (bool, error) {
-	res := pg.db.Delete(data.Category{Id: id})
+func (pg *PostgresCategoryStore) Delete(id string, accountId string) (bool, error) {
+	res := pg.db.Delete(data.Category{Id: id, AccountId: accountId})
 	return (res.RowsAffected == 1), res.Error
 }
 

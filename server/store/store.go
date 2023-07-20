@@ -9,7 +9,7 @@ type AccountStore interface {
 	Get(id string) (types.Optional[data.Account], error)
 	Insert(account data.Account) error
 	Update(id string, update data.AccountUpdate, timestamp int64) (bool, error)
-	UpdateDeleted(id string, isDeleted bool) (bool, error)
+	SetDeleted(id string) (bool, error)
 	Delete(id string) (bool, error)
 	DeleteAll() error
 }

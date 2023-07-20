@@ -85,8 +85,16 @@ func (pg *PostgresBudgetStore) Insert(budget data.Budget) error {
 	return pg.db.Create(&budget).Error
 }
 
-func (pg *PostgresBudgetStore) Update(id string, budget data.Budget) (bool, error) {
-	res := pg.db.UpdateColumns(&budget)
+func (pg *PostgresBudgetStore) Update(id string, accountId string, update data.BudgetUpdate, timestamp int64) (bool, error) {
+	q := pg.db.Where("id = ?", id)
+	q = q.Where("accountId = ?", accountId)
+
+	res := q.UpdateColumns(&data.Budget{
+		CategoryId: update.CategoryId,
+		Projected:  update.Projected,
+		UpdatedAt:  timestamp,
+	})
+
 	return (res.RowsAffected == 1), res.Error
 }
 

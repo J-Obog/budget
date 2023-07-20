@@ -32,13 +32,24 @@ func (pg *PostgresAccountStore) Insert(account data.Account) error {
 }
 
 func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, timestamp int64) (bool, error) {
-	/*res := pg.db.UpdateColumns(&data.Account{
+	q := pg.db.Where("id = ?", id)
+
+	res := q.UpdateColumns(&data.Account{
 		Name:      update.Name,
 		UpdatedAt: timestamp,
 	})
 
-	return res.Error*/
-	return true, nil
+	return (res.RowsAffected == 1), res.Error
+}
+
+func (pg *PostgresAccountStore) SetDeleted(id string) (bool, error) {
+	q := pg.db.Where("id = ?", id)
+
+	res := q.UpdateColumns(&data.Account{
+		IsDeleted: true,
+	})
+
+	return (res.RowsAffected == 1), res.Error
 }
 
 func (pg *PostgresAccountStore) Delete(id string) (bool, error) {
