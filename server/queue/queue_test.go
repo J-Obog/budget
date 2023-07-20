@@ -10,8 +10,10 @@ import (
 func TestQueue(t *testing.T) {
 	g, _ := config.MakeConfig(config.EnvType_LOCAL)
 	q := MakeQueue(g)
+	err := q.Flush(testQueueName)
+	assert.NoError(t, err)
 
-	t.Run("it pushes and pops message", func(t *testing.T) {
+	t.Run("it pushes and pops message and acks message", func(t *testing.T) {
 		msg := testMessage()
 
 		err := q.Push(msg, testQueueName)
@@ -20,16 +22,6 @@ func TestQueue(t *testing.T) {
 		m, err := q.Pop(testQueueName)
 		assert.NoError(t, err)
 		assert.Equal(t, msg, *m)
-	})
-
-	t.Run("it acks a message", func(t *testing.T) {
-		msg := testMessage()
-
-		err := q.Push(msg, testQueueName)
-		assert.NoError(t, err)
-
-		m, err := q.Pop(testQueueName)
-		assert.NoError(t, err)
 
 		err = q.Ack(m.Id)
 		assert.NoError(t, err)

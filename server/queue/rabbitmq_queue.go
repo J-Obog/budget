@@ -72,3 +72,8 @@ func (mq *RabbitMqQueue) Ack(messageId string) error {
 
 	return mq.channel.Ack(tag, false)
 }
+
+func (mq *RabbitMqQueue) Flush(queueName string) error {
+	_, err := mq.channel.QueuePurge(queueName, false)
+	return err
+}
