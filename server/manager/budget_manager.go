@@ -152,7 +152,11 @@ func (manager *BudgetManager) validateUpdate(body rest.BudgetUpdateBody, budgetI
 		return rest.ErrInvalidBudgetId
 	}
 
-	return manager.validateSet(body.BudgetSetBody, accountId, budget.Get().Month, budget.Get().Year)
+	if body.CategoryId != budget.Get().CategoryId {
+		return manager.validateSet(body.BudgetSetBody, accountId, budget.Get().Month, budget.Get().Year)
+	}
+
+	return nil
 }
 
 func (manager *BudgetManager) checkCategoryIsUnique(categoryId string, accountId string, month int, year int) error {

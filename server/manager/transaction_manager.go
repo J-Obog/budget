@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/J-Obog/paidoff/clock"
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
@@ -44,10 +45,10 @@ func (manager *TransactionManager) GetAllByRequest(req *rest.Request) *rest.Resp
 }
 
 func (manager *TransactionManager) CreateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.TransactionSetBody)
+	body := req.Body.(rest.TransactionCreateBody)
 	accountId := req.Account.Get().Id
 
-	if err := manager.validateSet(accountId, body, false); err != nil {
+	if err := manager.validateCreate(accountId, body); err != nil {
 		return rest.Err(err)
 	}
 
@@ -61,14 +62,14 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request) *rest.Resp
 }
 
 func (manager *TransactionManager) UpdateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.TransactionSetBody)
+	body := req.Body.(rest.TransactionUpdateBody)
 	accountId := req.Account.Get().Id
 	transactionId := req.ResourceId
 
 	timestamp := manager.clock.Now()
 	update := getUpdateForTransactionUpdate(body)
 
-	if err := manager.validateSet(accountId, body, true); err != nil {
+	if err := manager.validateUpdate(accountId, body); err != nil {
 		return rest.Err(err)
 	}
 
@@ -100,12 +101,60 @@ func (manager *TransactionManager) DeleteByRequest(req *rest.Request) *rest.Resp
 	return rest.Success()
 }
 
-func (manager *TransactionManager) validateSet(accountId string, body rest.TransactionSetBody, isUpdate bool) error {
+// TODO: look into validation for budget type
+func (manager *TransactionManager) validateSet(accountId string, body rest.TransactionSetBody) error {
+	period := data.NewDate(body.Month, body.Day, body.Year)
+
+	if ok := manager.clock.IsDateValid(period); !ok {
+		return rest.ErrInvalidDate
+	}
+
+	if body.CategoryId.NotEmpty() {
+		categoryId := body.CategoryId.Get()
+
+		category, err := manager.categoryStore.Get(categoryId, accountId)
+		if err != nil {
+			return err
+		}
+
+		if category.Empty() {
+			return rest.ErrInvalidCategoryId
+		}
+	}
+
+	if body.Note.NotEmpty() {
+		note := body.Note.Get()
+		if len(note) > config.LimitMaxTransactionNoteChars {
+			return rest.ErrInvalidTransactionNote
+		}
+	}
+
 	return nil
 }
 
-func (manager *TransactionManager) getTransactionForCreate(accountId string, body rest.TransactionSetBody) data.Transaction {
-	return data.Transaction{}
+func (manager *TransactionManager) validateUpdate(accountId string, body rest.TransactionUpdateBody) error {
+	return manager.validateSet(accountId, body.TransactionSetBody)
+}
+func (manager *TransactionManager) validateCreate(accountId string, body rest.TransactionCreateBody) error {
+	return manager.validateSet(accountId, body.TransactionSetBody)
+}
+func (manager *TransactionManager) getTransactionForCreate(accountId string, body rest.TransactionCreateBody) data.Transaction {
+	id := manager.uid.GetId()
+	timestamp := manager.clock.Now()
+
+	return data.Transaction{
+		Id:         id,
+		AccountId:  accountId,
+		CategoryId: body.CategoryId,
+		Note:       body.Note,
+		Type:       body.Type,
+		Amount:     body.Amount,
+		Month:      body.Month,
+		Day:        body.Day,
+		Year:       body.Year,
+		CreatedAt:  timestamp,
+		UpdatedAt:  timestamp,
+	}
 }
 
 // TODO: get default date bounds from config
@@ -131,6 +180,14 @@ func (manager *TransactionManager) getFilterForTransactionQuery(q rest.Transacti
 	}
 }
 
-func getUpdateForTransactionUpdate(body rest.TransactionSetBody) data.TransactionUpdate {
-	return data.TransactionUpdate{}
+func getUpdateForTransactionUpdate(body rest.TransactionUpdateBody) data.TransactionUpdate {
+	return data.TransactionUpdate{
+		CategoryId: body.CategoryId,
+		Note:       body.Note,
+		Type:       body.Type,
+		Amount:     body.Amount,
+		Month:      body.Month,
+		Day:        body.Day,
+		Year:       body.Year,
+	}
 }

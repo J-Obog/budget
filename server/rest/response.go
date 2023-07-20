@@ -12,7 +12,7 @@ var (
 	ErrInvalidAccountName            = errors.New("")
 	ErrInvalidDate                   = errors.New("")
 	ErrCategoryCurrentlyInUse        = errors.New("")
-	ErrTransactionNote               = errors.New("")
+	ErrInvalidTransactionNote        = errors.New("")
 	ErrInvalidBudgetId               = errors.New("")
 	ErrInvalidCategoryId             = errors.New("")
 	ErrInvalidTransactionId          = errors.New("")

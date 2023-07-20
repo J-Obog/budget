@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/types"
 )
 
@@ -36,10 +37,19 @@ type CategoryCreateBody struct {
 type TransactionSetBody struct {
 	CategoryId types.Optional[string] `json:"categoryId"`
 	Note       types.Optional[string] `json:"note"`
+	Type       data.BudgetType        `json:"budgetType"`
 	Amount     float64                `json:"amount"`
 	Month      int                    `json:"month"`
 	Day        int                    `json:"day"`
 	Year       int                    `json:"year"`
+}
+
+type TransactionUpdateBody struct {
+	TransactionSetBody
+}
+
+type TransactionCreateBody struct {
+	TransactionSetBody
 }
 
 type BudgetSetBody struct {
