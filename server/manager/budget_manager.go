@@ -9,10 +9,11 @@ import (
 )
 
 type BudgetManager struct {
-	store         store.BudgetStore
-	categoryStore store.CategoryStore
-	clock         clock.Clock
-	uid           uid.UIDProvider
+	store            store.BudgetStore
+	categoryStore    store.CategoryStore
+	transactionStore store.TransactionStore
+	clock            clock.Clock
+	uid              uid.UIDProvider
 }
 
 func (manager *BudgetManager) GetByRequest(req *rest.Request) *rest.Response {
@@ -28,7 +29,12 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request) *rest.Response {
 		return rest.Err(rest.ErrInvalidBudgetId)
 	}
 
-	return rest.Ok(budget)
+	materializedBudget, err := manager.toMaterializedBudget(budget.Get())
+	if err != nil {
+		return rest.Err(err)
+	}
+
+	return rest.Ok(materializedBudget)
 }
 
 func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response {
@@ -43,7 +49,17 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response 
 		return rest.Err(err)
 	}
 
-	return rest.Ok(budgets)
+	materializedBudgets := make([]data.BudgetMaterialized, len(budgets))
+	for _, budget := range budgets {
+		materializedBudget, err := manager.toMaterializedBudget(budget)
+		if err != nil {
+			return rest.Err(err)
+		}
+
+		materializedBudgets = append(materializedBudgets, materializedBudget)
+	}
+
+	return rest.Ok(materializedBudgets)
 }
 
 func (manager *BudgetManager) CreateByRequest(req *rest.Request) *rest.Response {
@@ -193,4 +209,35 @@ func getUpdateForBudgetUpdate(body rest.BudgetUpdateBody) data.BudgetUpdate {
 		CategoryId: body.CategoryId,
 		Projected:  body.Projected,
 	}
+}
+
+func (manager *BudgetManager) toMaterializedBudget(budget data.Budget) (data.BudgetMaterialized, error) {
+	accountId := budget.AccountId
+	categoryId := budget.CategoryId
+	month := budget.Month
+	year := budget.Year
+
+	total := 0.00
+	transactions, err := manager.transactionStore.GetByPeriodCategory(accountId, categoryId, month, year)
+
+	if err != nil {
+		return data.BudgetMaterialized{}, err
+
+	}
+
+	for _, transaction := range transactions {
+		netMove := transaction.Amount
+		if transaction.Type == data.BudgetType_Expense {
+			netMove *= -1
+		}
+
+		total += netMove
+	}
+
+	materialized := data.BudgetMaterialized{
+		Budget: budget,
+		Actual: total,
+	}
+
+	return materialized, nil
 }

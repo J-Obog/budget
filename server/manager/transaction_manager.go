@@ -111,7 +111,7 @@ func (manager *TransactionManager) getTransactionForCreate(accountId string, bod
 // TODO: get default date bounds from config
 func (manager *TransactionManager) getFilterForTransactionQuery(q rest.TransactionQuery) data.TransactionFilter {
 	lower := data.NewDate(1, 1, 1902)
-	upper := data.NewDate(1, 1, 40000000)
+	upper := data.NewDate(1, 1, math.MaxInt)
 
 	createdBefore := q.CreatedBefore
 	if createdBefore.NotEmpty() {

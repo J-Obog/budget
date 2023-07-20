@@ -38,6 +38,8 @@ type BudgetStore interface {
 type TransactionStore interface {
 	Get(id string, accountId string) (types.Optional[data.Transaction], error)
 	GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error)
+	GetByPeriod(accountId string, month int, year int) ([]data.Transaction, error)
+	GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error)
 	Insert(transaction data.Transaction) error
 	Update(id string, accountId string, update data.TransactionUpdate, timestamp int64) (bool, error)
 	Delete(id string, accountId string) (bool, error)

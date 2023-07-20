@@ -29,5 +29,6 @@ type BudgetFilter struct {
 }
 
 type BudgetMaterialized struct {
+	Budget
 	Actual float64 `json:"actual"`
 }
