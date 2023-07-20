@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/types"
 	"gorm.io/gorm"
 )
 
@@ -11,36 +12,23 @@ type PostgresTransactionStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresTransactionStore) Get(id string, accountId string) (*data.Transaction, error) {
-	transaction := new(data.Transaction)
+func (pg *PostgresTransactionStore) Get(id string, accountId string) (types.Optional[data.Transaction], error) {
+	transaction := types.OptionalOf[data.Transaction](nil)
 	err := pg.db.Where(data.Transaction{Id: id, AccountId: accountId}).First(transaction).Error
 	if err == nil {
 		return transaction, nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return transaction, nil
 	}
 
-	return nil, err
+	return transaction, err
 }
 
 // TODO: implement
-func (pg *PostgresTransactionStore) GetBy(filter data.TransactionFilter) (data.TransactionList, error) {
-	transactions := make(data.TransactionList, 0)
-
-	q := pg.db
-
-	if filter.AccountId != nil {
-		q = q.Where(data.Category{AccountId: *filter.AccountId})
-	}
-
-	err := q.Find(&transactions).Error
-	if err == nil {
-		return transactions, nil
-	}
-
-	return nil, err
+func (pg *PostgresTransactionStore) GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
+	return make([]data.Transaction, 0), nil
 }
 
 func (pg *PostgresTransactionStore) Insert(transaction data.Transaction) error {
@@ -52,8 +40,8 @@ func (pg *PostgresTransactionStore) Update(id string, transaction data.Transacti
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresTransactionStore) Delete(id string) (bool, error) {
-	res := pg.db.Delete(data.Transaction{Id: id})
+func (pg *PostgresTransactionStore) Delete(id string, accountId string) (bool, error) {
+	res := pg.db.Delete(data.Transaction{Id: id, AccountId: accountId})
 	return (res.RowsAffected == 1), res.Error
 }
 

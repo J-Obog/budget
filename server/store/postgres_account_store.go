@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/types"
 	"gorm.io/gorm"
 )
 
@@ -11,8 +12,8 @@ type PostgresAccountStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresAccountStore) Get(id string) (*data.Account, error) {
-	account := new(data.Account)
+func (pg *PostgresAccountStore) Get(id string) (types.Optional[data.Account], error) {
+	account := types.OptionalOf[data.Account](nil)
 
 	err := pg.db.Where(data.Account{Id: id}).First(account).Error
 	if err == nil {
@@ -20,24 +21,29 @@ func (pg *PostgresAccountStore) Get(id string) (*data.Account, error) {
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return account, nil
 	}
 
-	return nil, err
+	return account, err
 }
 
 func (pg *PostgresAccountStore) Insert(account data.Account) error {
 	return pg.db.Create(&account).Error
 }
 
-func (pg *PostgresAccountStore) Update(account data.Account) error {
-	err := pg.db.UpdateColumns(&account).Error
-	return err
+func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, timestamp int64) (bool, error) {
+	/*res := pg.db.UpdateColumns(&data.Account{
+		Name:      update.Name,
+		UpdatedAt: timestamp,
+	})
+
+	return res.Error*/
+	return true, nil
 }
 
-func (pg *PostgresAccountStore) Delete(id string) error {
-	err := pg.db.Delete(data.Account{Id: id}).Error
-	return err
+func (pg *PostgresAccountStore) Delete(id string) (bool, error) {
+	res := pg.db.Delete(data.Account{Id: id})
+	return (res.RowsAffected == 1), res.Error
 }
 
 func (pg *PostgresAccountStore) DeleteAll() error {

@@ -20,6 +20,10 @@ func New[T any](v any) Optional[T] {
 	return newOpt
 }
 
+func OptionalOf[T any](v any) Optional[T] {
+	return New[T](v)
+}
+
 func (o *Optional[T]) Empty() bool {
 	return o.val == nil
 }

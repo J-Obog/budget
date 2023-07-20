@@ -11,10 +11,6 @@ type Account struct {
 	UpdatedAt   int64 `json:"updatedAt"`
 }
 
-type AccountFilter struct {
-	Email string
-}
-
 type AccountUpdate struct {
 	Name     string
 	Email    string

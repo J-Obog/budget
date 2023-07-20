@@ -21,6 +21,14 @@ type AccountSetBody struct {
 	Name string `json:"name"`
 }
 
+type AccountUpdateBody struct {
+	AccountSetBody
+}
+
+type AccountCreateBody struct {
+	AccountSetBody
+}
+
 type CategorySetBody struct {
 	Name  string `json:"name"`
 	Color uint   `json:"color"`

@@ -14,14 +14,14 @@ type AccountManager struct {
 }
 
 func (manager *AccountManager) UpdateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.AccountSetBody)
+	body := req.Body.(rest.AccountUpdateBody)
 	accountId := req.Account.Get().Id
 
-	if err := manager.validateSet(body); err != nil {
+	if err := manager.validateUpdate(body); err != nil {
 		return rest.Err(err)
 	}
 
-	update := data.AccountUpdate{Name: body.Name}
+	update := getUpdateForAccountUpdate(body)
 	timestamp := manager.clock.Now()
 
 	if _, err := manager.store.Update(accountId, update, timestamp); err != nil {
@@ -47,4 +47,14 @@ func (manager *AccountManager) validateSet(body rest.AccountSetBody) error {
 	}
 
 	return nil
+}
+
+func (manager *AccountManager) validateUpdate(body rest.AccountUpdateBody) error {
+	return manager.validateSet(body.AccountSetBody)
+}
+
+func getUpdateForAccountUpdate(body rest.AccountUpdateBody) data.AccountUpdate {
+	return data.AccountUpdate{
+		Name: body.Name,
+	}
 }

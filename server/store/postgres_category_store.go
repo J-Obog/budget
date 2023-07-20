@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/types"
 	"gorm.io/gorm"
 )
 
@@ -11,8 +12,8 @@ type PostgresCategoryStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresCategoryStore) Get(id string, accountId string) (*data.Category, error) {
-	category := new(data.Category)
+func (pg *PostgresCategoryStore) Get(id string, accountId string) (types.Optional[data.Category], error) {
+	category := types.OptionalOf[data.Category](nil)
 
 	err := pg.db.Where(data.Category{Id: id, AccountId: accountId}).First(category).Error
 	if err == nil {
@@ -20,31 +21,36 @@ func (pg *PostgresCategoryStore) Get(id string, accountId string) (*data.Categor
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
+		return category, nil
 	}
 
-	return nil, err
+	return category, err
 }
 
-func (pg *PostgresCategoryStore) GetBy(filter data.CategoryFilter) (data.CategoryList, error) {
-	categories := make(data.CategoryList, 0)
+func (pg *PostgresCategoryStore) GetAll(accountId string) ([]data.Category, error) {
+	categories := make([]data.Category, 0)
 
-	q := pg.db
-
-	if filter.AccountId != nil {
-		q = q.Where(data.Category{AccountId: *filter.AccountId})
-	}
-
-	if filter.Name != nil {
-		q = q.Where(data.Category{Name: *filter.Name})
-	}
-
-	err := q.Find(&categories).Error
+	err := pg.db.Where(data.Category{AccountId: accountId}).Find(&categories).Error
 	if err == nil {
 		return categories, nil
 	}
 
 	return nil, err
+}
+
+func (pg *PostgresCategoryStore) GetByName(accountId string, name string) (types.Optional[data.Category], error) {
+	category := types.OptionalOf[data.Category](nil)
+
+	err := pg.db.Where(data.Category{AccountId: accountId, Name: name}).First(category).Error
+	if err == nil {
+		return category, nil
+	}
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return category, nil
+	}
+
+	return category, err
 }
 
 func (pg *PostgresCategoryStore) Insert(category data.Category) error {
