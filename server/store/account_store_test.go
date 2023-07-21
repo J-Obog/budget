@@ -9,10 +9,12 @@ import (
 
 func TestAccountStore(t *testing.T) {
 	it := NewStoreIntegrationTest()
-	account := testAccount()
-	timeNow := int64(12345)
 
 	t.Run("it inserts and gets", func(t *testing.T) {
+		it.Setup()
+
+		account := testAccount()
+
 		err := it.AccountStore.Insert(account)
 		assert.NoError(t, err)
 
@@ -23,10 +25,18 @@ func TestAccountStore(t *testing.T) {
 	})
 
 	t.Run("it updates", func(t *testing.T) {
+		it.Setup()
+
+		account := testAccount()
+		account.Email = "some-old-email@gmail.com"
+
 		newEmail := "some-new-email@gmail.com"
 		update := data.AccountUpdate{Email: newEmail}
 
-		ok, err := it.AccountStore.Update(account.Id, update, timeNow)
+		err := it.AccountStore.Insert(account)
+		assert.NoError(t, err)
+
+		ok, err := it.AccountStore.Update(account.Id, update, 1234)
 		assert.NoError(t, err)
 		assert.True(t, ok)
 
@@ -37,6 +47,14 @@ func TestAccountStore(t *testing.T) {
 	})
 
 	t.Run("it marks as deleted", func(t *testing.T) {
+		it.Setup()
+
+		account := testAccount()
+		account.IsDeleted = false
+
+		err := it.AccountStore.Insert(account)
+		assert.NoError(t, err)
+
 		ok, err := it.AccountStore.SetDeleted(account.Id)
 		assert.NoError(t, err)
 		assert.True(t, ok)
@@ -48,6 +66,13 @@ func TestAccountStore(t *testing.T) {
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
+		it.Setup()
+
+		account := testAccount()
+
+		err := it.AccountStore.Insert(account)
+		assert.NoError(t, err)
+
 		ok, err := it.AccountStore.Delete(account.Id)
 		assert.NoError(t, err)
 		assert.True(t, ok)

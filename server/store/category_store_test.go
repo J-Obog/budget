@@ -1,76 +1,106 @@
 package store
 
-/*
+import (
+	"testing"
+
+	"github.com/J-Obog/paidoff/data"
+	"github.com/stretchr/testify/assert"
+)
+
 func TestCategoryStore(t *testing.T) {
-	it := dbIntegrationTest()
+	it := NewStoreIntegrationTest()
 
 	t.Run("it inserts and gets", func(t *testing.T) {
-		setup(it)
+		it.Setup()
+
 		category := testCategory()
 
 		err := it.CategoryStore.Insert(category)
 		assert.NoError(t, err)
 
-		fetched, err := it.CategoryStore.Get(category.Id)
+		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
 		assert.NoError(t, err)
-		assert.Equal(t, category, *fetched)
+		assert.True(t, found.NotEmpty())
+		assert.Equal(t, category, found.Get())
 	})
 
 	t.Run("it updates", func(t *testing.T) {
-		setup(it)
+		it.Setup()
+
 		category := testCategory()
-		category.Color = 1234
+		category.Name = "some_old_name"
 
-		it.CategoryStore.Insert(category)
+		newName := "some_new_name"
+		update := data.CategoryUpdate{Name: newName}
 
-		category.Color = 56789
-
-		err := it.CategoryStore.Update(category)
+		err := it.CategoryStore.Insert(category)
 		assert.NoError(t, err)
 
-		fetched, _ := it.CategoryStore.Get(category.Id)
-		assert.Equal(t, category, *fetched)
+		ok, err := it.CategoryStore.Update(category.Id, category.AccountId, update, 1234)
+		assert.NoError(t, err)
+		assert.True(t, ok)
+
+		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
+		assert.NoError(t, err)
+		assert.True(t, found.NotEmpty())
+		assert.Equal(t, found.Get().Name, newName)
+	})
+
+	t.Run("it gets by name", func(t *testing.T) {
+		it.Setup()
+
+		name := "some+cool+name"
+
+		category := testCategory()
+		category.Name = name
+
+		err := it.CategoryStore.Insert(category)
+		assert.NoError(t, err)
+
+		found, err := it.CategoryStore.GetByName(category.AccountId, name)
+		assert.NoError(t, err)
+		assert.True(t, found.NotEmpty())
+		assert.Equal(t, found.Get(), category)
+	})
+
+	t.Run("it gets all", func(t *testing.T) {
+		it.Setup()
+
+		c1 := testCategory()
+		c1.Id = "t1"
+
+		c2 := testCategory()
+		c2.Id = "t2"
+
+		c3 := testCategory()
+		c3.Id = "t3"
+
+		categories := []data.Category{c1, c2, c3}
+
+		for _, category := range categories {
+			err := it.CategoryStore.Insert(category)
+			assert.NoError(t, err)
+		}
+
+		found, err := it.CategoryStore.GetAll(c1.AccountId)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, found, categories)
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
-		setup(it)
+		it.Setup()
+
 		category := testCategory()
 
-		it.CategoryStore.Insert(category)
-
-		err := it.CategoryStore.Delete(category.Id)
+		err := it.CategoryStore.Insert(category)
 		assert.NoError(t, err)
 
-		fetched, _ := it.CategoryStore.Get(category.Id)
-		assert.Nil(t, fetched)
-	})
-
-	t.Run("it gets categories by account", func(t *testing.T) {
-		setup(it)
-
-		accountId := "acc12345"
-
-		cat1 := testCategory()
-		cat1.Id = "t-1"
-		cat1.AccountId = accountId
-
-		cat2 := testCategory()
-		cat2.Id = "t-2"
-		cat2.AccountId = accountId
-
-		cat3 := testCategory()
-		cat3.Id = "t-3"
-		cat3.AccountId = "notid"
-
-		it.CategoryStore.Insert(cat1)
-		it.CategoryStore.Insert(cat2)
-		it.CategoryStore.Insert(cat3)
-
-		expected := []data.Category{cat1, cat2}
-
-		actual, err := it.CategoryStore.GetByAccount(accountId)
+		ok, err := it.CategoryStore.Delete(category.Id, category.AccountId)
 		assert.NoError(t, err)
-		assert.ElementsMatch(t, actual, expected)
+		assert.True(t, ok)
+
+		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
+		assert.NoError(t, err)
+		assert.True(t, found.Empty())
 	})
 }
-*/

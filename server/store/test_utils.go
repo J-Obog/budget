@@ -7,7 +7,11 @@ import (
 	"github.com/J-Obog/paidoff/data"
 )
 
-func NewStoreIntegrationTest() *StoreConfig {
+type StoreIntegrationTest struct {
+	StoreConfig
+}
+
+func NewStoreIntegrationTest() *StoreIntegrationTest {
 	cfg, err := config.MakeConfig(config.EnvType_LOCAL)
 
 	if err != nil {
@@ -16,29 +20,37 @@ func NewStoreIntegrationTest() *StoreConfig {
 
 	storeCfg := MakeStoreConfig(cfg)
 
-	if err := storeCfg.AccountStore.DeleteAll(); err != nil {
+	return &StoreIntegrationTest{
+		StoreConfig: *storeCfg,
+	}
+}
+
+func (it *StoreIntegrationTest) Setup() {
+	if err := it.AccountStore.DeleteAll(); err != nil {
 		log.Fatal(err)
 	}
 
-	/*if err := storeCfg.TransactionStore.DeleteAll(); err != nil {
+	if err := it.CategoryStore.DeleteAll(); err != nil {
 		log.Fatal(err)
 	}
+	/*
+		if err := it.TransactionStore.DeleteAll(); err != nil {
+			log.Fatal(err)
+		}
 
-	if err := storeCfg.BudgetStore.DeleteAll(); err != nil {
-		log.Fatal(err)
-	}
 
-	if err := storeCfg.CategoryStore.DeleteAll(); err != nil {
-		log.Fatal(err)
-	}*/
+		if err := it.BudgetStore.DeleteAll(); err != nil {
+			log.Fatal(err)
+		}
 
-	return storeCfg
+		if err := it.CategoryStore.DeleteAll(); err != nil {
+			log.Fatal(err)
+		}*/
 }
 
 func testAccount() data.Account {
 	return data.Account{
 		Id:        "test-12345",
-		IsDeleted: false,
 		UpdatedAt: 1234,
 		CreatedAt: 1234,
 	}
@@ -63,6 +75,7 @@ func testTransaction() data.Transaction {
 func testCategory() data.Category {
 	return data.Category{
 		Id:        "testing-1234",
+		AccountId: "test-acct-12345678",
 		UpdatedAt: 1234,
 		CreatedAt: 1234,
 	}

@@ -13,18 +13,18 @@ type PostgresCategoryStore struct {
 }
 
 func (pg *PostgresCategoryStore) Get(id string, accountId string) (types.Optional[data.Category], error) {
-	category := types.OptionalOf[data.Category](nil)
+	var category data.Category
 
-	err := pg.db.Where(data.Category{Id: id, AccountId: accountId}).First(category).Error
+	err := pg.db.Where(data.Category{Id: id, AccountId: accountId}).First(&category).Error
 	if err == nil {
-		return category, nil
+		return types.OptionalOf[data.Category](category), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return category, nil
+		return types.OptionalOf[data.Category](nil), nil
 	}
 
-	return category, err
+	return types.OptionalOf[data.Category](nil), err
 }
 
 func (pg *PostgresCategoryStore) GetAll(accountId string) ([]data.Category, error) {
@@ -39,18 +39,18 @@ func (pg *PostgresCategoryStore) GetAll(accountId string) ([]data.Category, erro
 }
 
 func (pg *PostgresCategoryStore) GetByName(accountId string, name string) (types.Optional[data.Category], error) {
-	category := types.OptionalOf[data.Category](nil)
+	var category data.Category
 
-	err := pg.db.Where(data.Category{AccountId: accountId, Name: name}).First(category).Error
+	err := pg.db.Where(data.Category{AccountId: accountId, Name: name}).First(&category).Error
 	if err == nil {
-		return category, nil
+		return types.OptionalOf[data.Category](category), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return category, nil
+		return types.OptionalOf[data.Category](nil), nil
 	}
 
-	return category, err
+	return types.OptionalOf[data.Category](nil), err
 }
 
 func (pg *PostgresCategoryStore) Insert(category data.Category) error {
@@ -59,7 +59,7 @@ func (pg *PostgresCategoryStore) Insert(category data.Category) error {
 
 func (pg *PostgresCategoryStore) Update(id string, accountId string, update data.CategoryUpdate, timestamp int64) (bool, error) {
 	q := pg.db.Where("id = ?", id)
-	q = q.Where("accountId = ?", accountId)
+	q = q.Where("account_id = ?", accountId)
 
 	res := q.UpdateColumns(&data.Category{
 		Name:  update.Name,
