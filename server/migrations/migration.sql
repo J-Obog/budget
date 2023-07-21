@@ -13,11 +13,9 @@ CREATE TABLE IF NOT EXISTS budgets (
     "id" VARCHAR PRIMARY KEY,
 	"account_id" VARCHAR NOT NULL,
 	"category_id" VARCHAR NULL,
-	"name" VARCHAR NOT NULL,
 	"month" INTEGER NOT NULL,
 	"year" INTEGER NOT NULL,
 	"projected" FLOAT NOT NULL,
-	"actual" FLOAT NOT NULL,
 	"created_at" BIGINT NOT NULL,
 	"updated_at" BIGINT NOT NULL
 );

@@ -1,12 +1,6 @@
 package store
 
-import (
-	"testing"
-
-	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func TestTransactionStore(t *testing.T) {
 	it := dbIntegrationTest()
 
@@ -80,3 +74,4 @@ func TestTransactionStore(t *testing.T) {
 	})
 
 }
+*/

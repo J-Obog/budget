@@ -42,7 +42,7 @@ func (manager *AccountManager) DeleteByRequest(req *rest.Request) *rest.Response
 func (manager *AccountManager) validateSet(body rest.AccountSetBody) error {
 	nameLen := len(body.Name)
 
-	if !(nameLen >= config.LimitMinAccountNameChars && nameLen <= config.LimitMaxAccountNameChars) {
+	if nameLen < config.LimitMinAccountNameChars || nameLen > config.LimitMaxAccountNameChars {
 		return rest.ErrInvalidAccountName
 	}
 

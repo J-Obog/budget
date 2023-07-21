@@ -13,14 +13,14 @@ const (
 	storeImpl = "postgres"
 )
 
-type DBConfig struct {
+type StoreConfig struct {
 	AccountStore     AccountStore
 	CategoryStore    CategoryStore
 	BudgetStore      BudgetStore
 	TransactionStore TransactionStore
 }
 
-func MakeDBConfig(cfg *config.AppConfig) *DBConfig {
+func MakeStoreConfig(cfg *config.AppConfig) *StoreConfig {
 	switch storeImpl {
 	case "postgres":
 		pgDb, err := gorm.Open(postgres.Open(cfg.PostgresUrl), &gorm.Config{
@@ -33,7 +33,7 @@ func MakeDBConfig(cfg *config.AppConfig) *DBConfig {
 			log.Fatal(err)
 		}
 
-		return &DBConfig{
+		return &StoreConfig{
 			AccountStore:     &PostgresAccountStore{db: pgDb},
 			CategoryStore:    &PostgresCategoryStore{db: pgDb},
 			BudgetStore:      &PostgresBudgetStore{db: pgDb},

@@ -1,27 +1,62 @@
 package types
 
-import "encoding/json"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+)
 
-//Implement scanner
+// Implement scanner
 type Optional[T any] struct {
 	val *T
 }
 
 func New[T any](v any) Optional[T] {
-	newOpt := Optional[T]{}
 	if v == nil {
-		newOpt.val = nil
+		return Optional[T]{
+			val: nil,
+		}
 	}
 
-	vObj, _ := v.(T)
+	vObj, ok := v.(T)
 
-	newOpt.val = new(T)
-	*newOpt.val = vObj
-	return newOpt
+	if !ok {
+		panic(errors.New("type mismatch"))
+	}
+
+	vN := new(T)
+	*vN = vObj
+
+	return Optional[T]{
+		val: vN,
+	}
 }
 
 func OptionalOf[T any](v any) Optional[T] {
 	return New[T](v)
+}
+
+func (o *Optional[T]) Value() (driver.Value, error) {
+	if o.Empty() {
+		return nil, nil
+	}
+
+	return o.Get(), nil
+}
+
+func (o *Optional[T]) Scan(data interface{}) error {
+	if data == nil {
+		*o = New[T](nil)
+	}
+
+	v, ok := data.(T)
+
+	if !ok {
+		return errors.New("unsupported optional type")
+	}
+
+	*o.val = v
+	return nil
 }
 
 func (o *Optional[T]) Empty() bool {

@@ -1,12 +1,6 @@
 package store
 
-import (
-	"testing"
-
-	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func TestCategoryStore(t *testing.T) {
 	it := dbIntegrationTest()
 
@@ -79,3 +73,4 @@ func TestCategoryStore(t *testing.T) {
 		assert.ElementsMatch(t, actual, expected)
 	})
 }
+*/

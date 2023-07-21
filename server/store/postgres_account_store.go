@@ -13,22 +13,22 @@ type PostgresAccountStore struct {
 }
 
 func (pg *PostgresAccountStore) Get(id string) (types.Optional[data.Account], error) {
-	account := types.OptionalOf[data.Account](nil)
+	var account data.Account
 
-	err := pg.db.Where(data.Account{Id: id}).First(account).Error
+	err := pg.db.Where(data.Account{Id: id}).First(&account).Error
 	if err == nil {
-		return account, nil
+		return types.OptionalOf[data.Account](account), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return account, nil
+		return types.OptionalOf[data.Account](nil), nil
 	}
 
-	return account, err
+	return types.OptionalOf[data.Account](nil), err
 }
 
 func (pg *PostgresAccountStore) Insert(account data.Account) error {
-	return pg.db.Create(&account).Error
+	return pg.db.Create(account).Error
 }
 
 func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, timestamp int64) (bool, error) {
@@ -36,6 +36,7 @@ func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, tim
 
 	res := q.UpdateColumns(&data.Account{
 		Name:      update.Name,
+		Email:     update.Email,
 		UpdatedAt: timestamp,
 	})
 
