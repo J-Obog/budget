@@ -33,19 +33,14 @@ func (it *StoreIntegrationTest) Setup() {
 	if err := it.CategoryStore.DeleteAll(); err != nil {
 		log.Fatal(err)
 	}
-	/*
-		if err := it.TransactionStore.DeleteAll(); err != nil {
-			log.Fatal(err)
-		}
 
+	if err := it.BudgetStore.DeleteAll(); err != nil {
+		log.Fatal(err)
+	}
 
-		if err := it.BudgetStore.DeleteAll(); err != nil {
-			log.Fatal(err)
-		}
-
-		if err := it.CategoryStore.DeleteAll(); err != nil {
-			log.Fatal(err)
-		}*/
+	if err := it.TransactionStore.DeleteAll(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func testAccount() data.Account {

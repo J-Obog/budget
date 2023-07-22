@@ -1,77 +1,90 @@
 package store
 
-/*
+import (
+	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
 func TestTransactionStore(t *testing.T) {
-	it := dbIntegrationTest()
+	it := NewStoreIntegrationTest()
 
 	t.Run("it inserts and gets", func(t *testing.T) {
-		setup(it)
+		it.Setup()
+
 		transaction := testTransaction()
+
+		//fmt.Println(transaction.CategoryId.Empty())
+
+		err := it.TransactionStore.Insert(transaction)
+		fmt.Println(err)
+		assert.NoError(t, err)
+
+		//found, err := it.TransactionStore.Get(transaction.Id, transaction.AccountId)
+		//assert.NoError(t, err)
+		//assert.Equal(t, transaction, found.Get())
+	})
+
+	/*t.Run("it gets by period category", func(t *testing.T) {
+		it.Setup()
+
+		month := 10
+		year := 2023
+		categoryId := types.OptionalString("some-category-id")
+
+		t1 := testTransaction()
+		t1.Id = "id-1"
+		t1.Month = month
+		t1.Year = year
+		t1.CategoryId = categoryId
+
+		err := it.TransactionStore.Insert(t1)
+		assert.NoError(t, err)
+
+		t2 := testTransaction()
+		t2.Id = "id-2"
+		t2.Month = month
+		t2.Year = year
+		t2.CategoryId = categoryId
+
+		err = it.TransactionStore.Insert(t2)
+		assert.NoError(t, err)
+
+		transactions := []data.Transaction{t1, t2}
+
+		found, err := it.TransactionStore.GetByPeriodCategory(t1.AccountId, categoryId.Get(), month, year)
+		assert.NoError(t, err)
+		assert.ElementsMatch(t, found, transactions)
+	})
+
+	t.Run("it gets by filter", func(t *testing.T) {
+		it.Setup()
+
+	})
+
+	t.Run("it updates", func(t *testing.T) {
+		it.Setup()
+
+		oldAmount := 1.23
+		newAmount := 2.23
+
+		transaction := testTransaction()
+		transaction.Amount = oldAmount
 
 		err := it.TransactionStore.Insert(transaction)
 		assert.NoError(t, err)
 
-		fetched, err := it.TransactionStore.Get(transaction.Id)
+		update := data.TransactionUpdate{
+			Amount: newAmount,
+		}
+
+		ok, err := it.TransactionStore.Update(transaction.Id, transaction.AccountId, update, 1234)
 		assert.NoError(t, err)
-		assert.Equal(t, transaction, *fetched)
-	})
+		assert.True(t, ok)
 
-	t.Run("it updates", func(t *testing.T) {
-		setup(it)
-		transaction := testTransaction()
-		transaction.Year = 1999
-
-		it.TransactionStore.Insert(transaction)
-
-		transaction.Year = 2001
-
-		err := it.TransactionStore.Update(transaction)
+		found, err := it.TransactionStore.Get(transaction.Id, transaction.AccountId)
 		assert.NoError(t, err)
-
-		fetched, _ := it.TransactionStore.Get(transaction.Id)
-		assert.Equal(t, transaction, *fetched)
-	})
-
-	t.Run("it deletes", func(t *testing.T) {
-		setup(it)
-		transaction := testTransaction()
-
-		it.TransactionStore.Insert(transaction)
-
-		err := it.TransactionStore.Delete(transaction.Id)
-		assert.NoError(t, err)
-
-		fetched, _ := it.TransactionStore.Get(transaction.Id)
-		assert.Nil(t, fetched)
-	})
-
-	t.Run("it gets transactions by account", func(t *testing.T) {
-		setup(it)
-
-		accountId := "test-12345"
-
-		t1 := testTransaction()
-		t1.Id = "t-1"
-		t1.AccountId = accountId
-
-		t2 := testTransaction()
-		t2.Id = "t-2"
-		t2.AccountId = accountId
-
-		t3 := testTransaction()
-		t3.Id = "t-3"
-		t3.AccountId = "notid"
-
-		it.TransactionStore.Insert(t1)
-		it.TransactionStore.Insert(t2)
-		it.TransactionStore.Insert(t3)
-
-		expected := []data.Transaction{t1, t2}
-
-		actual, err := it.TransactionStore.GetByAccount(accountId)
-		assert.NoError(t, err)
-		assert.ElementsMatch(t, actual, expected)
-	})
-
+		assert.Equal(t, found.Get().Amount, newAmount)
+	})*/
 }
-*/

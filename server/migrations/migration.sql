@@ -23,9 +23,9 @@ CREATE TABLE IF NOT EXISTS budgets (
 CREATE TABLE IF NOT EXISTS transactions (
     "id" VARCHAR PRIMARY KEY,
 	"account_id" VARCHAR NOT NULL,
-	"category_id" VARCHAR NULL,
-	"note" VARCHAR NULL,
-	"type" SMALLINT NOT NULL, 
+	"category_id" VARCHAR,
+	"note" VARCHAR,
+	"type" VARCHAR NOT NULL, 
 	"amount" FLOAT NOT NULL,
 	"month" INTEGER NOT NULL,
 	"year" INTEGER NOT NULL,

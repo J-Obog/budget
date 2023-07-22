@@ -6,7 +6,6 @@ import (
 	"errors"
 )
 
-// Implement scanner
 type Optional[T any] struct {
 	val *T
 }
@@ -44,18 +43,8 @@ func (o *Optional[T]) Value() (driver.Value, error) {
 	return o.Get(), nil
 }
 
-func (o *Optional[T]) Scan(data interface{}) error {
-	if data == nil {
-		*o = New[T](nil)
-	}
-
-	v, ok := data.(T)
-
-	if !ok {
-		return errors.New("unsupported optional type")
-	}
-
-	*o.val = v
+func (o *Optional[T]) Scan(data any) error {
+	*o = New[T](data)
 	return nil
 }
 
