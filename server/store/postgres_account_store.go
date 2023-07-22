@@ -12,19 +12,19 @@ type PostgresAccountStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresAccountStore) Get(id string) (types.Optional[data.Account], error) {
+func (pg *PostgresAccountStore) Get(id string) (*data.Account, error) {
 	var account data.Account
 
 	err := pg.db.Where(data.Account{Id: id}).First(&account).Error
 	if err == nil {
-		return types.OptionalOf[data.Account](account), nil
+		return types.Ptr[data.Account](account), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return types.OptionalOf[data.Account](nil), nil
+		return nil, nil
 	}
 
-	return types.OptionalOf[data.Account](nil), err
+	return nil, err
 }
 
 func (pg *PostgresAccountStore) Insert(account data.Account) error {

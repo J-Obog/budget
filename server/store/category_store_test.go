@@ -20,8 +20,8 @@ func TestCategoryStore(t *testing.T) {
 
 		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
 		assert.NoError(t, err)
-		assert.True(t, found.NotEmpty())
-		assert.Equal(t, category, found.Get())
+		assert.NotNil(t, found)
+		assert.Equal(t, category, *found)
 	})
 
 	t.Run("it updates", func(t *testing.T) {
@@ -42,8 +42,8 @@ func TestCategoryStore(t *testing.T) {
 
 		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
 		assert.NoError(t, err)
-		assert.True(t, found.NotEmpty())
-		assert.Equal(t, found.Get().Name, newName)
+		assert.NotNil(t, found)
+		assert.Equal(t, found.Name, newName)
 	})
 
 	t.Run("it gets by name", func(t *testing.T) {
@@ -59,21 +59,26 @@ func TestCategoryStore(t *testing.T) {
 
 		found, err := it.CategoryStore.GetByName(category.AccountId, name)
 		assert.NoError(t, err)
-		assert.True(t, found.NotEmpty())
-		assert.Equal(t, found.Get(), category)
+		assert.NotNil(t, found)
+		assert.Equal(t, found, category)
 	})
 
 	t.Run("it gets all", func(t *testing.T) {
 		it.Setup()
 
+		accountId := "some-account-id"
+
 		c1 := testCategory()
 		c1.Id = "t1"
+		c1.AccountId = accountId
 
 		c2 := testCategory()
 		c2.Id = "t2"
+		c2.AccountId = accountId
 
 		c3 := testCategory()
 		c3.Id = "t3"
+		c3.AccountId = accountId
 
 		categories := []data.Category{c1, c2, c3}
 
@@ -82,7 +87,7 @@ func TestCategoryStore(t *testing.T) {
 			assert.NoError(t, err)
 		}
 
-		found, err := it.CategoryStore.GetAll(c1.AccountId)
+		found, err := it.CategoryStore.GetAll(accountId)
 		assert.NoError(t, err)
 		assert.ElementsMatch(t, found, categories)
 	})
@@ -101,6 +106,6 @@ func TestCategoryStore(t *testing.T) {
 
 		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
 		assert.NoError(t, err)
-		assert.True(t, found.Empty())
+		assert.Nil(t, found)
 	})
 }

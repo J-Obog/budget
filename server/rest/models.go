@@ -2,19 +2,18 @@ package rest
 
 import (
 	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/types"
 )
 
 type BudgetQuery struct {
-	Month types.Optional[int] `json:"month"`
-	Year  types.Optional[int] `json:"year"`
+	Month *int `json:"month"`
+	Year  *int `json:"year"`
 }
 
 type TransactionQuery struct {
-	CreatedBefore types.Optional[int64]   `json:"createdBefore"`
-	CreatedAfter  types.Optional[int64]   `json:"createdAfter"`
-	AmountGte     types.Optional[float64] `json:"amountGte"`
-	AmountLte     types.Optional[float64] `json:"amountLte"`
+	CreatedBefore *int64   `json:"createdBefore"`
+	CreatedAfter  *int64   `json:"createdAfter"`
+	AmountGte     *float64 `json:"amountGte"`
+	AmountLte     *float64 `json:"amountLte"`
 }
 
 type AccountSetBody struct {
@@ -43,13 +42,13 @@ type CategoryCreateBody struct {
 }
 
 type TransactionSetBody struct {
-	CategoryId types.Optional[string] `json:"categoryId"`
-	Note       types.Optional[string] `json:"note"`
-	Type       data.BudgetType        `json:"budgetType"`
-	Amount     float64                `json:"amount"`
-	Month      int                    `json:"month"`
-	Day        int                    `json:"day"`
-	Year       int                    `json:"year"`
+	CategoryId *string         `json:"categoryId"`
+	Note       *string         `json:"note"`
+	Type       data.BudgetType `json:"budgetType"`
+	Amount     float64         `json:"amount"`
+	Month      int             `json:"month"`
+	Day        int             `json:"day"`
+	Year       int             `json:"year"`
 }
 
 type TransactionUpdateBody struct {

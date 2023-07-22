@@ -19,12 +19,12 @@ type CategoryManager struct {
 }
 
 func (manager *CategoryManager) GetByRequest(req *rest.Request) *rest.Response {
-	category, err := manager.store.Get(req.ResourceId, req.Account.Get().Id)
+	category, err := manager.store.Get(req.ResourceId, req.Account.Id)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if category.Empty() {
+	if category == nil {
 		return rest.Err(rest.ErrInvalidCategoryId)
 	}
 
@@ -32,7 +32,7 @@ func (manager *CategoryManager) GetByRequest(req *rest.Request) *rest.Response {
 }
 
 func (manager *CategoryManager) GetAllByRequest(req *rest.Request) *rest.Response {
-	categories, err := manager.store.GetAll(req.Account.Get().Id)
+	categories, err := manager.store.GetAll(req.Account.Id)
 
 	if err != nil {
 		return rest.Err(err)
@@ -43,7 +43,7 @@ func (manager *CategoryManager) GetAllByRequest(req *rest.Request) *rest.Respons
 
 func (manager *CategoryManager) CreateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.CategoryCreateBody)
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	category := manager.getCategoryForCreate(accountId, body)
 
@@ -61,7 +61,7 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request) *rest.Respons
 func (manager *CategoryManager) UpdateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.CategoryUpdateBody)
 	categoryId := req.ResourceId
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	if err := manager.validateUpdate(body, accountId); err != nil {
 		return rest.Err(err)
@@ -85,7 +85,7 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request) *rest.Respons
 
 func (manager *CategoryManager) DeleteByRequest(req *rest.Request) *rest.Response {
 	categoryId := req.ResourceId
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	budgets, err := manager.budgetStore.GetByCategory(accountId, categoryId)
 	if err != nil {
@@ -125,7 +125,7 @@ func (manager *CategoryManager) validateSet(body rest.CategorySetBody, accountId
 		return err
 	}
 
-	if category.NotEmpty() {
+	if category != nil {
 		return rest.ErrCategoryNameAlreadyExists
 	}
 

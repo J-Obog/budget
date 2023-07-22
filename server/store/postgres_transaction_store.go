@@ -13,19 +13,19 @@ type PostgresTransactionStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresTransactionStore) Get(id string, accountId string) (types.Optional[data.Transaction], error) {
+func (pg *PostgresTransactionStore) Get(id string, accountId string) (*data.Transaction, error) {
 	var transaction data.Transaction
 
 	err := pg.db.Where(data.Transaction{Id: id, AccountId: accountId}).First(&transaction).Error
 	if err == nil {
-		return types.OptionalOf[data.Transaction](transaction), nil
+		return types.Ptr[data.Transaction](transaction), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return types.OptionalOf[data.Transaction](nil), nil
+		return nil, nil
 	}
 
-	return types.OptionalOf[data.Transaction](nil), err
+	return nil, err
 }
 
 func (pg *PostgresTransactionStore) GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
@@ -50,10 +50,10 @@ func (pg *PostgresTransactionStore) GetByPeriodCategory(accountId string, catego
 	transactions := make([]data.Transaction, 0)
 
 	query := data.Transaction{
-		AccountId: accountId,
-		//CategoryId: types.OptionalString(categoryId),
-		Month: month,
-		Year:  year,
+		AccountId:  accountId,
+		CategoryId: types.StringPtr(categoryId),
+		Month:      month,
+		Year:       year,
 	}
 
 	err := pg.db.Where(query).Find(&transactions).Error
@@ -73,13 +73,13 @@ func (pg *PostgresTransactionStore) Update(id string, accountId string, update d
 	q = q.Where("account_id = ?", accountId)
 
 	res := q.UpdateColumns(&data.Transaction{
-		//CategoryId: update.CategoryId,
-		//Note:       update.Note,
-		Type:   update.Type,
-		Amount: update.Amount,
-		Month:  update.Month,
-		Day:    update.Day,
-		Year:   update.Year,
+		CategoryId: update.CategoryId,
+		Note:       update.Note,
+		Type:       update.Type,
+		Amount:     update.Amount,
+		Month:      update.Month,
+		Day:        update.Day,
+		Year:       update.Year,
 	})
 
 	return (res.RowsAffected == 1), res.Error

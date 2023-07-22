@@ -2,11 +2,10 @@ package store
 
 import (
 	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/types"
 )
 
 type AccountStore interface {
-	Get(id string) (types.Optional[data.Account], error)
+	Get(id string) (*data.Account, error)
 	Insert(account data.Account) error
 	Update(id string, update data.AccountUpdate, timestamp int64) (bool, error)
 	SetDeleted(id string) (bool, error)
@@ -15,8 +14,8 @@ type AccountStore interface {
 }
 
 type CategoryStore interface {
-	Get(id string, accountId string) (types.Optional[data.Category], error)
-	GetByName(accountId string, name string) (types.Optional[data.Category], error)
+	Get(id string, accountId string) (*data.Category, error)
+	GetByName(accountId string, name string) (*data.Category, error)
 	GetAll(accountId string) ([]data.Category, error)
 	Insert(category data.Category) error
 	Update(id string, accountId string, update data.CategoryUpdate, timestamp int64) (bool, error)
@@ -25,8 +24,8 @@ type CategoryStore interface {
 }
 
 type BudgetStore interface {
-	Get(id string, accountId string) (types.Optional[data.Budget], error)
-	GetByPeriodCategory(accountId string, categoryId string, month int, year int) (types.Optional[data.Budget], error)
+	Get(id string, accountId string) (*data.Budget, error)
+	GetByPeriodCategory(accountId string, categoryId string, month int, year int) (*data.Budget, error)
 	GetByCategory(accountId string, categoryId string) ([]data.Budget, error)
 	GetBy(accountId string, filter data.BudgetFilter) ([]data.Budget, error)
 	Insert(budget data.Budget) error
@@ -36,7 +35,7 @@ type BudgetStore interface {
 }
 
 type TransactionStore interface {
-	Get(id string, accountId string) (types.Optional[data.Transaction], error)
+	Get(id string, accountId string) (*data.Transaction, error)
 	GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error)
 	GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error)
 	Insert(transaction data.Transaction) error

@@ -19,12 +19,12 @@ type TransactionManager struct {
 }
 
 func (manager *TransactionManager) GetByRequest(req *rest.Request) *rest.Response {
-	transaction, err := manager.store.Get(req.ResourceId, req.Account.Get().Id)
+	transaction, err := manager.store.Get(req.ResourceId, req.Account.Id)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if transaction.Empty() {
+	if transaction == nil {
 		return rest.Err(rest.ErrInvalidTransactionId)
 	}
 
@@ -33,7 +33,7 @@ func (manager *TransactionManager) GetByRequest(req *rest.Request) *rest.Respons
 
 func (manager *TransactionManager) GetAllByRequest(req *rest.Request) *rest.Response {
 	query := req.Query.(rest.TransactionQuery)
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 	filter := manager.getFilterForTransactionQuery(query)
 
 	transactions, err := manager.store.GetBy(accountId, filter)
@@ -46,7 +46,7 @@ func (manager *TransactionManager) GetAllByRequest(req *rest.Request) *rest.Resp
 
 func (manager *TransactionManager) CreateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.TransactionCreateBody)
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	if err := manager.validateCreate(accountId, body); err != nil {
 		return rest.Err(err)
@@ -63,7 +63,7 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request) *rest.Resp
 
 func (manager *TransactionManager) UpdateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.TransactionUpdateBody)
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 	transactionId := req.ResourceId
 
 	timestamp := manager.clock.Now()
@@ -87,7 +87,7 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request) *rest.Resp
 
 func (manager *TransactionManager) DeleteByRequest(req *rest.Request) *rest.Response {
 	transactionId := req.ResourceId
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	ok, err := manager.store.Delete(transactionId, accountId)
 	if err != nil {
@@ -109,22 +109,19 @@ func (manager *TransactionManager) validateSet(accountId string, body rest.Trans
 		return rest.ErrInvalidDate
 	}
 
-	if body.CategoryId.NotEmpty() {
-		categoryId := body.CategoryId.Get()
-
-		category, err := manager.categoryStore.Get(categoryId, accountId)
+	if body.CategoryId != nil {
+		category, err := manager.categoryStore.Get(*body.CategoryId, accountId)
 		if err != nil {
 			return err
 		}
 
-		if category.Empty() {
+		if category == nil {
 			return rest.ErrInvalidCategoryId
 		}
 	}
 
-	if body.Note.NotEmpty() {
-		note := body.Note.Get()
-		if len(note) > config.LimitMaxTransactionNoteChars {
+	if body.Note != nil {
+		if len(*body.Note) > config.LimitMaxTransactionNoteChars {
 			return rest.ErrInvalidTransactionNote
 		}
 	}
@@ -159,25 +156,30 @@ func (manager *TransactionManager) getTransactionForCreate(accountId string, bod
 
 // TODO: get default date bounds from config
 func (manager *TransactionManager) getFilterForTransactionQuery(q rest.TransactionQuery) data.TransactionFilter {
-	lower := data.NewDate(1, 1, 1902)
-	upper := data.NewDate(1, 1, math.MaxInt)
-
-	createdBefore := q.CreatedBefore
-	if createdBefore.NotEmpty() {
-		upper = manager.clock.DateFromStamp(createdBefore.Get())
+	filter := data.TransactionFilter{
+		Before:      data.NewDate(1, 1, 1902),
+		After:       data.NewDate(1, 1, math.MaxInt),
+		GreaterThan: math.MaxFloat64,
+		LessThan:    0,
 	}
 
-	createdAfter := q.CreatedAfter
-	if createdAfter.NotEmpty() {
-		lower = manager.clock.DateFromStamp(createdAfter.Get())
+	if q.CreatedBefore != nil {
+		filter.Before = manager.clock.DateFromStamp(*q.CreatedBefore)
 	}
 
-	return data.TransactionFilter{
-		Before:      lower,
-		After:       upper,
-		GreaterThan: q.AmountGte.GetOr(math.MaxFloat64),
-		LessThan:    q.AmountLte.GetOr(0.00),
+	if q.CreatedAfter != nil {
+		filter.After = manager.clock.DateFromStamp(*q.CreatedAfter)
 	}
+
+	if q.AmountGte != nil {
+		filter.GreaterThan = *q.AmountGte
+	}
+
+	if q.AmountLte != nil {
+		filter.LessThan = *q.AmountLte
+	}
+
+	return filter
 }
 
 func getUpdateForTransactionUpdate(body rest.TransactionUpdateBody) data.TransactionUpdate {

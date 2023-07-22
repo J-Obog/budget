@@ -15,7 +15,7 @@ type AccountManager struct {
 
 func (manager *AccountManager) UpdateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.AccountUpdateBody)
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	if err := manager.validateUpdate(body); err != nil {
 		return rest.Err(err)
@@ -32,7 +32,7 @@ func (manager *AccountManager) UpdateByRequest(req *rest.Request) *rest.Response
 }
 
 func (manager *AccountManager) DeleteByRequest(req *rest.Request) *rest.Response {
-	if _, err := manager.store.SetDeleted(req.Account.Get().Id); err != nil {
+	if _, err := manager.store.SetDeleted(req.Account.Id); err != nil {
 		return rest.Err(err)
 	}
 

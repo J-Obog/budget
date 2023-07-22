@@ -12,19 +12,19 @@ type PostgresCategoryStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresCategoryStore) Get(id string, accountId string) (types.Optional[data.Category], error) {
+func (pg *PostgresCategoryStore) Get(id string, accountId string) (*data.Category, error) {
 	var category data.Category
 
 	err := pg.db.Where(data.Category{Id: id, AccountId: accountId}).First(&category).Error
 	if err == nil {
-		return types.OptionalOf[data.Category](category), nil
+		return types.Ptr[data.Category](category), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return types.OptionalOf[data.Category](nil), nil
+		return nil, nil
 	}
 
-	return types.OptionalOf[data.Category](nil), err
+	return nil, err
 }
 
 func (pg *PostgresCategoryStore) GetAll(accountId string) ([]data.Category, error) {
@@ -38,19 +38,19 @@ func (pg *PostgresCategoryStore) GetAll(accountId string) ([]data.Category, erro
 	return nil, err
 }
 
-func (pg *PostgresCategoryStore) GetByName(accountId string, name string) (types.Optional[data.Category], error) {
+func (pg *PostgresCategoryStore) GetByName(accountId string, name string) (*data.Category, error) {
 	var category data.Category
 
 	err := pg.db.Where(data.Category{AccountId: accountId, Name: name}).First(&category).Error
 	if err == nil {
-		return types.OptionalOf[data.Category](category), nil
+		return types.Ptr[data.Category](category), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return types.OptionalOf[data.Category](nil), nil
+		return nil, nil
 	}
 
-	return types.OptionalOf[data.Category](nil), err
+	return nil, err
 }
 
 func (pg *PostgresCategoryStore) Insert(category data.Category) error {

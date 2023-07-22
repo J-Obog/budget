@@ -19,94 +19,92 @@ func TestBudgetStore(t *testing.T) {
 
 		found, err := it.BudgetStore.Get(budget.Id, budget.AccountId)
 		assert.NoError(t, err)
-		assert.Equal(t, budget, found.Get())
+		assert.NotNil(t, found)
+		assert.Equal(t, budget, *found)
 	})
 
 	t.Run("it gets by period category", func(t *testing.T) {
 		it.Setup()
 
 		categoryId := "some-category-id"
+		month := 10
+		year := 2024
 
-		b1 := testBudget()
-		b1.Id = "test-id-1"
-		b1.CategoryId = categoryId
+		budget := testBudget()
+		budget.Id = "test-id-1"
+		budget.CategoryId = categoryId
+		budget.Month = month
+		budget.Year = year
 
-		b2 := testBudget()
-		b2.Id = "test-id-2"
-		b2.CategoryId = "some-other-id"
-
-		err := it.BudgetStore.Insert(b1)
+		err := it.BudgetStore.Insert(budget)
 		assert.NoError(t, err)
 
-		err = it.BudgetStore.Insert(b2)
+		found, err := it.BudgetStore.GetByPeriodCategory(budget.AccountId, categoryId, month, year)
 		assert.NoError(t, err)
-
-		found, err := it.BudgetStore.GetByPeriodCategory(b1.AccountId, b1.CategoryId, b1.Month, b1.Year)
-		assert.NoError(t, err)
-		assert.Equal(t, b1, found.Get())
+		assert.NotNil(t, found)
+		assert.Equal(t, budget, *found)
 	})
 
 	t.Run("it gets by category", func(t *testing.T) {
 		it.Setup()
 
 		categoryId := "some-category-id"
+		accountId := "some-account-id"
 
 		b1 := testBudget()
 		b1.Id = "test-id-1"
+		b1.AccountId = accountId
 		b1.CategoryId = categoryId
 
 		b2 := testBudget()
 		b2.Id = "test-id-2"
+		b2.AccountId = accountId
 		b2.CategoryId = categoryId
 
-		b3 := testBudget()
-		b3.Id = "test-id-3"
-		b3.CategoryId = categoryId
+		expected := []data.Budget{b1, b2}
 
-		budgets := []data.Budget{b1, b2, b3}
-
-		for _, budget := range budgets {
+		for _, budget := range expected {
 			err := it.BudgetStore.Insert(budget)
 			assert.NoError(t, err)
 		}
 
-		found, err := it.BudgetStore.GetByCategory(b1.AccountId, categoryId)
+		found, err := it.BudgetStore.GetByCategory(accountId, categoryId)
 		assert.NoError(t, err)
-		assert.ElementsMatch(t, found, budgets)
+		assert.ElementsMatch(t, found, expected)
 	})
 
 	t.Run("it gets by filter", func(t *testing.T) {
 		it.Setup()
 
-		filterMonth := 10
-		otherMonth := 12
-
+		month := 10
 		year := 2023
+		accountId := "some-account-id"
 
 		b1 := testBudget()
 		b1.Id = "test-id-1"
-		b1.Month = filterMonth
+		b1.AccountId = accountId
+		b1.Month = month
 		b1.Year = year
-
-		err := it.BudgetStore.Insert(b1)
-		assert.NoError(t, err)
 
 		b2 := testBudget()
 		b2.Id = "test-id-2"
-		b2.Month = otherMonth
+		b2.AccountId = accountId
+		b2.Month = month
 		b2.Year = year
 
-		err = it.BudgetStore.Insert(b2)
-		assert.NoError(t, err)
+		expected := []data.Budget{b1, b2}
+
+		for _, budget := range expected {
+			err := it.BudgetStore.Insert(budget)
+			assert.NoError(t, err)
+		}
 
 		filter := data.BudgetFilter{
-			Month: filterMonth,
+			Month: month,
 			Year:  year,
 		}
 
-		expected := []data.Budget{b1}
-
-		found, err := it.BudgetStore.GetBy(b1.AccountId, filter)
+		found, err := it.BudgetStore.GetBy(accountId, filter)
 		assert.NoError(t, err)
 		assert.ElementsMatch(t, found, expected)
 	})
@@ -133,7 +131,7 @@ func TestBudgetStore(t *testing.T) {
 
 		found, err := it.BudgetStore.Get(budget.Id, budget.AccountId)
 		assert.NoError(t, err)
-		assert.Equal(t, found.Get().Projected, newProjected)
+		assert.Equal(t, found.Projected, newProjected)
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
@@ -150,6 +148,6 @@ func TestBudgetStore(t *testing.T) {
 
 		found, err := it.BudgetStore.Get(budget.Id, budget.AccountId)
 		assert.NoError(t, err)
-		assert.True(t, found.Empty())
+		assert.Nil(t, found)
 	})
 }

@@ -17,7 +17,7 @@ type BudgetManager struct {
 }
 
 func (manager *BudgetManager) GetByRequest(req *rest.Request) *rest.Response {
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 	budgetId := req.ResourceId
 
 	budget, err := manager.store.Get(budgetId, accountId)
@@ -25,11 +25,11 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	if budget.Empty() {
+	if budget == nil {
 		return rest.Err(rest.ErrInvalidBudgetId)
 	}
 
-	materializedBudget, err := manager.toMaterializedBudget(budget.Get())
+	materializedBudget, err := manager.toMaterializedBudget(*budget)
 	if err != nil {
 		return rest.Err(err)
 	}
@@ -38,7 +38,7 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request) *rest.Response {
 }
 
 func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response {
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	query := req.Query.(rest.BudgetQuery)
 
@@ -64,7 +64,7 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response 
 
 func (manager *BudgetManager) CreateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.BudgetCreateBody)
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 
 	if err := manager.validateCreate(body, accountId); err != nil {
 		return rest.Err(err)
@@ -81,7 +81,7 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request) *rest.Response 
 
 func (manager *BudgetManager) UpdateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.BudgetUpdateBody)
-	accountId := req.Account.Get().Id
+	accountId := req.Account.Id
 	budgetId := req.ResourceId
 
 	timestamp := manager.clock.Now()
@@ -104,7 +104,7 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request) *rest.Response 
 }
 
 func (manager *BudgetManager) DeleteByRequest(req *rest.Request) *rest.Response {
-	ok, err := manager.store.Delete(req.ResourceId, req.Account.Get().Id)
+	ok, err := manager.store.Delete(req.ResourceId, req.Account.Id)
 	if err != nil {
 		return rest.Err(err)
 	}
@@ -148,12 +148,12 @@ func (manager *BudgetManager) validateUpdate(body rest.BudgetUpdateBody, budgetI
 		return err
 	}
 
-	if budget.Empty() {
+	if budget == nil {
 		return rest.ErrInvalidBudgetId
 	}
 
-	if body.CategoryId != budget.Get().CategoryId {
-		return manager.validateSet(body.BudgetSetBody, accountId, budget.Get().Month, budget.Get().Year)
+	if body.CategoryId != budget.CategoryId {
+		return manager.validateSet(body.BudgetSetBody, accountId, budget.Month, budget.Year)
 	}
 
 	return nil
@@ -165,7 +165,7 @@ func (manager *BudgetManager) checkCategoryIsUnique(categoryId string, accountId
 		return err
 	}
 
-	if budget.Empty() {
+	if budget == nil {
 		return rest.ErrCategoryAlreadyInBudgetPeriod
 	}
 
@@ -178,7 +178,7 @@ func (manager *BudgetManager) checkCategoryExists(categoryId string, accountId s
 		return err
 	}
 
-	if category.Empty() {
+	if category == nil {
 		return rest.ErrInvalidCategoryId
 	}
 
@@ -202,10 +202,20 @@ func (manager *BudgetManager) getBudgetForCreate(accountId string, body rest.Bud
 }
 
 func (manager *BudgetManager) getFilterForBudgetQuery(q rest.BudgetQuery) data.BudgetFilter {
-	return data.BudgetFilter{
-		Month: q.Month.GetOr(manager.clock.CurrentMonth()),
-		Year:  q.Year.GetOr(manager.clock.CurrentYear()),
+	filter := data.BudgetFilter{
+		Month: manager.clock.CurrentMonth(),
+		Year:  manager.clock.CurrentYear(),
 	}
+
+	if q.Month != nil {
+		filter.Month = *q.Month
+	}
+
+	if q.Year != nil {
+		filter.Year = *q.Year
+	}
+
+	return filter
 }
 
 func getUpdateForBudgetUpdate(body rest.BudgetUpdateBody) data.BudgetUpdate {

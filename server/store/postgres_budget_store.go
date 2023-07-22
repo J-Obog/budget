@@ -12,22 +12,22 @@ type PostgresBudgetStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresBudgetStore) Get(id string, accountId string) (types.Optional[data.Budget], error) {
+func (pg *PostgresBudgetStore) Get(id string, accountId string) (*data.Budget, error) {
 	var budget data.Budget
 
 	err := pg.db.Where(data.Budget{Id: id, AccountId: accountId}).First(&budget).Error
 	if err == nil {
-		return types.OptionalOf[data.Budget](budget), nil
+		return types.Ptr[data.Budget](budget), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return types.OptionalOf[data.Budget](nil), nil
+		return nil, nil
 	}
 
-	return types.OptionalOf[data.Budget](nil), err
+	return nil, err
 }
 
-func (pg *PostgresBudgetStore) GetByPeriodCategory(accountId string, categoryId string, month int, year int) (types.Optional[data.Budget], error) {
+func (pg *PostgresBudgetStore) GetByPeriodCategory(accountId string, categoryId string, month int, year int) (*data.Budget, error) {
 	var budget data.Budget
 
 	q := data.Budget{
@@ -39,14 +39,14 @@ func (pg *PostgresBudgetStore) GetByPeriodCategory(accountId string, categoryId 
 
 	err := pg.db.Where(q).First(&budget).Error
 	if err == nil {
-		return types.OptionalOf[data.Budget](budget), nil
+		return types.Ptr[data.Budget](budget), nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return types.OptionalOf[data.Budget](nil), nil
+		return nil, nil
 	}
 
-	return types.OptionalOf[data.Budget](nil), err
+	return nil, err
 }
 
 func (pg *PostgresBudgetStore) GetByCategory(accountId string, categoryId string) ([]data.Budget, error) {

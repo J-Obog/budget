@@ -20,8 +20,8 @@ func TestAccountStore(t *testing.T) {
 
 		found, err := it.AccountStore.Get(account.Id)
 		assert.NoError(t, err)
-		assert.True(t, found.NotEmpty())
-		assert.Equal(t, account, found.Get())
+		assert.NotNil(t, found)
+		assert.Equal(t, account, *found)
 	})
 
 	t.Run("it updates", func(t *testing.T) {
@@ -42,8 +42,8 @@ func TestAccountStore(t *testing.T) {
 
 		found, err := it.AccountStore.Get(account.Id)
 		assert.NoError(t, err)
-		assert.True(t, found.NotEmpty())
-		assert.Equal(t, found.Get().Email, newEmail)
+		assert.NotNil(t, found)
+		assert.Equal(t, found.Email, newEmail)
 	})
 
 	t.Run("it marks as deleted", func(t *testing.T) {
@@ -61,8 +61,8 @@ func TestAccountStore(t *testing.T) {
 
 		found, err := it.AccountStore.Get(account.Id)
 		assert.NoError(t, err)
-		assert.True(t, found.NotEmpty())
-		assert.Equal(t, found.Get().IsDeleted, true)
+		assert.NotNil(t, found)
+		assert.Equal(t, found.IsDeleted, true)
 	})
 
 	t.Run("it deletes", func(t *testing.T) {
@@ -79,6 +79,6 @@ func TestAccountStore(t *testing.T) {
 
 		found, err := it.AccountStore.Get(account.Id)
 		assert.NoError(t, err)
-		assert.True(t, found.Empty())
+		assert.Nil(t, found)
 	})
 }
