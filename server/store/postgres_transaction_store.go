@@ -33,7 +33,6 @@ func (pg *PostgresTransactionStore) GetBy(accountId string, filter data.Transact
 
 	q := pg.db.Where("amount >= ?", filter.GreaterThan)
 	q = q.Where("amount <= ?", filter.LessThan)
-	q = q.Where("amount >= ?", filter.LessThan)
 	q = q.Where("make_date(year, month, day) <= ?", dateToSQL(filter.Before))
 	q = q.Where("make_date(year, month, day) >= ?", dateToSQL(filter.After))
 
@@ -96,5 +95,5 @@ func (pg *PostgresTransactionStore) DeleteAll() error {
 }
 
 func dateToSQL(date data.Date) string {
-	return fmt.Sprintf("make_date(%d, %d, %d)", date.Year, date.Month, date.Year)
+	return fmt.Sprintf("%d-%d-%d", date.Year, date.Month, date.Day)
 }

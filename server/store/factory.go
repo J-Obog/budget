@@ -6,7 +6,6 @@ import (
 	"github.com/J-Obog/paidoff/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 const (
@@ -26,7 +25,7 @@ func MakeStoreConfig(cfg *config.AppConfig) *StoreConfig {
 		pgDb, err := gorm.Open(postgres.Open(cfg.PostgresUrl), &gorm.Config{
 			AllowGlobalUpdate: true,
 			NowFunc:           nil,
-			Logger:            logger.Default.LogMode(logger.Silent),
+			//Logger:            logger.Default.LogMode(logger.Silent),
 		})
 
 		if err != nil {
