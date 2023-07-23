@@ -45,11 +45,11 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request) *rest.Respons
 	body := req.Body.(rest.CategoryCreateBody)
 	accountId := req.Account.Id
 
-	category := manager.getCategoryForCreate(accountId, body)
-
 	if err := manager.validateCreate(body, accountId); err != nil {
 		return rest.Err(err)
 	}
+
+	category := manager.getCategoryForCreate(accountId, body)
 
 	if err := manager.store.Insert(category); err != nil {
 		return rest.Err(err)
@@ -63,7 +63,7 @@ func (manager *CategoryManager) UpdateByRequest(req *rest.Request) *rest.Respons
 	categoryId := req.ResourceId
 	accountId := req.Account.Id
 
-	if err := manager.validateUpdate(body, accountId); err != nil {
+	if err := manager.validateUpdate(body, accountId, categoryId); err != nil {
 		return rest.Err(err)
 	}
 
@@ -87,13 +87,8 @@ func (manager *CategoryManager) DeleteByRequest(req *rest.Request) *rest.Respons
 	categoryId := req.ResourceId
 	accountId := req.Account.Id
 
-	budgets, err := manager.budgetStore.GetByCategory(accountId, categoryId)
-	if err != nil {
+	if err := manager.checkCategoryBeingUsed(categoryId, accountId); err != nil {
 		return rest.Err(err)
-	}
-
-	if len(budgets) != 0 {
-		return rest.Err(rest.ErrCategoryCurrentlyInUse)
 	}
 
 	if err := manager.sendMsg(req.ResourceId); err != nil {
@@ -113,14 +108,64 @@ func (manager *CategoryManager) DeleteByRequest(req *rest.Request) *rest.Respons
 	return rest.Success()
 }
 
-func (manager *CategoryManager) validateSet(body rest.CategorySetBody, accountId string) error {
-	nameLen := len(body.Name)
+func (manager *CategoryManager) validateUpdate(body rest.CategoryUpdateBody, accountId string, id string) error {
+	existing, err := manager.store.Get(id, accountId)
+	if err != nil {
+		return err
+	}
 
-	if nameLen > config.LimitMaxCategoryNameChars {
+	if existing == nil {
+		return rest.ErrInvalidCategoryId
+	}
+
+	if body.Name != existing.Name {
+		if err := manager.checkName(body.Name); err != nil {
+			return err
+		}
+		if err := manager.checkNameAlreadyExists(accountId, body.Name); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (manager *CategoryManager) validateCreate(body rest.CategoryCreateBody, accountId string) error {
+	if err := manager.checkName(body.Name); err != nil {
+		return err
+	}
+
+	if err := manager.checkNameAlreadyExists(accountId, body.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (manager *CategoryManager) checkCategoryBeingUsed(categoryId string, accountId string) error {
+	budgets, err := manager.budgetStore.GetByCategory(accountId, categoryId)
+	if err != nil {
+		return err
+	}
+
+	if len(budgets) != 0 {
+		return rest.ErrCategoryCurrentlyInUse
+	}
+
+	return nil
+}
+
+func (manager *CategoryManager) checkName(name string) error {
+	nameLen := len(name)
+	if nameLen < config.LimitMinCategoryNameChars || nameLen > config.LimitMaxCategoryNameChars {
 		return rest.ErrInvalidCategoryName
 	}
 
-	category, err := manager.store.GetByName(accountId, body.Name)
+	return nil
+}
+
+func (manager *CategoryManager) checkNameAlreadyExists(accountId string, name string) error {
+	category, err := manager.store.GetByName(accountId, name)
 	if err != nil {
 		return err
 	}
@@ -128,15 +173,7 @@ func (manager *CategoryManager) validateSet(body rest.CategorySetBody, accountId
 	if category != nil {
 		return rest.ErrCategoryNameAlreadyExists
 	}
-
 	return nil
-}
-
-func (manager *CategoryManager) validateUpdate(body rest.CategoryUpdateBody, accountId string) error {
-	return manager.validateSet(body.CategorySetBody, accountId)
-}
-func (manager *CategoryManager) validateCreate(body rest.CategoryCreateBody, accountId string) error {
-	return manager.validateSet(body.CategorySetBody, accountId)
 }
 
 // TODO: better msg id?
