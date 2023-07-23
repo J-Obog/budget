@@ -4,8 +4,7 @@ import (
 	"github.com/J-Obog/paidoff/data"
 )
 
-//TODO: change any to 'serializable' type alias?
-
+// TODO: change any to 'serializable' type alias?
 type Request struct {
 	Url        string
 	ResourceId string

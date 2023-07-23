@@ -13,6 +13,10 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
+func (manager *AccountManager) GetByRequest(req *rest.Request) *rest.Response {
+	return rest.Ok(req.Account)
+}
+
 func (manager *AccountManager) UpdateByRequest(req *rest.Request) *rest.Response {
 	body := req.Body.(rest.AccountUpdateBody)
 	accountId := req.Account.Id

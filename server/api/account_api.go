@@ -10,7 +10,7 @@ type AccountAPI struct {
 }
 
 func (api *AccountAPI) GetAccount(req *rest.Request) *rest.Response {
-	return rest.Ok(req.Account)
+	return api.accountManager.GetByRequest(req)
 }
 
 func (api *AccountAPI) UpdateAccount(req *rest.Request) *rest.Response {
