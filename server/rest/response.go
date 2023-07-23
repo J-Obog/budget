@@ -20,13 +20,14 @@ var (
 )
 
 type Response struct {
-	Data        any
-	Status      int
-	InternalErr error
+	Data  any
+	Error error
 }
 
 func Ok(v any) *Response {
-	return &Response{}
+	return &Response{
+		Data: v,
+	}
 }
 
 func Success() *Response {
@@ -34,5 +35,7 @@ func Success() *Response {
 }
 
 func Err(err error) *Response {
-	return &Response{}
+	return &Response{
+		Error: err,
+	}
 }
