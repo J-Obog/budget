@@ -12,6 +12,38 @@ const (
 	testResourceId = "test-resource-id"
 )
 
+type BugdetManagerMock struct {
+	BudgetManager
+	MockBudgetStore      *mocks.BudgetStore
+	MockCategoryStore    *mocks.CategoryStore
+	MockTransactionStore *mocks.TransactionStore
+	MockClock            *mocks.Clock
+	MockUid              *mocks.UIDProvider
+}
+
+func bugdetManagerMock() *BugdetManagerMock {
+	mockedCategoryStore := new(mocks.CategoryStore)
+	mockedBudgetStore := new(mocks.BudgetStore)
+	mockedTransactionStore := new(mocks.TransactionStore)
+	mockedClock := new(mocks.Clock)
+	mockedUid := new(mocks.UIDProvider)
+
+	return &BugdetManagerMock{
+		BudgetManager: BudgetManager{
+			store:            mockedBudgetStore,
+			categoryStore:    mockedCategoryStore,
+			transactionStore: mockedTransactionStore,
+			clock:            mockedClock,
+			uid:              mockedUid,
+		},
+		MockBudgetStore:      mockedBudgetStore,
+		MockCategoryStore:    mockedCategoryStore,
+		MockTransactionStore: mockedTransactionStore,
+		MockClock:            mockedClock,
+		MockUid:              mockedUid,
+	}
+}
+
 type AccountManagerMock struct {
 	AccountManager
 	MockAccountStore *mocks.AccountStore

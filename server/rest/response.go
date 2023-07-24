@@ -6,10 +6,10 @@ import (
 
 // TODO: actually implement errors
 var (
-	ErrCategoryAlreadyInBudgetPeriod = errors.New("")
 	ErrCategoryNameAlreadyExists     = errors.New("")
 	ErrBadRequest                    = errors.New("")
 	ErrInvalidAccountName            = errors.New("")
+	ErrCategoryAlreadyInBudgetPeriod = errors.New("")
 	ErrInvalidDate                   = errors.New("")
 	ErrCategoryCurrentlyInUse        = errors.New("")
 	ErrInvalidTransactionNote        = errors.New("")

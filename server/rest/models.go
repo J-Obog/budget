@@ -48,17 +48,14 @@ type TransactionCreateBody struct {
 	TransactionSetBody
 }
 
-type BudgetSetBody struct {
+type BudgetCreateBody struct {
 	CategoryId string  `json:"categoryId"`
 	Projected  float64 `json:"projected"`
-}
-
-type BudgetCreateBody struct {
-	BudgetSetBody
-	Month int `json:"month"`
-	Year  int `json:"year"`
+	Month      int     `json:"month"`
+	Year       int     `json:"year"`
 }
 
 type BudgetUpdateBody struct {
-	BudgetSetBody
+	CategoryId string  `json:"categoryId"`
+	Projected  float64 `json:"projected"`
 }

@@ -40,6 +40,7 @@ func TestAccountManagerUpdatesByRequest(t *testing.T) {
 		body := rest.AccountUpdateBody{Name: genString(config.LimitMinAccountNameChars - 5)}
 		req := testRequest()
 		req.Body = body
+		req.Account.Name = "Some old name"
 
 		res := manager.UpdateByRequest(req)
 
@@ -51,6 +52,7 @@ func TestAccountManagerUpdatesByRequest(t *testing.T) {
 		body := rest.AccountUpdateBody{Name: genString(config.LimitMaxAccountNameChars + 5)}
 		req := testRequest()
 		req.Body = body
+		req.Account.Name = "Some old name"
 
 		res := manager.UpdateByRequest(req)
 

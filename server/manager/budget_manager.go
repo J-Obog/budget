@@ -29,7 +29,7 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request) *rest.Response {
 		return rest.Err(rest.ErrInvalidBudgetId)
 	}
 
-	materializedBudget, err := manager.toMaterializedBudget(*budget)
+	materializedBudget, err := manager.toMaterializedBudget(*budget, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}
@@ -51,7 +51,7 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response 
 
 	materializedBudgets := make([]data.BudgetMaterialized, len(budgets))
 	for _, budget := range budgets {
-		materializedBudget, err := manager.toMaterializedBudget(budget)
+		materializedBudget, err := manager.toMaterializedBudget(budget, accountId)
 		if err != nil {
 			return rest.Err(err)
 		}
@@ -84,12 +84,12 @@ func (manager *BudgetManager) UpdateByRequest(req *rest.Request) *rest.Response 
 	accountId := req.Account.Id
 	budgetId := req.ResourceId
 
-	timestamp := manager.clock.Now()
-	update := getUpdateForBudgetUpdate(body)
-
 	if err := manager.validateUpdate(body, budgetId, accountId); err != nil {
 		return rest.Err(err)
 	}
+
+	timestamp := manager.clock.Now()
+	update := getUpdateForBudgetUpdate(body)
 
 	ok, err := manager.store.Update(budgetId, accountId, update, timestamp)
 	if err != nil {
@@ -116,26 +116,16 @@ func (manager *BudgetManager) DeleteByRequest(req *rest.Request) *rest.Response 
 	return rest.Success()
 }
 
-func (manager *BudgetManager) validateSet(body rest.BudgetSetBody, accountId string, month int, year int) error {
+func (manager *BudgetManager) validateCreate(body rest.BudgetCreateBody, accountId string) error {
+	if err := manager.checkPeriod(body.Month, body.Year); err != nil {
+		return err
+	}
+
 	if err := manager.checkCategoryExists(body.CategoryId, accountId); err != nil {
 		return err
 	}
 
-	if err := manager.checkCategoryIsUnique(body.CategoryId, accountId, month, year); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (manager *BudgetManager) validateCreate(body rest.BudgetCreateBody, accountId string) error {
-	period := data.NewDate(body.Month, 1, body.Year)
-
-	if ok := manager.clock.IsDateValid(period); !ok {
-		return rest.ErrInvalidDate
-	}
-
-	if err := manager.validateSet(body.BudgetSetBody, accountId, period.Month, period.Year); err != nil {
+	if err := manager.checkCategoryIsUnique(body.CategoryId, accountId, body.Month, body.Year); err != nil {
 		return err
 	}
 
@@ -153,7 +143,23 @@ func (manager *BudgetManager) validateUpdate(body rest.BudgetUpdateBody, budgetI
 	}
 
 	if body.CategoryId != budget.CategoryId {
-		return manager.validateSet(body.BudgetSetBody, accountId, budget.Month, budget.Year)
+		if err := manager.checkCategoryExists(body.CategoryId, accountId); err != nil {
+			return err
+		}
+
+		if err := manager.checkCategoryIsUnique(body.CategoryId, accountId, budget.Month, budget.Year); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (manager *BudgetManager) checkPeriod(month int, year int) error {
+	d := data.NewDate(month, 1, year)
+
+	if ok := manager.clock.IsDateValid(d); !ok {
+		return rest.ErrInvalidDate
 	}
 
 	return nil
@@ -165,7 +171,7 @@ func (manager *BudgetManager) checkCategoryIsUnique(categoryId string, accountId
 		return err
 	}
 
-	if budget == nil {
+	if budget != nil {
 		return rest.ErrCategoryAlreadyInBudgetPeriod
 	}
 
@@ -225,8 +231,7 @@ func getUpdateForBudgetUpdate(body rest.BudgetUpdateBody) data.BudgetUpdate {
 	}
 }
 
-func (manager *BudgetManager) toMaterializedBudget(budget data.Budget) (data.BudgetMaterialized, error) {
-	accountId := budget.AccountId
+func (manager *BudgetManager) toMaterializedBudget(budget data.Budget, accountId string) (data.BudgetMaterialized, error) {
 	categoryId := budget.CategoryId
 	month := budget.Month
 	year := budget.Year
