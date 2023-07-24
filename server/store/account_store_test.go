@@ -27,11 +27,12 @@ func TestAccountStore(t *testing.T) {
 	t.Run("it updates", func(t *testing.T) {
 		it.Setup()
 
-		account := testAccount()
-		account.Email = "some-old-email@gmail.com"
+		account := data.Account{Name: "old-account-name"}
+		updatedAccount := data.Account{
+			Name: "new-account-name",
+		}
 
-		newEmail := "some-new-email@gmail.com"
-		update := data.AccountUpdate{Email: newEmail}
+		update := data.AccountUpdate{Name: updatedAccount.Name}
 
 		err := it.AccountStore.Insert(account)
 		assert.NoError(t, err)
@@ -43,14 +44,13 @@ func TestAccountStore(t *testing.T) {
 		found, err := it.AccountStore.Get(account.Id)
 		assert.NoError(t, err)
 		assert.NotNil(t, found)
-		assert.Equal(t, found.Email, newEmail)
+		assert.Equal(t, *found, account)
 	})
 
 	t.Run("it marks as deleted", func(t *testing.T) {
 		it.Setup()
 
-		account := testAccount()
-		account.IsDeleted = false
+		account := data.Account{IsDeleted: false}
 
 		err := it.AccountStore.Insert(account)
 		assert.NoError(t, err)

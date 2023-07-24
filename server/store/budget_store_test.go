@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/J-Obog/paidoff/data"
@@ -26,20 +27,17 @@ func TestBudgetStore(t *testing.T) {
 	t.Run("it gets by period category", func(t *testing.T) {
 		it.Setup()
 
-		categoryId := "some-category-id"
-		month := 10
-		year := 2024
-
-		budget := testBudget()
-		budget.Id = "test-id-1"
-		budget.CategoryId = categoryId
-		budget.Month = month
-		budget.Year = year
+		budget := data.Budget{
+			Id:         "some-account-id",
+			CategoryId: "some-category-id",
+			Month:      10,
+			Year:       2024,
+		}
 
 		err := it.BudgetStore.Insert(budget)
 		assert.NoError(t, err)
 
-		found, err := it.BudgetStore.GetByPeriodCategory(budget.AccountId, categoryId, month, year)
+		found, err := it.BudgetStore.GetByPeriodCategory(budget.AccountId, budget.CategoryId, budget.Month, budget.Year)
 		assert.NoError(t, err)
 		assert.NotNil(t, found)
 		assert.Equal(t, budget, *found)
@@ -51,19 +49,10 @@ func TestBudgetStore(t *testing.T) {
 		categoryId := "some-category-id"
 		accountId := "some-account-id"
 
-		b1 := testBudget()
-		b1.Id = "test-id-1"
-		b1.AccountId = accountId
-		b1.CategoryId = categoryId
+		expected := []data.Budget{}
 
-		b2 := testBudget()
-		b2.Id = "test-id-2"
-		b2.AccountId = accountId
-		b2.CategoryId = categoryId
-
-		expected := []data.Budget{b1, b2}
-
-		for _, budget := range expected {
+		for i := 0; i < 3; i++ {
+			budget := data.Budget{Id: fmt.Sprintf("id-%d", i), AccountId: accountId, CategoryId: categoryId}
 			err := it.BudgetStore.Insert(budget)
 			assert.NoError(t, err)
 		}
