@@ -12,7 +12,5 @@ type Account struct {
 }
 
 type AccountUpdate struct {
-	Name     string
-	Email    string
-	Password string
+	Name string
 }

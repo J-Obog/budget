@@ -21,7 +21,7 @@ func (manager *AccountManager) UpdateByRequest(req *rest.Request) *rest.Response
 	body := req.Body.(rest.AccountUpdateBody)
 	accountId := req.Account.Id
 
-	if err := manager.validateUpdate(body); err != nil {
+	if err := manager.validateUpdate(body, req.Account); err != nil {
 		return rest.Err(err)
 	}
 
@@ -43,18 +43,24 @@ func (manager *AccountManager) DeleteByRequest(req *rest.Request) *rest.Response
 	return rest.Success()
 }
 
-func (manager *AccountManager) validateSet(body rest.AccountSetBody) error {
-	nameLen := len(body.Name)
+func (manager *AccountManager) validateUpdate(body rest.AccountUpdateBody, account *data.Account) error {
+	if body.Name != account.Name {
+		if err := manager.checkAccountName(body.Name); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (manager *AccountManager) checkAccountName(name string) error {
+	nameLen := len(name)
 
 	if nameLen < config.LimitMinAccountNameChars || nameLen > config.LimitMaxAccountNameChars {
 		return rest.ErrInvalidAccountName
 	}
 
 	return nil
-}
-
-func (manager *AccountManager) validateUpdate(body rest.AccountUpdateBody) error {
-	return manager.validateSet(body.AccountSetBody)
 }
 
 func getUpdateForAccountUpdate(body rest.AccountUpdateBody) data.AccountUpdate {

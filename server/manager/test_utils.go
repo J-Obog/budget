@@ -1,10 +1,15 @@
 package manager
 
 import (
-	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/mocks"
 	"github.com/J-Obog/paidoff/rest"
+)
+
+const (
+	testTimestamp  = int64(1234564321)
+	testUuid       = "test-uuid-1"
+	testResourceId = "test-resource-id"
 )
 
 type AccountManagerMock struct {
@@ -59,146 +64,20 @@ func categoryManagerMock() *CategoryManagerMock {
 	}
 }
 
-func categoryDelete() *rest.Request {
+func testRequest() *rest.Request {
 	return &rest.Request{
-		Account:    testAccount(),
-		ResourceId: "some-id",
+		Account: &data.Account{
+			Id: "some-account-id",
+		},
 	}
 }
 
-func testBudget() *data.Budget {
-	return &data.Budget{
-		Id: "some-id",
-	}
-}
+func genString(length int) string {
+	var s string
 
-func categoryUpdateNameTooShort() *rest.Request {
-	body := rest.CategoryUpdateBody{}
-	body.Color = 123
-	body.Name = ""
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func categoryUpdateNameTooLong() *rest.Request {
-	body := rest.CategoryUpdateBody{}
-	body.Color = 123
-	body.Name = ""
-
-	for i := 0; i < config.LimitMaxCategoryNameChars+20; i++ {
-		body.Name += "F"
+	for i := 0; i < length; i++ {
+		s += "C"
 	}
 
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func categoryUpdate() *rest.Request {
-	body := rest.CategoryUpdateBody{}
-	body.Color = 123
-	body.Name = "Some other name"
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func testAccount() *data.Account {
-	return &data.Account{
-		Id: "some-uuid",
-	}
-}
-
-func testCategory() *data.Category {
-	return &data.Category{
-		Id:   "cat-id-1",
-		Name: "Name1",
-	}
-}
-
-func categoryCreateNameTooLong() *rest.Request {
-	body := rest.CategoryCreateBody{}
-	body.Name = ""
-
-	for i := 0; i < config.LimitMaxCategoryNameChars+20; i++ {
-		body.Name += "F"
-	}
-
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func categoryCreateNameTooShort() *rest.Request {
-	body := rest.CategoryCreateBody{}
-	body.Name = ""
-
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func categoryCreate() *rest.Request {
-	body := rest.CategoryCreateBody{}
-	body.Color = 123
-	body.Name = "Somename"
-
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func categoryGet() *rest.Request {
-	return &rest.Request{
-		Account:    testAccount(),
-		ResourceId: "cat-id-1",
-	}
-}
-
-func accountUpdate() *rest.Request {
-	body := rest.AccountUpdateBody{}
-	body.Name = "John Doe"
-
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func accountUpdateNameTooShort() *rest.Request {
-	body := rest.AccountUpdateBody{}
-	body.Name = ""
-
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func accountUpdateNameTooLong() *rest.Request {
-	name := ""
-	for i := 0; i < config.LimitMaxAccountNameChars+5; i++ {
-		name += "F"
-	}
-
-	body := rest.AccountUpdateBody{}
-	body.Name = string(name)
-
-	return &rest.Request{
-		Account: testAccount(),
-		Body:    body,
-	}
-}
-
-func accountDelete() *rest.Request {
-	return &rest.Request{
-		Account: testAccount(),
-	}
+	return s
 }

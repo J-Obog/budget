@@ -3,6 +3,7 @@ package manager
 import (
 	"testing"
 
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/stretchr/testify/assert"
@@ -10,31 +11,24 @@ import (
 
 func TestAccountManagerGetsByRequest(t *testing.T) {
 	manager := accountManagerMock()
-	account := testAccount()
-
-	req := &rest.Request{
-		Account: account,
-	}
+	req := testRequest()
 
 	res := manager.GetByRequest(req)
-
-	assert.Equal(t, res.Data, account)
+	assert.Equal(t, res.Data, req.Account)
 	assert.NoError(t, res.Error)
 }
 
 func TestAccountManagerUpdatesByRequest(t *testing.T) {
 	t.Run("it succeeds", func(t *testing.T) {
 		manager := accountManagerMock()
-		timeNow := int64(1234555)
+		body := rest.AccountUpdateBody{Name: "Some Name"}
+		req := testRequest()
+		req.Body = body
 
-		req := accountUpdate()
+		update := getExpectedAccountUpdate(body)
 
-		update := data.AccountUpdate{
-			Name: req.Body.(rest.AccountUpdateBody).Name,
-		}
-
-		manager.MockClock.On("Now").Return(timeNow)
-		manager.MockAccountStore.On("Update", req.Account.Id, update, timeNow).Return(true, nil)
+		manager.MockClock.On("Now").Return(testTimestamp)
+		manager.MockAccountStore.On("Update", req.Account.Id, update, testTimestamp).Return(true, nil)
 
 		res := manager.UpdateByRequest(req)
 
@@ -43,7 +37,10 @@ func TestAccountManagerUpdatesByRequest(t *testing.T) {
 
 	t.Run("it fails when account name is too short", func(t *testing.T) {
 		manager := accountManagerMock()
-		req := accountUpdateNameTooShort()
+		body := rest.AccountUpdateBody{Name: genString(config.LimitMinAccountNameChars - 5)}
+		req := testRequest()
+		req.Body = body
+
 		res := manager.UpdateByRequest(req)
 
 		assert.ErrorIs(t, res.Error, rest.ErrInvalidAccountName)
@@ -51,7 +48,10 @@ func TestAccountManagerUpdatesByRequest(t *testing.T) {
 
 	t.Run("it fails when account name is too long", func(t *testing.T) {
 		manager := accountManagerMock()
-		req := accountUpdateNameTooLong()
+		body := rest.AccountUpdateBody{Name: genString(config.LimitMaxAccountNameChars + 5)}
+		req := testRequest()
+		req.Body = body
+
 		res := manager.UpdateByRequest(req)
 
 		assert.ErrorIs(t, res.Error, rest.ErrInvalidAccountName)
@@ -61,12 +61,17 @@ func TestAccountManagerUpdatesByRequest(t *testing.T) {
 
 func TestAccountManagerDeletesByRequest(t *testing.T) {
 	manager := accountManagerMock()
-
-	req := accountDelete()
+	req := testRequest()
 
 	manager.MockAccountStore.On("SetDeleted", req.Account.Id).Return(true, nil)
 
 	res := manager.DeleteByRequest(req)
 
 	assert.NoError(t, res.Error)
+}
+
+func getExpectedAccountUpdate(body rest.AccountUpdateBody) data.AccountUpdate {
+	return data.AccountUpdate{
+		Name: body.Name,
+	}
 }

@@ -16,29 +16,18 @@ type TransactionQuery struct {
 	AmountLte     *float64 `json:"amountLte"`
 }
 
-type AccountSetBody struct {
+type AccountUpdateBody struct {
 	Name string `json:"name"`
 }
 
-type AccountUpdateBody struct {
-	AccountSetBody
-}
-
-type AccountCreateBody struct {
-	AccountSetBody
-}
-
-type CategorySetBody struct {
+type CategoryUpdateBody struct {
 	Name  string `json:"name"`
 	Color uint   `json:"color"`
 }
 
-type CategoryUpdateBody struct {
-	CategorySetBody
-}
-
 type CategoryCreateBody struct {
-	CategorySetBody
+	Name  string `json:"name"`
+	Color uint   `json:"color"`
 }
 
 type TransactionSetBody struct {

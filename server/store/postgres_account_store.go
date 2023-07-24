@@ -36,7 +36,6 @@ func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, tim
 
 	res := q.UpdateColumns(&data.Account{
 		Name:      update.Name,
-		Email:     update.Email,
 		UpdatedAt: timestamp,
 	})
 
