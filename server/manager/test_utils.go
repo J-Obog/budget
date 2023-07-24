@@ -12,6 +12,38 @@ const (
 	testResourceId = "test-resource-id"
 )
 
+var (
+	testDate = data.NewDate(6, 15, 2023)
+)
+
+type TransactionManagerMock struct {
+	TransactionManager
+	MockTransactionStore *mocks.TransactionStore
+	MockCategoryStore    *mocks.CategoryStore
+	MockClock            *mocks.Clock
+	MockUid              *mocks.UIDProvider
+}
+
+func transactionManagerMock() *TransactionManagerMock {
+	mockedCategoryStore := new(mocks.CategoryStore)
+	mockedTransactionStore := new(mocks.TransactionStore)
+	mockedClock := new(mocks.Clock)
+	mockedUid := new(mocks.UIDProvider)
+
+	return &TransactionManagerMock{
+		TransactionManager: TransactionManager{
+			store:         mockedTransactionStore,
+			categoryStore: mockedCategoryStore,
+			clock:         mockedClock,
+			uid:           mockedUid,
+		},
+		MockCategoryStore:    mockedCategoryStore,
+		MockTransactionStore: mockedTransactionStore,
+		MockClock:            mockedClock,
+		MockUid:              mockedUid,
+	}
+}
+
 type BugdetManagerMock struct {
 	BudgetManager
 	MockBudgetStore      *mocks.BudgetStore

@@ -66,12 +66,12 @@ func (manager *TransactionManager) UpdateByRequest(req *rest.Request) *rest.Resp
 	accountId := req.Account.Id
 	transactionId := req.ResourceId
 
-	timestamp := manager.clock.Now()
-	update := getUpdateForTransactionUpdate(body)
-
-	if err := manager.validateUpdate(accountId, body); err != nil {
+	if err := manager.validateUpdate(transactionId, accountId, body); err != nil {
 		return rest.Err(err)
 	}
+
+	timestamp := manager.clock.Now()
+	update := getUpdateForTransactionUpdate(body)
 
 	ok, err := manager.store.Update(transactionId, accountId, update, timestamp)
 	if err != nil {
@@ -102,39 +102,90 @@ func (manager *TransactionManager) DeleteByRequest(req *rest.Request) *rest.Resp
 }
 
 // TODO: look into validation for budget type
-func (manager *TransactionManager) validateSet(accountId string, body rest.TransactionSetBody) error {
-	period := data.NewDate(body.Month, body.Day, body.Year)
-
-	if ok := manager.clock.IsDateValid(period); !ok {
-		return rest.ErrInvalidDate
+func (manager *TransactionManager) validateUpdate(id string, accountId string, body rest.TransactionUpdateBody) error {
+	existing, err := manager.store.Get(id, accountId)
+	if err != nil {
+		return err
 	}
 
-	if body.CategoryId != nil {
-		category, err := manager.categoryStore.Get(*body.CategoryId, accountId)
-		if err != nil {
-			return err
-		}
+	if existing == nil {
+		return rest.ErrInvalidTransactionId
+	}
 
-		if category == nil {
-			return rest.ErrInvalidCategoryId
-		}
+	if err := manager.checkDate(body.Month, body.Day, body.Year); err != nil {
+		return err
 	}
 
 	if body.Note != nil {
-		if len(*body.Note) > config.LimitMaxTransactionNoteChars {
-			return rest.ErrInvalidTransactionNote
+		if existing.Note == nil || (*existing.Note != *body.Note) {
+			if err := manager.checkNote(*body.Note); err != nil {
+				return err
+			}
+		}
+	}
+
+	if body.CategoryId != nil {
+		if existing.CategoryId == nil || (*existing.CategoryId != *body.CategoryId) {
+			if err := manager.checkCategoryExists(*body.CategoryId, accountId); err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
 }
 
-func (manager *TransactionManager) validateUpdate(accountId string, body rest.TransactionUpdateBody) error {
-	return manager.validateSet(accountId, body.TransactionSetBody)
-}
 func (manager *TransactionManager) validateCreate(accountId string, body rest.TransactionCreateBody) error {
-	return manager.validateSet(accountId, body.TransactionSetBody)
+	if err := manager.checkDate(body.Month, body.Day, body.Year); err != nil {
+		return err
+	}
+
+	if body.Note != nil {
+		if err := manager.checkNote(*body.Note); err != nil {
+			return err
+		}
+	}
+
+	if body.CategoryId != nil {
+		if err := manager.checkCategoryExists(*body.CategoryId, accountId); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
+
+func (manager *TransactionManager) checkDate(month int, day int, year int) error {
+	d := data.NewDate(month, day, year)
+
+	if ok := manager.clock.IsDateValid(d); !ok {
+		return rest.ErrInvalidDate
+	}
+
+	return nil
+}
+
+func (manager *TransactionManager) checkNote(note string) error {
+	if len(note) > config.LimitMaxTransactionNoteChars {
+		return rest.ErrInvalidTransactionNote
+	}
+
+	return nil
+}
+
+func (manager *TransactionManager) checkCategoryExists(categoryId string, accountId string) error {
+	category, err := manager.categoryStore.Get(categoryId, accountId)
+	if err != nil {
+		return err
+	}
+
+	if category == nil {
+		return rest.ErrInvalidCategoryId
+	}
+
+	return nil
+}
+
 func (manager *TransactionManager) getTransactionForCreate(accountId string, body rest.TransactionCreateBody) data.Transaction {
 	id := manager.uid.GetId()
 	timestamp := manager.clock.Now()
