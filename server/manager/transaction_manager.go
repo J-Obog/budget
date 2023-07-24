@@ -32,8 +32,13 @@ func (manager *TransactionManager) GetByRequest(req *rest.Request) *rest.Respons
 }
 
 func (manager *TransactionManager) GetAllByRequest(req *rest.Request) *rest.Response {
-	query := req.Query.(rest.TransactionQuery)
 	accountId := req.Account.Id
+
+	query, err := rest.ParseQuery[rest.TransactionQuery](req.Query)
+	if err != nil {
+		return rest.Err(err)
+	}
+
 	filter := manager.getFilterForTransactionQuery(query)
 
 	transactions, err := manager.store.GetBy(accountId, filter)
@@ -45,8 +50,12 @@ func (manager *TransactionManager) GetAllByRequest(req *rest.Request) *rest.Resp
 }
 
 func (manager *TransactionManager) CreateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.TransactionCreateBody)
 	accountId := req.Account.Id
+
+	body, err := rest.ParseBody[rest.TransactionCreateBody](req.Body)
+	if err != nil {
+		return rest.Err(err)
+	}
 
 	if err := manager.validateCreate(accountId, body); err != nil {
 		return rest.Err(err)
@@ -62,9 +71,13 @@ func (manager *TransactionManager) CreateByRequest(req *rest.Request) *rest.Resp
 }
 
 func (manager *TransactionManager) UpdateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.TransactionUpdateBody)
 	accountId := req.Account.Id
 	transactionId := req.ResourceId
+
+	body, err := rest.ParseBody[rest.TransactionUpdateBody](req.Body)
+	if err != nil {
+		return rest.Err(err)
+	}
 
 	if err := manager.validateUpdate(transactionId, accountId, body); err != nil {
 		return rest.Err(err)

@@ -42,8 +42,12 @@ func (manager *CategoryManager) GetAllByRequest(req *rest.Request) *rest.Respons
 }
 
 func (manager *CategoryManager) CreateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.CategoryCreateBody)
 	accountId := req.Account.Id
+
+	body, err := rest.ParseBody[rest.CategoryCreateBody](req.Body)
+	if err != nil {
+		return rest.Err(err)
+	}
 
 	if err := manager.validateCreate(body, accountId); err != nil {
 		return rest.Err(err)
@@ -59,9 +63,13 @@ func (manager *CategoryManager) CreateByRequest(req *rest.Request) *rest.Respons
 }
 
 func (manager *CategoryManager) UpdateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.CategoryUpdateBody)
 	categoryId := req.ResourceId
 	accountId := req.Account.Id
+
+	body, err := rest.ParseBody[rest.CategoryUpdateBody](req.Body)
+	if err != nil {
+		return rest.Err(err)
+	}
 
 	if err := manager.validateUpdate(body, accountId, categoryId); err != nil {
 		return rest.Err(err)

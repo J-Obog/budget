@@ -40,7 +40,10 @@ func (manager *BudgetManager) GetByRequest(req *rest.Request) *rest.Response {
 func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response {
 	accountId := req.Account.Id
 
-	query := req.Query.(rest.BudgetQuery)
+	query, err := rest.ParseQuery[rest.BudgetQuery](req.Query)
+	if err != nil {
+		return rest.Err(err)
+	}
 
 	filter := manager.getFilterForBudgetQuery(query)
 
@@ -63,8 +66,12 @@ func (manager *BudgetManager) GetAllByRequest(req *rest.Request) *rest.Response 
 }
 
 func (manager *BudgetManager) CreateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.BudgetCreateBody)
 	accountId := req.Account.Id
+
+	body, err := rest.ParseBody[rest.BudgetCreateBody](req.Body)
+	if err != nil {
+		return rest.Err(err)
+	}
 
 	if err := manager.validateCreate(body, accountId); err != nil {
 		return rest.Err(err)
@@ -80,9 +87,13 @@ func (manager *BudgetManager) CreateByRequest(req *rest.Request) *rest.Response 
 }
 
 func (manager *BudgetManager) UpdateByRequest(req *rest.Request) *rest.Response {
-	body := req.Body.(rest.BudgetUpdateBody)
 	accountId := req.Account.Id
 	budgetId := req.ResourceId
+
+	body, err := rest.ParseBody[rest.BudgetUpdateBody](req.Body)
+	if err != nil {
+		return rest.Err(err)
+	}
 
 	if err := manager.validateUpdate(body, budgetId, accountId); err != nil {
 		return rest.Err(err)
