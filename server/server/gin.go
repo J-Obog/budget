@@ -12,28 +12,27 @@ type GinServer struct {
 }
 
 func (g *GinServer) Start(port int) error {
-	g.eng.GET("/account")
-	g.eng.PUT("/account")
-	g.eng.DELETE("/account")
+	g.eng.GET("/account", ginHandler(g.accountManager.GetByRequest))
+	g.eng.PUT("/account", ginHandler(g.accountManager.UpdateByRequest))
+	g.eng.DELETE("/account", ginHandler(g.accountManager.DeleteByRequest))
 
-	g.eng.GET("/category")
-	g.eng.GET("/category/:id")
-	g.eng.POST("/category")
-	g.eng.PUT("/category/:id")
-	g.eng.DELETE("/category/:id")
+	g.eng.GET("/category", ginHandler(g.categoryManager.GetAllByRequest))
+	g.eng.GET("/category/:id", ginHandler(g.categoryManager.GetByRequest))
+	g.eng.POST("/category", ginHandler(g.categoryManager.CreateByRequest))
+	g.eng.PUT("/category/:id", ginHandler(g.categoryManager.UpdateByRequest))
+	g.eng.DELETE("/category/:id", ginHandler(g.accountManager.DeleteByRequest))
 
-	g.eng.GET("/transaction")
-	g.eng.GET("/transaction/:id")
-	g.eng.POST("/transaction")
-	g.eng.PUT("/transaction/:id")
-	g.eng.DELETE("/transaction/:id")
+	g.eng.GET("/transaction", ginHandler(g.transactionManager.GetAllByRequest))
+	g.eng.GET("/transaction/:id", ginHandler(g.transactionManager.GetByRequest))
+	g.eng.POST("/transaction", ginHandler(g.transactionManager.CreateByRequest))
+	g.eng.PUT("/transaction/:id", ginHandler(g.transactionManager.UpdateByRequest))
+	g.eng.DELETE("/transaction/:id", ginHandler(g.transactionManager.DeleteByRequest))
 
-	g.eng.GET("/budget")
-	g.eng.GET("/budget/:id")
-	//g.eng.GET("/budget/types")
-	g.eng.POST("/budget")
-	g.eng.PUT("/budget/:id")
-	g.eng.DELETE("/budget/:id")
+	g.eng.GET("/budget", ginHandler(g.budgetManager.GetAllByRequest))
+	g.eng.GET("/budget/:id", ginHandler(g.budgetManager.GetByRequest))
+	g.eng.POST("/budget", ginHandler(g.budgetManager.CreateByRequest))
+	g.eng.PUT("/budget/:id", ginHandler(g.budgetManager.UpdateByRequest))
+	g.eng.DELETE("/budget/:id", ginHandler(g.budgetManager.DeleteByRequest))
 
 	return g.eng.Run(fmt.Sprintf(":%d", port))
 }
@@ -42,7 +41,7 @@ func (g *GinServer) Stop() error {
 	return nil
 }
 
-func (g *GinServer) handle() gin.HandlerFunc {
+func ginHandler(rh routeHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 	}
