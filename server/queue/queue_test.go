@@ -9,7 +9,9 @@ import (
 
 func TestQueue(t *testing.T) {
 	g, _ := config.MakeConfig(config.EnvType_LOCAL)
+
 	q := MakeQueue(g)
+
 	err := q.Flush(testQueueName)
 	assert.NoError(t, err)
 
