@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 
+	"github.com/J-Obog/paidoff/rest"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,8 +42,19 @@ func (g *GinServer) Stop() error {
 	return nil
 }
 
+// TODO: remove dummy account for auth
 func ginHandler(rh routeHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		req := &rest.Request{}
 
+		res := rh(req)
+
+		respb, code := res.ToJSON()
+
+		if code == 500 {
+			//log error
+		}
+
+		c.JSON(code, respb)
 	}
 }
