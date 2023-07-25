@@ -5,6 +5,7 @@ import "net/http"
 const (
 	Code_400 = http.StatusBadRequest
 	Code_404 = http.StatusNotFound
+	Code_500 = http.StatusInternalServerError
 )
 
 // TODO: actually implement errors
@@ -59,6 +60,12 @@ var (
 	ErrInvalidTransactionId = &RestError{
 		Msg:    "category name already exists",
 		Status: Code_404,
+	}
+
+	//500
+	ErrInternalServor = &RestError{
+		Msg:    "internal error",
+		Status: Code_500,
 	}
 )
 

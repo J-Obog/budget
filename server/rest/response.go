@@ -26,22 +26,25 @@ func Err(err error) *Response {
 	}
 }
 
+func getErrBody(errMsg string) []byte {
+	return []byte(fmt.Sprintf(`{"error": {"message": %s}}`, errMsg))
+}
+
 func (res *Response) ToJSON() ([]byte, int) {
 	if res.Error != nil {
 		restErr, isHandledError := res.Error.(*RestError)
 
 		if isHandledError {
-			d := []byte(fmt.Sprintf(`{"error": {"message": %s}}`, restErr.Error()))
-			return d, restErr.Status
+			return getErrBody(restErr.Error()), restErr.Status
 		}
 
-		return []byte(`{"error": {"message": "internal error"}}`), 500
+		return getErrBody(ErrInternalServor.Error()), ErrInternalServor.Status
 	}
 
 	b, err := json.Marshal(res.Data)
 
 	if err != nil {
-		return []byte(`{"error": {"message": "internal error"}}`), 500
+		return getErrBody(ErrInternalServor.Error()), ErrInternalServor.Status
 	}
 
 	return b, 200
