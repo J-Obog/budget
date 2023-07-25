@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -13,9 +14,22 @@ type RabbitMqQueue struct {
 	dtags   map[string]uint64
 }
 
-func NewRabbitMqQueue(channel *amqp.Channel) *RabbitMqQueue {
+func NewRabbitMqQueue(url string) *RabbitMqQueue {
+	conn, err := amqp.Dial(url)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ch, err := conn.Channel()
+	ch.Qos(1, 0, false)
+	ch.Confirm(false)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 	return &RabbitMqQueue{
-		channel: channel,
+		channel: ch,
 		dtags:   make(map[string]uint64),
 	}
 }
