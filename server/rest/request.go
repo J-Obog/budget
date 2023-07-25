@@ -8,7 +8,7 @@ type Request struct {
 	Url        string
 	ResourceId string
 	Account    *data.Account
-	Query      map[string]string
+	Query      map[string][]string
 	Body       []byte
 }
 
@@ -18,7 +18,7 @@ func ParseBody[T any](jsonb []byte) (T, error) {
 	return t, nil
 }
 
-func ParseQuery[T any](qmap map[string]string) (T, error) {
+func ParseQuery[T any](qmap map[string][]string) (T, error) {
 	var t T
 	return t, nil
 }

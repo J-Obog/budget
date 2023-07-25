@@ -2,7 +2,9 @@ package server
 
 import (
 	"fmt"
+	"io"
 
+	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/gin-gonic/gin"
 )
@@ -42,10 +44,32 @@ func (g *GinServer) Stop() error {
 	return nil
 }
 
-// TODO: remove dummy account for auth
+func ginCtxToRequest(c *gin.Context) *rest.Request {
+	//TODO: handle error when reading body
+
+	b, _ := io.ReadAll(c.Request.Body)
+
+	// TODO: remove dummy account for auth
+	req := &rest.Request{
+		Account: &data.Account{
+			Id: "some-account-id",
+		},
+
+		Url:   c.Request.URL.String(),
+		Query: c.Request.URL.Query(),
+		Body:  b,
+	}
+
+	if id, inRequest := c.Params.Get("id"); inRequest {
+		req.ResourceId = id
+	}
+
+	return req
+}
+
 func ginHandler(rh routeHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		req := &rest.Request{}
+		req := ginCtxToRequest(c)
 
 		res := rh(req)
 
