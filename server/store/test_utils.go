@@ -12,12 +12,7 @@ type StoreIntegrationTest struct {
 }
 
 func NewStoreIntegrationTest() *StoreIntegrationTest {
-	cfg, err := config.MakeConfig(config.EnvType_LOCAL)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	cfg := config.Get()
 	storeCfg := MakeStoreConfig(cfg)
 
 	return &StoreIntegrationTest{
