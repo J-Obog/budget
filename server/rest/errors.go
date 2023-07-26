@@ -11,6 +11,11 @@ const (
 // TODO: actually implement errors
 var (
 	// 400 errors
+	ErrInvalidJSONBody = &RestError{
+		Msg:    "error parsing body",
+		Status: Code_400,
+	}
+
 	ErrCategoryNameAlreadyExists = &RestError{
 		Msg:    "category name already exists",
 		Status: Code_400,
@@ -63,7 +68,7 @@ var (
 	}
 
 	//500
-	ErrInternalServor = &RestError{
+	ErrInternalServer = &RestError{
 		Msg:    "internal error",
 		Status: Code_500,
 	}

@@ -38,13 +38,13 @@ func (res *Response) ToJSON() ([]byte, int) {
 			return getErrBody(restErr.Error()), restErr.Status
 		}
 
-		return getErrBody(ErrInternalServor.Error()), ErrInternalServor.Status
+		return getErrBody(ErrInternalServer.Error()), ErrInternalServer.Status
 	}
 
 	b, err := json.Marshal(res.Data)
 
 	if err != nil {
-		return getErrBody(ErrInternalServor.Error()), ErrInternalServor.Status
+		return getErrBody(ErrInternalServer.Error()), ErrInternalServer.Status
 	}
 
 	return b, 200
