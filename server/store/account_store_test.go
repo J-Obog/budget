@@ -7,6 +7,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestAccountStoreGets(t *testing.T) {
+	it.Setup()
+
+	account := testAccount()
+
+	err := it.AccountStore.Insert(account)
+	assert.NoError(t, err)
+
+	found, err := it.AccountStore.Get(account.Id)
+	assert.NoError(t, err)
+	assert.NotNil(t, found)
+	assert.Equal(t, account, *found)
+}
+
 func TestAccountStore(t *testing.T) {
 	it := NewStoreIntegrationTest()
 

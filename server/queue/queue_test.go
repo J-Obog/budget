@@ -9,7 +9,7 @@ import (
 
 func TestQueue(t *testing.T) {
 	cfg := config.Get()
-	q := MakeQueue(cfg)
+	q := GetConfiguredQueue(cfg)
 
 	err := q.Flush(testQueueName)
 	assert.NoError(t, err)
