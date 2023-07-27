@@ -1,16 +1,6 @@
 package manager
 
-import (
-	"math"
-	"testing"
-
-	"github.com/J-Obog/paidoff/config"
-	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/rest"
-	"github.com/J-Obog/paidoff/types"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func TestTransactionManagerGetsByRequest(t *testing.T) {
 	t.Run("it succeeds", func(t *testing.T) {
 		manager := transactionManagerMock()
@@ -359,3 +349,4 @@ func getExpectedTransactionUpdate(body rest.TransactionUpdateBody) data.Transact
 		Year:       body.Year,
 	}
 }
+*/

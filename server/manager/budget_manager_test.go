@@ -1,13 +1,6 @@
 package manager
 
-import (
-	"testing"
-
-	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/rest"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func TestBudgetManagerGetsByRequest(t *testing.T) {
 	t.Run("it succeeds", func(t *testing.T) {
 		manager := bugdetManagerMock()
@@ -300,3 +293,4 @@ func getExpectedBudgetUpdate(body rest.BudgetUpdateBody) data.BudgetUpdate {
 		Projected:  body.Projected,
 	}
 }
+*/

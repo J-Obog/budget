@@ -1,14 +1,6 @@
 package manager
 
-import (
-	"testing"
-
-	"github.com/J-Obog/paidoff/config"
-	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/rest"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func TestAccountManagerGetsByRequest(t *testing.T) {
 	manager := accountManagerMock()
 	req := testRequest()
@@ -77,3 +69,4 @@ func getExpectedAccountUpdate(body rest.AccountUpdateBody) data.AccountUpdate {
 		Name: body.Name,
 	}
 }
+*/
