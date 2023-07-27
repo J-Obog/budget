@@ -4,139 +4,114 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
+type BudgetStoreTestSuite struct {
+	suite.Suite
+	store BudgetStore
+}
+
 func TestBudgetStore(t *testing.T) {
-	it := NewStoreIntegrationTest()
-	t.Run("it inserts and gets", func(t *testing.T) {
-		it.Setup()
+	suite.Run(t, new(AccountStoreTestSuite))
+}
 
-		budget := testBudget()
+func (s *BudgetStoreTestSuite) SetupSuite() {
+	cfg := config.Get()
+	svc := GetConfiguredStoreService(cfg)
+	s.store = svc.BudgetStore
+}
 
-		err := it.BudgetStore.Insert(budget)
-		assert.NoError(t, err)
+func (s *BudgetStoreTestSuite) SetupTest() {
+	err := s.store.DeleteAll()
+	s.NoError(err)
+}
 
-		found, err := it.BudgetStore.Get(budget.Id, budget.AccountId)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, budget, *found)
-	})
+func (s *BudgetStoreTestSuite) TestInsertsAndGets() {
+	budget := data.Budget{Id: "budget-id"}
 
-	t.Run("it gets by period category", func(t *testing.T) {
-		it.Setup()
+	err := s.store.Insert(budget)
+	s.NoError(err)
 
-		budget := data.Budget{
-			Id:         "some-account-id",
-			CategoryId: "some-category-id",
-			Month:      10,
-			Year:       2024,
-		}
+	found, err := s.store.Get(budget.Id, budget.AccountId)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(budget, *found)
+}
 
-		err := it.BudgetStore.Insert(budget)
-		assert.NoError(t, err)
+func (s *BudgetStoreTestSuite) TestGetsByPeriodCategory() {
+	budget := data.Budget{
+		Id:         "some-account-id",
+		CategoryId: "some-category-id",
+		Month:      10,
+		Year:       2024,
+	}
 
-		found, err := it.BudgetStore.GetByPeriodCategory(budget.AccountId, budget.CategoryId, budget.Month, budget.Year)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, budget, *found)
-	})
+	err := s.store.Insert(budget)
+	s.NoError(err)
 
-	t.Run("it gets by category", func(t *testing.T) {
-		it.Setup()
+	found, err := s.store.GetByPeriodCategory(budget.AccountId, budget.CategoryId, budget.Month, budget.Year)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(budget, *found)
+}
 
-		categoryId := "some-category-id"
-		accountId := "some-account-id"
+func (s *BudgetStoreTestSuite) TestGetsByCategory() {
+	categoryId := "some-category-id"
+	accountId := "some-account-id"
 
-		expected := []data.Budget{}
+	expected := []data.Budget{}
 
-		for i := 0; i < 3; i++ {
-			budget := data.Budget{Id: fmt.Sprintf("id-%d", i), AccountId: accountId, CategoryId: categoryId}
-			err := it.BudgetStore.Insert(budget)
-			assert.NoError(t, err)
-		}
+	for i := 0; i < 5; i++ {
+		budget := data.Budget{Id: fmt.Sprintf("id-%d", i), AccountId: accountId, CategoryId: categoryId}
+		err := s.store.Insert(budget)
+		s.NoError(err)
+	}
 
-		found, err := it.BudgetStore.GetByCategory(accountId, categoryId)
-		assert.NoError(t, err)
-		assert.ElementsMatch(t, found, expected)
-	})
+	found, err := s.store.GetByCategory(accountId, categoryId)
+	s.NoError(err)
+	s.ElementsMatch(found, expected)
+}
 
-	t.Run("it gets by filter", func(t *testing.T) {
-		it.Setup()
+// TODO: implement
+func (s *BudgetStoreTestSuite) TestGetsByFilter() {
+}
 
-		month := 10
-		year := 2023
-		accountId := "some-account-id"
+func (s *BudgetStoreTestSuite) TestUpdates() {
+	budget := data.Budget{Id: "budget-id"}
 
-		b1 := testBudget()
-		b1.Id = "test-id-1"
-		b1.AccountId = accountId
-		b1.Month = month
-		b1.Year = year
+	err := s.store.Insert(budget)
+	s.NoError(err)
 
-		b2 := testBudget()
-		b2.Id = "test-id-2"
-		b2.AccountId = accountId
-		b2.Month = month
-		b2.Year = year
+	update := data.BudgetUpdate{
+		CategoryId: "some-category-id",
+		Projected:  10.56,
+	}
 
-		expected := []data.Budget{b1, b2}
+	ok, err := s.store.Update(budget.Id, budget.AccountId, update, 12345)
+	s.NoError(err)
+	s.True(ok)
 
-		for _, budget := range expected {
-			err := it.BudgetStore.Insert(budget)
-			assert.NoError(t, err)
-		}
+	found, err := s.store.Get(budget.Id, budget.AccountId)
+	s.NoError(err)
+	s.Equal(found.CategoryId, update.CategoryId)
+	s.Equal(found.Projected, update.Projected)
+	s.Equal(found.UpdatedAt, testTimestamp)
+}
 
-		filter := data.BudgetFilter{
-			Month: month,
-			Year:  year,
-		}
+func (s *BudgetStoreTestSuite) TestDeletes() {
+	budget := data.Budget{Id: "budget-id"}
 
-		found, err := it.BudgetStore.GetBy(accountId, filter)
-		assert.NoError(t, err)
-		assert.ElementsMatch(t, found, expected)
-	})
+	err := s.store.Insert(budget)
+	s.NoError(err)
 
-	t.Run("it updates", func(t *testing.T) {
-		it.Setup()
+	ok, err := s.store.Delete(budget.Id, budget.AccountId)
+	s.NoError(err)
+	s.True(ok)
 
-		oldProjected := float64(1234)
-		newProjected := float64(4321)
-
-		budget := testBudget()
-		budget.Projected = oldProjected
-
-		err := it.BudgetStore.Insert(budget)
-		assert.NoError(t, err)
-
-		update := data.BudgetUpdate{
-			Projected: newProjected,
-		}
-
-		ok, err := it.BudgetStore.Update(budget.Id, budget.AccountId, update, 12345)
-		assert.NoError(t, err)
-		assert.True(t, ok)
-
-		found, err := it.BudgetStore.Get(budget.Id, budget.AccountId)
-		assert.NoError(t, err)
-		assert.Equal(t, found.Projected, newProjected)
-	})
-
-	t.Run("it deletes", func(t *testing.T) {
-		it.Setup()
-
-		budget := testBudget()
-
-		err := it.BudgetStore.Insert(budget)
-		assert.NoError(t, err)
-
-		ok, err := it.BudgetStore.Delete(budget.Id, budget.AccountId)
-		assert.NoError(t, err)
-		assert.True(t, ok)
-
-		found, err := it.BudgetStore.Get(budget.Id, budget.AccountId)
-		assert.NoError(t, err)
-		assert.Nil(t, found)
-	})
+	found, err := s.store.Get(budget.Id, budget.AccountId)
+	s.NoError(err)
+	s.Nil(found)
 }

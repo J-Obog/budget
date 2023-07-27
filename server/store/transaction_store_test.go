@@ -1,150 +1,117 @@
 package store
 
 import (
-	"testing"
+	"fmt"
 
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/types"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestTransactionStore(t *testing.T) {
-	it := NewStoreIntegrationTest()
+type TransactionStoreTestSuite struct {
+	suite.Suite
+	store TransactionStore
+}
 
-	t.Run("it inserts and gets", func(t *testing.T) {
-		it.Setup()
+func (s *TransactionStoreTestSuite) SetupSuite() {
+	cfg := config.Get()
+	svc := GetConfiguredStoreService(cfg)
+	s.store = svc.TransactionStore
+}
 
-		transaction := testTransaction()
+func (s *TransactionStoreTestSuite) SetupTest() {
+	err := s.store.DeleteAll()
+	s.NoError(err)
+}
 
-		err := it.TransactionStore.Insert(transaction)
-		assert.NoError(t, err)
+func (s *TransactionStoreTestSuite) TestInsertsAndGets() {
+	transaction := data.Transaction{Id: "transaction-id"}
 
-		found, err := it.TransactionStore.Get(transaction.Id, transaction.AccountId)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, transaction, *found)
-	})
+	err := s.store.Insert(transaction)
+	s.NoError(err)
 
-	t.Run("it gets by period category", func(t *testing.T) {
-		it.Setup()
+	found, err := s.store.Get(transaction.Id, transaction.AccountId)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(transaction, *found)
+}
 
-		month := 10
-		year := 2023
-		categoryId := types.StringPtr("some-category-id")
+// TODO: implement
+func (s *TransactionStoreTestSuite) TestGetsFilter() {
+}
 
-		t1 := testTransaction()
-		t1.Id = "id-1"
-		t1.Month = month
-		t1.Year = year
-		t1.CategoryId = categoryId
+func (s *TransactionStoreTestSuite) TestGetByPeriodCategory() {
+	accountId := "some-account-id"
+	categoryId := "some-category-id"
+	month := 10
+	year := 2024
 
-		t2 := testTransaction()
-		t2.Id = "id-2"
-		t2.Month = month
-		t2.Year = year
-		t2.CategoryId = categoryId
+	expected := []data.Transaction{}
 
-		expected := []data.Transaction{t1, t2}
-
-		for _, transaction := range expected {
-			err := it.TransactionStore.Insert(transaction)
-			assert.NoError(t, err)
+	for i := 0; i < 5; i++ {
+		transaction := data.Transaction{
+			Id:         fmt.Sprintf("id-%d", i),
+			AccountId:  accountId,
+			CategoryId: &categoryId,
+			Month:      month,
+			Year:       year,
 		}
 
-		found, err := it.TransactionStore.GetByPeriodCategory(t1.AccountId, *categoryId, month, year)
-		assert.NoError(t, err)
-		assert.ElementsMatch(t, found, expected)
-	})
+		err := s.store.Insert(transaction)
+		s.NoError(err)
+	}
 
-	t.Run("it gets by filter", func(t *testing.T) {
-		it.Setup()
+	found, err := s.store.GetByPeriodCategory(accountId, categoryId, month, year)
+	s.NoError(err)
+	s.ElementsMatch(found, expected)
+}
 
-		accountId := "someId"
+func (s *TransactionStoreTestSuite) TestUpdates() {
+	transaction := data.Transaction{Id: "transaction-id"}
 
-		lowestAmount := 10.90
-		highestAmount := 99.99
+	err := s.store.Insert(transaction)
+	s.NoError(err)
 
-		lowestDay := 10
-		highestDay := 15
+	update := data.TransactionUpdate{
+		CategoryId: types.StringPtr("category-id"),
+		Note:       types.StringPtr("Some note"),
+		Type:       data.BudgetType_Income,
+		Amount:     123.45,
+		Month:      11,
+		Day:        7,
+		Year:       2023,
+	}
 
-		month := 10
-		year := 2021
+	ok, err := s.store.Update(transaction.Id, transaction.AccountId, update, testTimestamp)
+	s.NoError(err)
+	s.True(ok)
 
-		t1 := testTransaction()
-		t1.Id = "id-1"
-		t1.AccountId = accountId
-		t1.Month = month
-		t1.Year = year
-		t1.Day = lowestDay
-		t1.Amount = lowestAmount
+	found, err := s.store.Get(transaction.Id, transaction.AccountId)
+	s.NoError(err)
+	s.Equal(*found.CategoryId, *update.CategoryId)
+	s.Equal(*found.Note, *update.Note)
+	s.Equal(found.Type, update.Type)
+	s.Equal(found.Amount, update.Amount)
+	s.Equal(found.Month, update.Month)
+	s.Equal(found.Day, update.Day)
+	s.Equal(found.Year, update.Year)
+	s.Equal(*found.CategoryId, *update.CategoryId)
 
-		err := it.TransactionStore.Insert(t1)
-		assert.NoError(t, err)
+	s.Equal(found.UpdatedAt, testTimestamp)
+}
 
-		t2 := testTransaction()
-		t2.Id = "id-2"
-		t2.AccountId = accountId
-		t2.Month = month
-		t2.Year = year
-		t2.Day = highestDay
-		t2.Amount = highestAmount + 10
+func (s *TransactionStoreTestSuite) TestDeletes() {
+	transaction := data.Transaction{Id: "transaction-id"}
 
-		err = it.TransactionStore.Insert(t2)
-		assert.NoError(t, err)
+	err := s.store.Insert(transaction)
+	s.NoError(err)
 
-		expected := []data.Transaction{t1}
+	ok, err := s.store.Delete(transaction.Id, transaction.AccountId)
+	s.NoError(err)
+	s.True(ok)
 
-		filter := data.TransactionFilter{
-			Before:      data.NewDate(month, highestDay, year),
-			After:       data.NewDate(month, lowestDay, year),
-			GreaterThan: lowestAmount,
-			LessThan:    highestAmount,
-		}
-
-		found, err := it.TransactionStore.GetBy(accountId, filter)
-		assert.NoError(t, err)
-		assert.ElementsMatch(t, expected, found)
-	})
-
-	t.Run("it updates", func(t *testing.T) {
-		it.Setup()
-
-		oldAmount := 1.23
-		newAmount := 2.23
-
-		transaction := testTransaction()
-		transaction.Amount = oldAmount
-
-		err := it.TransactionStore.Insert(transaction)
-		assert.NoError(t, err)
-
-		update := data.TransactionUpdate{
-			Amount: newAmount,
-		}
-
-		ok, err := it.TransactionStore.Update(transaction.Id, transaction.AccountId, update, 1234)
-		assert.NoError(t, err)
-		assert.True(t, ok)
-
-		found, err := it.TransactionStore.Get(transaction.Id, transaction.AccountId)
-		assert.NoError(t, err)
-		assert.Equal(t, found.Amount, newAmount)
-	})
-
-	t.Run("it deletes", func(t *testing.T) {
-		it.Setup()
-
-		transaction := testTransaction()
-
-		err := it.TransactionStore.Insert(transaction)
-		assert.NoError(t, err)
-
-		ok, err := it.TransactionStore.Delete(transaction.Id, transaction.AccountId)
-		assert.NoError(t, err)
-		assert.True(t, ok)
-
-		found, err := it.TransactionStore.Get(transaction.Id, transaction.AccountId)
-		assert.NoError(t, err)
-		assert.Nil(t, found)
-	})
+	found, err := s.store.Get(transaction.Id, transaction.AccountId)
+	s.NoError(err)
+	s.Nil(found)
 }

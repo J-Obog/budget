@@ -1,98 +1,88 @@
 package store
 
 import (
-	"testing"
-
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-func TestAccountStoreGets(t *testing.T) {
-	it.Setup()
-
-	account := testAccount()
-
-	err := it.AccountStore.Insert(account)
-	assert.NoError(t, err)
-
-	found, err := it.AccountStore.Get(account.Id)
-	assert.NoError(t, err)
-	assert.NotNil(t, found)
-	assert.Equal(t, account, *found)
+type AccountStoreTestSuite struct {
+	suite.Suite
+	store AccountStore
 }
 
-func TestAccountStore(t *testing.T) {
-	it := NewStoreIntegrationTest()
+func (s *AccountStoreTestSuite) SetupSuite() {
+	cfg := config.Get()
+	svc := GetConfiguredStoreService(cfg)
+	s.store = svc.AccountStore
+}
 
-	t.Run("it inserts and gets", func(t *testing.T) {
-		it.Setup()
+func (s *AccountStoreTestSuite) SetupTest() {
+	err := s.store.DeleteAll()
+	s.NoError(err)
+}
 
-		account := testAccount()
+func (s *AccountStoreTestSuite) TestInsertsAndGets() {
+	account := data.Account{
+		Id:        "account-id",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
-		err := it.AccountStore.Insert(account)
-		assert.NoError(t, err)
+	err := s.store.Insert(account)
+	s.NoError(err)
 
-		found, err := it.AccountStore.Get(account.Id)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, account, *found)
-	})
+	found, err := s.store.Get(account.Id)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(account, *found)
+}
 
-	t.Run("it updates", func(t *testing.T) {
-		it.Setup()
+func (s *AccountStoreTestSuite) TestUpdates() {
+	account := data.Account{Id: "account-id"}
+	update := data.AccountUpdate{Name: "New Account Name"}
 
-		account := data.Account{Name: "old-account-name"}
-		updatedAccount := data.Account{
-			Name: "new-account-name",
-		}
+	err := s.store.Insert(account)
+	s.NoError(err)
 
-		update := data.AccountUpdate{Name: updatedAccount.Name}
+	ok, err := s.store.Update(account.Id, update, testTimestamp)
+	s.NoError(err)
+	s.True(ok)
 
-		err := it.AccountStore.Insert(account)
-		assert.NoError(t, err)
+	found, err := s.store.Get(account.Id)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(found.Name, update.Name)
+	s.Equal(found.UpdatedAt, testTimestamp)
+}
 
-		ok, err := it.AccountStore.Update(account.Id, update, 1234)
-		assert.NoError(t, err)
-		assert.True(t, ok)
+func (s *AccountStoreTestSuite) TestMarksAccountAsDeleted() {
+	account := data.Account{Id: "account-id", IsDeleted: false}
 
-		found, err := it.AccountStore.Get(account.Id)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, *found, account)
-	})
+	err := s.store.Insert(account)
+	s.NoError(err)
 
-	t.Run("it marks as deleted", func(t *testing.T) {
-		it.Setup()
+	ok, err := s.store.SetDeleted(account.Id)
+	s.NoError(err)
+	s.True(ok)
 
-		account := data.Account{IsDeleted: false}
+	found, err := s.store.Get(account.Id)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(found.IsDeleted, true)
+}
 
-		err := it.AccountStore.Insert(account)
-		assert.NoError(t, err)
+func (s *AccountStoreTestSuite) TestDeletesAccount() {
+	account := data.Account{Id: "account-id"}
 
-		ok, err := it.AccountStore.SetDeleted(account.Id)
-		assert.NoError(t, err)
-		assert.True(t, ok)
+	err := s.store.Insert(account)
+	s.NoError(err)
 
-		found, err := it.AccountStore.Get(account.Id)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, found.IsDeleted, true)
-	})
+	ok, err := s.store.Delete(account.Id)
+	s.NoError(err)
+	s.True(ok)
 
-	t.Run("it deletes", func(t *testing.T) {
-		it.Setup()
-
-		account := testAccount()
-
-		err := it.AccountStore.Insert(account)
-		assert.NoError(t, err)
-
-		ok, err := it.AccountStore.Delete(account.Id)
-		assert.NoError(t, err)
-		assert.True(t, ok)
-
-		found, err := it.AccountStore.Get(account.Id)
-		assert.NoError(t, err)
-		assert.Nil(t, found)
-	})
+	found, err := s.store.Get(account.Id)
+	s.NoError(err)
+	s.Nil(found)
 }

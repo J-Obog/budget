@@ -28,7 +28,7 @@ func (pg *PostgresAccountStore) Get(id string) (*data.Account, error) {
 }
 
 func (pg *PostgresAccountStore) Insert(account data.Account) error {
-	return pg.db.Create(account).Error
+	return pg.db.Create(&account).Error
 }
 
 func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, timestamp int64) (bool, error) {

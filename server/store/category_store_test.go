@@ -1,111 +1,117 @@
 package store
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
+type CategoryStoreTestSuite struct {
+	suite.Suite
+	store CategoryStore
+}
+
 func TestCategoryStore(t *testing.T) {
-	it := NewStoreIntegrationTest()
+	suite.Run(t, new(CategoryStoreTestSuite))
+}
 
-	t.Run("it inserts and gets", func(t *testing.T) {
-		it.Setup()
+func (s *CategoryStoreTestSuite) SetupSuite() {
+	cfg := config.Get()
+	svc := GetConfiguredStoreService(cfg)
+	s.store = svc.CategoryStore
+}
 
-		category := testCategory()
+func (s *CategoryStoreTestSuite) SetupTest() {
+	err := s.store.DeleteAll()
+	s.NoError(err)
+}
 
-		err := it.CategoryStore.Insert(category)
-		assert.NoError(t, err)
+func (s *CategoryStoreTestSuite) TestInsertsAndGets() {
+	category := data.Category{Id: "category-id"}
 
-		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, category, *found)
-	})
+	err := s.store.Insert(category)
+	s.NoError(err)
 
-	t.Run("it updates", func(t *testing.T) {
-		it.Setup()
+	found, err := s.store.Get(category.Id, category.AccountId)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(category, *found)
+}
 
-		category := testCategory()
-		category.Name = "some_old_name"
+func (s *CategoryStoreTestSuite) TestGetsByName() {
+	category := data.Category{
+		Id:        "category-id",
+		AccountId: "account-id",
+		Name:      "FooBar",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
-		newName := "some_new_name"
-		update := data.CategoryUpdate{Name: newName}
+	err := s.store.Insert(category)
+	s.NoError(err)
 
-		err := it.CategoryStore.Insert(category)
-		assert.NoError(t, err)
+	found, err := s.store.GetByName(category.AccountId, category.Name)
+	s.NoError(err)
+	s.NotNil(found)
+	s.Equal(category, *found)
+}
 
-		ok, err := it.CategoryStore.Update(category.Id, category.AccountId, update, 1234)
-		assert.NoError(t, err)
-		assert.True(t, ok)
+func (s *CategoryStoreTestSuite) TestGetsAll() {
+	accountId := "some-account-id"
 
-		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, found.Name, newName)
-	})
+	expected := []data.Budget{}
 
-	t.Run("it gets by name", func(t *testing.T) {
-		it.Setup()
-
-		name := "some+cool+name"
-
-		category := testCategory()
-		category.Name = name
-
-		err := it.CategoryStore.Insert(category)
-		assert.NoError(t, err)
-
-		found, err := it.CategoryStore.GetByName(category.AccountId, name)
-		assert.NoError(t, err)
-		assert.NotNil(t, found)
-		assert.Equal(t, found, category)
-	})
-
-	t.Run("it gets all", func(t *testing.T) {
-		it.Setup()
-
-		accountId := "some-account-id"
-
-		c1 := testCategory()
-		c1.Id = "t1"
-		c1.AccountId = accountId
-
-		c2 := testCategory()
-		c2.Id = "t2"
-		c2.AccountId = accountId
-
-		c3 := testCategory()
-		c3.Id = "t3"
-		c3.AccountId = accountId
-
-		categories := []data.Category{c1, c2, c3}
-
-		for _, category := range categories {
-			err := it.CategoryStore.Insert(category)
-			assert.NoError(t, err)
+	for i := 0; i < 5; i++ {
+		category := data.Category{
+			Id:        fmt.Sprintf("id-%d", i),
+			AccountId: accountId,
 		}
 
-		found, err := it.CategoryStore.GetAll(accountId)
-		assert.NoError(t, err)
-		assert.ElementsMatch(t, found, categories)
-	})
+		err := s.store.Insert(category)
+		s.NoError(err)
+	}
 
-	t.Run("it deletes", func(t *testing.T) {
-		it.Setup()
+	found, err := s.store.GetAll(accountId)
+	s.NoError(err)
+	s.ElementsMatch(found, expected)
+}
 
-		category := testCategory()
+func (s *CategoryStoreTestSuite) TestUpdates() {
+	category := data.Category{Id: "category-id"}
 
-		err := it.CategoryStore.Insert(category)
-		assert.NoError(t, err)
+	err := s.store.Insert(category)
+	s.NoError(err)
 
-		ok, err := it.CategoryStore.Delete(category.Id, category.AccountId)
-		assert.NoError(t, err)
-		assert.True(t, ok)
+	update := data.CategoryUpdate{
+		Name:  "Baz",
+		Color: 11111,
+	}
 
-		found, err := it.CategoryStore.Get(category.Id, category.AccountId)
-		assert.NoError(t, err)
-		assert.Nil(t, found)
-	})
+	ok, err := s.store.Update(category.Id, category.AccountId, update, testTimestamp)
+	s.NoError(err)
+	s.True(ok)
+
+	found, err := s.store.Get(category.Id, category.AccountId)
+	s.NoError(err)
+	s.Equal(found.Name, update.Name)
+	s.Equal(found.Color, update.Color)
+	s.Equal(found.UpdatedAt, testTimestamp)
+}
+
+func (s *CategoryStoreTestSuite) TestDeletes() {
+	category := data.Category{Id: "category-id"}
+
+	err := s.store.Insert(category)
+	s.NoError(err)
+
+	ok, err := s.store.Delete(category.Id, category.AccountId)
+	s.NoError(err)
+	s.True(ok)
+
+	found, err := s.store.Get(category.Id, category.AccountId)
+	s.NoError(err)
+	s.Nil(found)
 }
