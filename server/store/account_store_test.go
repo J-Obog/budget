@@ -22,7 +22,7 @@ func (s *AccountStoreTestSuite) SetupTest() {
 	s.NoError(err)
 }
 
-func (s *AccountStoreTestSuite) TestInsertsAndGets() {
+func (s *AccountStoreTestSuite) TestInsertsAndGetsAccount() {
 	account := data.Account{
 		Id:        "account-id",
 		CreatedAt: testTimestamp,
@@ -38,7 +38,7 @@ func (s *AccountStoreTestSuite) TestInsertsAndGets() {
 	s.Equal(account, *found)
 }
 
-func (s *AccountStoreTestSuite) TestUpdates() {
+func (s *AccountStoreTestSuite) TestUpdatesAccount() {
 	account := data.Account{Id: "account-id"}
 	update := data.AccountUpdate{Name: "New Account Name"}
 

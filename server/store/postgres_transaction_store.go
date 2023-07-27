@@ -79,6 +79,7 @@ func (pg *PostgresTransactionStore) Update(id string, accountId string, update d
 		Month:      update.Month,
 		Day:        update.Day,
 		Year:       update.Year,
+		UpdatedAt:  timestamp,
 	})
 
 	return (res.RowsAffected == 1), res.Error

@@ -2,7 +2,6 @@ package store
 
 import (
 	"fmt"
-	"testing"
 
 	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
@@ -12,10 +11,6 @@ import (
 type CategoryStoreTestSuite struct {
 	suite.Suite
 	store CategoryStore
-}
-
-func TestCategoryStore(t *testing.T) {
-	suite.Run(t, new(CategoryStoreTestSuite))
 }
 
 func (s *CategoryStoreTestSuite) SetupSuite() {
@@ -29,8 +24,12 @@ func (s *CategoryStoreTestSuite) SetupTest() {
 	s.NoError(err)
 }
 
-func (s *CategoryStoreTestSuite) TestInsertsAndGets() {
-	category := data.Category{Id: "category-id"}
+func (s *CategoryStoreTestSuite) TestInsertsAndGetsCategory() {
+	category := data.Category{
+		Id:        "category-id",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
 	err := s.store.Insert(category)
 	s.NoError(err)
@@ -41,7 +40,7 @@ func (s *CategoryStoreTestSuite) TestInsertsAndGets() {
 	s.Equal(category, *found)
 }
 
-func (s *CategoryStoreTestSuite) TestGetsByName() {
+func (s *CategoryStoreTestSuite) TestGetsCategoryByName() {
 	category := data.Category{
 		Id:        "category-id",
 		AccountId: "account-id",
@@ -59,16 +58,20 @@ func (s *CategoryStoreTestSuite) TestGetsByName() {
 	s.Equal(category, *found)
 }
 
-func (s *CategoryStoreTestSuite) TestGetsAll() {
+func (s *CategoryStoreTestSuite) TestGetsAllCategories() {
 	accountId := "some-account-id"
 
-	expected := []data.Budget{}
+	expected := []data.Category{}
 
 	for i := 0; i < 5; i++ {
 		category := data.Category{
 			Id:        fmt.Sprintf("id-%d", i),
 			AccountId: accountId,
+			CreatedAt: testTimestamp,
+			UpdatedAt: testTimestamp,
 		}
+
+		expected = append(expected, category)
 
 		err := s.store.Insert(category)
 		s.NoError(err)
@@ -79,7 +82,7 @@ func (s *CategoryStoreTestSuite) TestGetsAll() {
 	s.ElementsMatch(found, expected)
 }
 
-func (s *CategoryStoreTestSuite) TestUpdates() {
+func (s *CategoryStoreTestSuite) TestUpdatesCategory() {
 	category := data.Category{Id: "category-id"}
 
 	err := s.store.Insert(category)
@@ -101,7 +104,7 @@ func (s *CategoryStoreTestSuite) TestUpdates() {
 	s.Equal(found.UpdatedAt, testTimestamp)
 }
 
-func (s *CategoryStoreTestSuite) TestDeletes() {
+func (s *CategoryStoreTestSuite) TestDeletesCategory() {
 	category := data.Category{Id: "category-id"}
 
 	err := s.store.Insert(category)

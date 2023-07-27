@@ -25,8 +25,12 @@ func (s *TransactionStoreTestSuite) SetupTest() {
 	s.NoError(err)
 }
 
-func (s *TransactionStoreTestSuite) TestInsertsAndGets() {
-	transaction := data.Transaction{Id: "transaction-id"}
+func (s *TransactionStoreTestSuite) TestInsertsAndGetsTransaction() {
+	transaction := data.Transaction{
+		Id:        "transaction-id",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
 	err := s.store.Insert(transaction)
 	s.NoError(err)
@@ -38,10 +42,10 @@ func (s *TransactionStoreTestSuite) TestInsertsAndGets() {
 }
 
 // TODO: implement
-func (s *TransactionStoreTestSuite) TestGetsFilter() {
+func (s *TransactionStoreTestSuite) TestGetsTransactionsByFilter() {
 }
 
-func (s *TransactionStoreTestSuite) TestGetByPeriodCategory() {
+func (s *TransactionStoreTestSuite) TestGetsTransactionsByPeriodCategory() {
 	accountId := "some-account-id"
 	categoryId := "some-category-id"
 	month := 10
@@ -56,7 +60,11 @@ func (s *TransactionStoreTestSuite) TestGetByPeriodCategory() {
 			CategoryId: &categoryId,
 			Month:      month,
 			Year:       year,
+			CreatedAt:  testTimestamp,
+			UpdatedAt:  testTimestamp,
 		}
+
+		expected = append(expected, transaction)
 
 		err := s.store.Insert(transaction)
 		s.NoError(err)
@@ -67,7 +75,7 @@ func (s *TransactionStoreTestSuite) TestGetByPeriodCategory() {
 	s.ElementsMatch(found, expected)
 }
 
-func (s *TransactionStoreTestSuite) TestUpdates() {
+func (s *TransactionStoreTestSuite) TestUpdatesTransaction() {
 	transaction := data.Transaction{Id: "transaction-id"}
 
 	err := s.store.Insert(transaction)
@@ -101,7 +109,7 @@ func (s *TransactionStoreTestSuite) TestUpdates() {
 	s.Equal(found.UpdatedAt, testTimestamp)
 }
 
-func (s *TransactionStoreTestSuite) TestDeletes() {
+func (s *TransactionStoreTestSuite) TestDeletesTransaction() {
 	transaction := data.Transaction{Id: "transaction-id"}
 
 	err := s.store.Insert(transaction)

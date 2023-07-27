@@ -2,7 +2,6 @@ package store
 
 import (
 	"fmt"
-	"testing"
 
 	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
@@ -12,10 +11,6 @@ import (
 type BudgetStoreTestSuite struct {
 	suite.Suite
 	store BudgetStore
-}
-
-func TestBudgetStore(t *testing.T) {
-	suite.Run(t, new(AccountStoreTestSuite))
 }
 
 func (s *BudgetStoreTestSuite) SetupSuite() {
@@ -29,8 +24,12 @@ func (s *BudgetStoreTestSuite) SetupTest() {
 	s.NoError(err)
 }
 
-func (s *BudgetStoreTestSuite) TestInsertsAndGets() {
-	budget := data.Budget{Id: "budget-id"}
+func (s *BudgetStoreTestSuite) TestInsertsAndGetsBudget() {
+	budget := data.Budget{
+		Id:        "budget-id",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
 	err := s.store.Insert(budget)
 	s.NoError(err)
@@ -41,12 +40,14 @@ func (s *BudgetStoreTestSuite) TestInsertsAndGets() {
 	s.Equal(budget, *found)
 }
 
-func (s *BudgetStoreTestSuite) TestGetsByPeriodCategory() {
+func (s *BudgetStoreTestSuite) TestGetsBudgetByPeriodCategory() {
 	budget := data.Budget{
 		Id:         "some-account-id",
 		CategoryId: "some-category-id",
 		Month:      10,
 		Year:       2024,
+		CreatedAt:  testTimestamp,
+		UpdatedAt:  testTimestamp,
 	}
 
 	err := s.store.Insert(budget)
@@ -58,14 +59,23 @@ func (s *BudgetStoreTestSuite) TestGetsByPeriodCategory() {
 	s.Equal(budget, *found)
 }
 
-func (s *BudgetStoreTestSuite) TestGetsByCategory() {
+func (s *BudgetStoreTestSuite) TestGetsBudgetsByCategory() {
 	categoryId := "some-category-id"
 	accountId := "some-account-id"
 
 	expected := []data.Budget{}
 
 	for i := 0; i < 5; i++ {
-		budget := data.Budget{Id: fmt.Sprintf("id-%d", i), AccountId: accountId, CategoryId: categoryId}
+		budget := data.Budget{
+			Id:         fmt.Sprintf("id-%d", i),
+			AccountId:  accountId,
+			CategoryId: categoryId,
+			CreatedAt:  testTimestamp,
+			UpdatedAt:  testTimestamp,
+		}
+
+		expected = append(expected, budget)
+
 		err := s.store.Insert(budget)
 		s.NoError(err)
 	}
@@ -76,10 +86,10 @@ func (s *BudgetStoreTestSuite) TestGetsByCategory() {
 }
 
 // TODO: implement
-func (s *BudgetStoreTestSuite) TestGetsByFilter() {
+func (s *BudgetStoreTestSuite) TestGetsBudgetsByFilter() {
 }
 
-func (s *BudgetStoreTestSuite) TestUpdates() {
+func (s *BudgetStoreTestSuite) TestUpdatesBudget() {
 	budget := data.Budget{Id: "budget-id"}
 
 	err := s.store.Insert(budget)
@@ -90,7 +100,7 @@ func (s *BudgetStoreTestSuite) TestUpdates() {
 		Projected:  10.56,
 	}
 
-	ok, err := s.store.Update(budget.Id, budget.AccountId, update, 12345)
+	ok, err := s.store.Update(budget.Id, budget.AccountId, update, testTimestamp)
 	s.NoError(err)
 	s.True(ok)
 
@@ -101,7 +111,7 @@ func (s *BudgetStoreTestSuite) TestUpdates() {
 	s.Equal(found.UpdatedAt, testTimestamp)
 }
 
-func (s *BudgetStoreTestSuite) TestDeletes() {
+func (s *BudgetStoreTestSuite) TestDeletesBudget() {
 	budget := data.Budget{Id: "budget-id"}
 
 	err := s.store.Insert(budget)

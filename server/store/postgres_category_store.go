@@ -62,8 +62,9 @@ func (pg *PostgresCategoryStore) Update(id string, accountId string, update data
 	q = q.Where("account_id = ?", accountId)
 
 	res := q.UpdateColumns(&data.Category{
-		Name:  update.Name,
-		Color: update.Color,
+		Name:      update.Name,
+		Color:     update.Color,
+		UpdatedAt: timestamp,
 	})
 
 	return (res.RowsAffected == 1), res.Error
