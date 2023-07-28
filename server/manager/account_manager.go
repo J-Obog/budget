@@ -12,7 +12,7 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
-func (manager *AccountManager) Update(existing *data.Account, body *rest.AccountUpdateBody) (bool, error) {
+func (manager *AccountManager) Update(existing *data.Account, body rest.AccountUpdateBody) (bool, error) {
 	timestamp := manager.clock.Now()
 
 	update := data.AccountUpdate{

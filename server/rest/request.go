@@ -12,6 +12,7 @@ type Request struct {
 	ResourceId string
 	Account    *data.Account
 	Query      map[string][]string
+	Params     map[string]string
 	Body       []byte
 }
 

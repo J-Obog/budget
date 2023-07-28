@@ -18,6 +18,10 @@ func (manager *TransactionManager) Get(id string, accountId string) (*data.Trans
 	return manager.store.Get(id, accountId)
 }
 
+func (manager *TransactionManager) GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error) {
+	return manager.store.GetByPeriodCategory(accountId, categoryId, month, year)
+}
+
 // TODO: implement
 func (manager *TransactionManager) GetAll(req *rest.Request) {
 

@@ -20,11 +20,15 @@ func (manager *CategoryManager) Get(id string, accountId string) (*data.Category
 	return manager.store.Get(id, accountId)
 }
 
+func (manager *CategoryManager) GetByName(accountId string, name string) (*data.Category, error) {
+	return manager.store.GetByName(accountId, name)
+}
+
 func (manager *CategoryManager) GetAll(accountId string) ([]data.Category, error) {
 	return manager.store.GetAll(accountId)
 }
 
-func (manager *CategoryManager) Create(accountId string, body *rest.CategoryCreateBody) (data.Category, error) {
+func (manager *CategoryManager) Create(accountId string, body rest.CategoryCreateBody) (data.Category, error) {
 	id := manager.uid.GetId()
 	timestamp := manager.clock.Now()
 
@@ -42,7 +46,7 @@ func (manager *CategoryManager) Create(accountId string, body *rest.CategoryCrea
 	return category, err
 }
 
-func (manager *CategoryManager) Update(existing *data.Category, body *rest.CategoryUpdateBody) (bool, error) {
+func (manager *CategoryManager) Update(existing *data.Category, body rest.CategoryUpdateBody) (bool, error) {
 	timestamp := manager.clock.Now()
 
 	update := data.CategoryUpdate{

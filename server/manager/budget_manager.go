@@ -18,12 +18,20 @@ func (manager *BudgetManager) Get(id string, accountId string) (*data.Budget, er
 	return manager.store.Get(id, accountId)
 }
 
+func (manager *BudgetManager) GetByPeriodCategory(accountId string, categoryId string, month int, year int) (*data.Budget, error) {
+	return manager.store.GetByPeriodCategory(accountId, categoryId, month, year)
+}
+
+func (manager *BudgetManager) GetByCategory(accountId string, categoryId string) ([]data.Budget, error) {
+	return manager.store.GetByCategory(accountId, categoryId)
+}
+
 // TODO: implement, may make it get for period
 func (manager *BudgetManager) GetAll() ([]data.Budget, error) {
 	return []data.Budget{}, nil
 }
 
-func (manager *BudgetManager) Create(accountId string, body *rest.BudgetCreateBody) (data.Budget, error) {
+func (manager *BudgetManager) Create(accountId string, body rest.BudgetCreateBody) (data.Budget, error) {
 	id := manager.uid.GetId()
 	timestamp := manager.clock.Now()
 
@@ -43,7 +51,7 @@ func (manager *BudgetManager) Create(accountId string, body *rest.BudgetCreateBo
 	return budget, err
 }
 
-func (manager *BudgetManager) Update(existing *data.Budget, body *rest.BudgetCreateBody) (bool, error) {
+func (manager *BudgetManager) Update(existing *data.Budget, body rest.BudgetUpdateBody) (bool, error) {
 	timestamp := manager.clock.Now()
 
 	update := data.BudgetUpdate{

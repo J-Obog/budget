@@ -67,6 +67,11 @@ var (
 		Status: Code_404,
 	}
 
+	ErrInvalidAccountId = &RestError{
+		Msg:    "category name already exists",
+		Status: Code_404,
+	}
+
 	//500
 	ErrInternalServer = &RestError{
 		Msg:    "internal error",
