@@ -27,7 +27,7 @@ func (manager *TransactionManager) GetAll(req *rest.Request) {
 
 }
 
-func (manager *TransactionManager) Create(accountId string, body *rest.TransactionCreateBody) (data.Transaction, error) {
+func (manager *TransactionManager) Create(accountId string, body rest.TransactionCreateBody) (data.Transaction, error) {
 	id := manager.uid.GetId()
 	timestamp := manager.clock.Now()
 
@@ -50,7 +50,7 @@ func (manager *TransactionManager) Create(accountId string, body *rest.Transacti
 	return transaction, err
 }
 
-func (manager *TransactionManager) Update(existing *data.Transaction, body *rest.TransactionUpdateBody) (bool, error) {
+func (manager *TransactionManager) Update(existing *data.Transaction, body rest.TransactionUpdateBody) (bool, error) {
 	timestamp := manager.clock.Now()
 	update := data.TransactionUpdate{
 		CategoryId: body.CategoryId,
