@@ -22,6 +22,7 @@ func NewGinServer(config api.APIConfig) *GinServer {
 	router.DELETE("/account", ginHandler(config.AccountAPI.Delete))
 
 	router.GET("/category", ginHandler(config.CategoryAPI.GetAll))
+
 	router.GET("/category/:id", ginHandler(config.CategoryAPI.Get))
 	router.POST("/category", ginHandler(config.CategoryAPI.Create))
 	router.PUT("/category/:id", ginHandler(config.CategoryAPI.Update))
