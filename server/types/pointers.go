@@ -10,6 +10,10 @@ func StringPtr(v string) *string {
 	return Ptr[string](v)
 }
 
+func IntPtr(v int) *int {
+	return Ptr[int](v)
+}
+
 func Int64Ptr(v int64) *int64 {
 	return Ptr[int64](v)
 }

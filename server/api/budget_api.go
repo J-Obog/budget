@@ -39,9 +39,20 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 	})
 }
 
-// TODO: implement
-func (api *BudgetAPI) GetAll(req *rest.Request) *rest.Response {
-	return rest.Ok(nil)
+func (api *BudgetAPI) Filter(req *rest.Request) *rest.Response {
+	accountId := req.Account.Id
+
+	query, err := rest.ParseQuery[rest.BudgetQuery](req.Query)
+	if err != nil {
+		return rest.Err(err)
+	}
+
+	budgets, err := api.budgetManager.GetByQuery(accountId, query)
+	if err != nil {
+		return rest.Err(err)
+	}
+
+	return rest.Ok(budgets)
 }
 
 func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {

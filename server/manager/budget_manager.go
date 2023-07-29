@@ -26,9 +26,21 @@ func (manager *BudgetManager) GetByCategory(accountId string, categoryId string)
 	return manager.store.GetByCategory(accountId, categoryId)
 }
 
-// TODO: implement, may make it get for period
-func (manager *BudgetManager) GetAll() ([]data.Budget, error) {
-	return []data.Budget{}, nil
+func (manager *BudgetManager) GetByQuery(accountId string, query rest.BudgetQuery) ([]data.Budget, error) {
+	filter := data.BudgetFilter{
+		Month: manager.clock.CurrentMonth(),
+		Year:  manager.clock.CurrentYear(),
+	}
+
+	if query.Month != nil {
+		filter.Month = *query.Month
+	}
+
+	if query.Year != nil {
+		filter.Year = *query.Year
+	}
+
+	return manager.store.GetBy(accountId, filter)
 }
 
 func (manager *BudgetManager) Create(accountId string, body rest.BudgetCreateBody) (data.Budget, error) {

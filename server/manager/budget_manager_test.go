@@ -4,6 +4,7 @@ import (
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/mocks"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/J-Obog/paidoff/types"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -39,6 +40,51 @@ func (s *BudgetManagerTestSuite) TestGetsBudget() {
 
 	s.NoError(err)
 	s.Equal(*expected, *actual)
+}
+
+func (s *BudgetManagerTestSuite) TestGetsByQuery() {
+	accountId := "some-account"
+
+	expected := []data.Budget{
+		{Id: "some-budget"},
+	}
+
+	defaultMonth := 10
+	defaultYear := 2024
+
+	s.clock.On("CurrentMonth").Return(defaultMonth)
+	s.clock.On("CurrentYear").Return(defaultYear)
+
+	s.Run("sets defaults", func() {
+		q := rest.BudgetQuery{}
+		expectedFilter := data.BudgetFilter{
+			Month: defaultMonth,
+			Year:  defaultYear,
+		}
+
+		s.store.On("GetBy", accountId, expectedFilter).Return(expected, nil)
+
+		actual, err := s.manager.GetByQuery(accountId, q)
+		s.NoError(err)
+		s.ElementsMatch(expected, actual)
+	})
+
+	s.Run("uses query values", func() {
+		q := rest.BudgetQuery{
+			Month: types.IntPtr(11),
+			Year:  types.IntPtr(4),
+		}
+		expectedFilter := data.BudgetFilter{
+			Month: *q.Month,
+			Year:  *q.Year,
+		}
+
+		s.store.On("GetBy", accountId, expectedFilter).Return(expected, nil)
+
+		actual, err := s.manager.GetByQuery(accountId, q)
+		s.NoError(err)
+		s.ElementsMatch(expected, actual)
+	})
 }
 
 func (s *BudgetManagerTestSuite) TestGetsBudgetsByPeriodCategory() {
