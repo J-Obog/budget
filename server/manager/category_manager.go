@@ -16,6 +16,15 @@ type CategoryManager struct {
 	queue queue.Queue
 }
 
+func NewCategoryManager(store store.CategoryStore, clock clock.Clock, uid uid.UIDProvider, queue queue.Queue) *CategoryManager {
+	return &CategoryManager{
+		store: store,
+		clock: clock,
+		uid:   uid,
+		queue: queue,
+	}
+}
+
 func (manager *CategoryManager) Get(id string, accountId string) (*data.Category, error) {
 	return manager.store.Get(id, accountId)
 }

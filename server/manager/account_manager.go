@@ -12,6 +12,13 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
+func NewAccountManager(store store.AccountStore, clock clock.Clock) *AccountManager {
+	return &AccountManager{
+		store: store,
+		clock: clock,
+	}
+}
+
 func (manager *AccountManager) Update(existing *data.Account, body rest.AccountUpdateBody) (bool, error) {
 	timestamp := manager.clock.Now()
 

@@ -13,17 +13,17 @@ const (
 	storeImpl = "postgres"
 )
 
-type StoreService struct {
+type StoreConfig struct {
 	AccountStore     AccountStore
 	CategoryStore    CategoryStore
 	BudgetStore      BudgetStore
 	TransactionStore TransactionStore
 }
 
-func GetConfiguredStoreService(cfg *config.AppConfig) *StoreService {
+func CreateConfig(app *config.AppConfig) *StoreConfig {
 	switch storeImpl {
 	case "postgres":
-		return getPostgresService(cfg.PostgresUrl)
+		return getPostgresService(app.PostgresUrl)
 	default:
 		log.Fatal("Not a supported impl for store")
 	}
@@ -31,7 +31,7 @@ func GetConfiguredStoreService(cfg *config.AppConfig) *StoreService {
 	return nil
 }
 
-func getPostgresService(url string) *StoreService {
+func getPostgresService(url string) *StoreConfig {
 	pgDb, err := gorm.Open(postgres.Open(url), &gorm.Config{
 		AllowGlobalUpdate: true,
 		Logger:            logger.Default.LogMode(logger.Silent),
@@ -41,7 +41,7 @@ func getPostgresService(url string) *StoreService {
 		log.Fatal(err)
 	}
 
-	return &StoreService{
+	return &StoreConfig{
 		AccountStore:     &PostgresAccountStore{db: pgDb},
 		CategoryStore:    &PostgresCategoryStore{db: pgDb},
 		BudgetStore:      &PostgresBudgetStore{db: pgDb},

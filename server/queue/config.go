@@ -10,10 +10,10 @@ const (
 	queueImpl = "rabbit"
 )
 
-func GetConfiguredQueue(cfg *config.AppConfig) Queue {
+func CreateConfig(app *config.AppConfig) Queue {
 	switch queueImpl {
 	case "rabbit":
-		return getRabbitMqQueue(cfg.RabbitMqUrl)
+		return getRabbitMqQueue(app.RabbitMqUrl)
 	default:
 		log.Fatal("Not a supported impl for queue")
 	}

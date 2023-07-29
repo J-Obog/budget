@@ -14,6 +14,14 @@ type BudgetManager struct {
 	uid   uid.UIDProvider
 }
 
+func NewBudgetManager(store store.BudgetStore, clock clock.Clock, uid uid.UIDProvider) *BudgetManager {
+	return &BudgetManager{
+		store: store,
+		clock: clock,
+		uid:   uid,
+	}
+}
+
 func (manager *BudgetManager) Get(id string, accountId string) (*data.Budget, error) {
 	return manager.store.Get(id, accountId)
 }

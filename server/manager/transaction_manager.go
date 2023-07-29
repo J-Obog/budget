@@ -16,6 +16,14 @@ type TransactionManager struct {
 	uid   uid.UIDProvider
 }
 
+func NewTransactionManager(store store.TransactionStore, clock clock.Clock, uid uid.UIDProvider) *TransactionManager {
+	return &TransactionManager{
+		store: store,
+		clock: clock,
+		uid:   uid,
+	}
+}
+
 func (manager *TransactionManager) Get(id string, accountId string) (*data.Transaction, error) {
 	return manager.store.Get(id, accountId)
 }
