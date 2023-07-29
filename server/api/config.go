@@ -13,7 +13,12 @@ type APIConfig struct {
 }
 
 func CreateConfig(app *config.AppConfig) *APIConfig {
-	managerConfig := manager.CreateConfig(app)
+	managerCfg := manager.CreateConfig(app)
 
-	return &APIConfig{}
+	return &APIConfig{
+		AccountAPI:     NewAccountAPI(managerCfg.AccountManager),
+		CategoryAPI:    NewCategoryAPI(managerCfg.CategoryManager, managerCfg.BudgetManager),
+		TransactionAPI: NewTransactionAPI(managerCfg.TransactionManager, managerCfg.CategoryManager),
+		BudgetAPI:      NewBudgetAPI(managerCfg.BudgetManager, managerCfg.TransactionManager),
+	}
 }
