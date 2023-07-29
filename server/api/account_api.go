@@ -11,6 +11,12 @@ type AccountAPI struct {
 	accountManager *manager.AccountManager
 }
 
+func NewAccountAPI(accountManager *manager.AccountManager) *AccountAPI {
+	return &AccountAPI{
+		accountManager: accountManager,
+	}
+}
+
 func (api *AccountAPI) Get(req *rest.Request) *rest.Response {
 	return rest.Ok(req.Account)
 }

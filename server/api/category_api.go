@@ -12,6 +12,13 @@ type CategoryAPI struct {
 	budgetManager   *manager.BudgetManager
 }
 
+func NewCategoryAPI(categoryManager *manager.CategoryManager, budgetManager *manager.BudgetManager) *CategoryAPI {
+	return &CategoryAPI{
+		budgetManager:   budgetManager,
+		categoryManager: categoryManager,
+	}
+}
+
 func getCategoryId(req *rest.Request) string {
 	return ""
 }

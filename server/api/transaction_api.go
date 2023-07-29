@@ -12,6 +12,13 @@ type TransactionAPI struct {
 	categoryManager    *manager.CategoryManager
 }
 
+func NewTransactionAPI(transactionManager *manager.TransactionManager, categoryManager *manager.CategoryManager) *TransactionAPI {
+	return &TransactionAPI{
+		transactionManager: transactionManager,
+		categoryManager:    categoryManager,
+	}
+}
+
 func getTransactionId(req *rest.Request) string {
 	return ""
 }

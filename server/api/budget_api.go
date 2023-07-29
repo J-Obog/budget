@@ -11,6 +11,13 @@ type BudgetAPI struct {
 	transactionManager *manager.TransactionManager
 }
 
+func NewBudgetAPI(budgetManager *manager.BudgetManager, transactionManager *manager.TransactionManager) *BudgetAPI {
+	return &BudgetAPI{
+		budgetManager:      budgetManager,
+		transactionManager: transactionManager,
+	}
+}
+
 func getBudgetId(req *rest.Request) string {
 	return ""
 }
