@@ -1,6 +1,8 @@
 package manager
 
 import (
+	"math"
+
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/mocks"
 	"github.com/J-Obog/paidoff/rest"
@@ -26,6 +28,51 @@ func (s *TransactionManagerTestSuite) SetupSuite() {
 		clock: s.clock,
 		uid:   s.uid,
 	}
+}
+
+func (s *TransactionManagerTestSuite) TestGetsByQuery() {
+	accountId := "some-account"
+
+	expected := []data.Transaction{
+		{Id: "some-transaction"},
+	}
+
+	s.Run("sets defaults", func() {
+		q := rest.TransactionQuery{}
+		expectedFilter := data.TransactionFilter{
+			Before:      data.NewDate(12, 31, math.MaxInt),
+			After:       data.NewDate(1, 1, math.MinInt),
+			GreaterThan: 0.00,
+			LessThan:    math.MaxFloat64,
+		}
+
+		s.store.On("GetBy", accountId, expectedFilter).Return(expected, nil)
+
+		actual, err := s.manager.GetByQuery(accountId, q)
+		s.NoError(err)
+		s.ElementsMatch(expected, actual)
+	})
+
+	s.Run("uses query values", func() {
+		q := rest.TransactionQuery{
+			StartDate: types.Ptr[data.Date](data.NewDate(1, 5, 2023)),
+			EndDate:   types.Ptr[data.Date](data.NewDate(4, 10, 2022)),
+			MinAmount: types.Float64Ptr(11.23),
+			MaxAmount: types.Float64Ptr(78.90),
+		}
+		expectedFilter := data.TransactionFilter{
+			After:       *q.StartDate,
+			Before:      *q.EndDate,
+			GreaterThan: *q.MinAmount,
+			LessThan:    *q.MaxAmount,
+		}
+
+		s.store.On("GetBy", accountId, expectedFilter).Return(expected, nil)
+
+		actual, err := s.manager.GetByQuery(accountId, q)
+		s.NoError(err)
+		s.ElementsMatch(expected, actual)
+	})
 }
 
 func (s *TransactionManagerTestSuite) TestGetsTransaction() {

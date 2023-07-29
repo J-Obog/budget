@@ -1,6 +1,8 @@
 package manager
 
 import (
+	"math"
+
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
@@ -22,9 +24,31 @@ func (manager *TransactionManager) GetByPeriodCategory(accountId string, categor
 	return manager.store.GetByPeriodCategory(accountId, categoryId, month, year)
 }
 
-// TODO: implement
-func (manager *TransactionManager) GetAll(req *rest.Request) {
+func (manager *TransactionManager) GetByQuery(accountId string, query rest.TransactionQuery) ([]data.Transaction, error) {
+	filter := data.TransactionFilter{
+		Before:      data.NewDate(12, 31, math.MaxInt),
+		After:       data.NewDate(1, 1, math.MinInt),
+		GreaterThan: 0.00,
+		LessThan:    math.MaxFloat64,
+	}
 
+	if query.StartDate != nil {
+		filter.After = *query.StartDate
+	}
+
+	if query.EndDate != nil {
+		filter.Before = *query.EndDate
+	}
+
+	if query.MinAmount != nil {
+		filter.GreaterThan = *query.MinAmount
+	}
+
+	if query.MaxAmount != nil {
+		filter.LessThan = *query.MaxAmount
+	}
+
+	return manager.store.GetBy(accountId, filter)
 }
 
 func (manager *TransactionManager) Create(accountId string, body rest.TransactionCreateBody) (data.Transaction, error) {

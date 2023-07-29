@@ -10,10 +10,10 @@ type BudgetQuery struct {
 }
 
 type TransactionQuery struct {
-	CreatedBefore *int64   `json:"createdBefore"`
-	CreatedAfter  *int64   `json:"createdAfter"`
-	AmountGte     *float64 `json:"amountGte"`
-	AmountLte     *float64 `json:"amountLte"`
+	StartDate *data.Date `json:"startDate"`
+	EndDate   *data.Date `json:"endDate"`
+	MinAmount *float64   `json:"minAmount"`
+	MaxAmount *float64   `json:"maxAmount"`
 }
 
 type AccountUpdateBody struct {
