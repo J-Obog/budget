@@ -1,329 +1,89 @@
 package manager
 
-/*
-func TestTransactionManagerGetsByRequest(t *testing.T) {
-	t.Run("it succeeds", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		req.ResourceId = testResourceId
+import (
+	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/mocks"
+	"github.com/J-Obog/paidoff/rest"
+	"github.com/J-Obog/paidoff/types"
+	"github.com/stretchr/testify/suite"
+)
 
-		transaction := data.Transaction{Id: "tr-id-1"}
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(&transaction, nil)
-
-		res := manager.GetByRequest(req)
-		assert.Equal(t, res.Data, &transaction)
-		assert.NoError(t, res.Error)
-	})
-
-	t.Run("it fails if transaction doesn't exist", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		req.ResourceId = testResourceId
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(nil, nil)
-
-		res := manager.GetByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidTransactionId)
-	})
+type TransactionManagerTestSuite struct {
+	suite.Suite
+	store   *mocks.TransactionStore
+	clock   *mocks.Clock
+	uid     *mocks.UIDProvider
+	manager *TransactionManager
 }
 
-func TestTransactionManagerGetsAllByRequest(t *testing.T) {
-	t.Run("it succeeds with user-given values", func(t *testing.T) {
-		manager := transactionManagerMock()
-		query := rest.TransactionQuery{
-			CreatedBefore: types.Int64Ptr(4000),
-			CreatedAfter:  types.Int64Ptr(3000),
-			AmountGte:     types.Float64Ptr(123.45),
-			AmountLte:     types.Float64Ptr(678.90),
-		}
-
-		filter := getExpectedTransactionUserFilter(query)
-
-		req := testRequest()
-		req.Query = query
-
-		transactions := []data.Transaction{{Id: "tr-id-1"}}
-
-		manager.MockTransactionStore.On("GetBy", req.Account.Id, filter).Return(transactions, nil)
-		manager.MockClock.On("DateFromStamp", *query.CreatedAfter).Return(testDate)
-		manager.MockClock.On("DateFromStamp", *query.CreatedBefore).Return(testDate)
-
-		res := manager.GetAllByRequest(req)
-		assert.Equal(t, res.Data, transactions)
-		assert.NoError(t, res.Error)
-	})
-
-	t.Run("it succeeds with default values", func(t *testing.T) {
-		manager := transactionManagerMock()
-		query := rest.TransactionQuery{}
-
-		filter := getExpectedTransactionDefaultFilter()
-
-		req := testRequest()
-		req.Query = query
-
-		transactions := []data.Transaction{{Id: "tr-id-1"}}
-
-		manager.MockTransactionStore.On("GetBy", req.Account.Id, filter).Return(transactions, nil)
-
-		res := manager.GetAllByRequest(req)
-		assert.Equal(t, res.Data, transactions)
-		assert.NoError(t, res.Error)
-	})
-}
-
-func TestTransactionManagerCreatesByRequest(t *testing.T) {
-	t.Run("it succeeds", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		body := rest.TransactionCreateBody{
-			Amount: 15.67,
-		}
-		req.Body = body
-
-		expected := getExpectedCreatedTransaction(body, req.Account.Id)
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockClock.On("IsDateValid", d).Return(true)
-		manager.MockClock.On("Now").Return(testTimestamp)
-		manager.MockUid.On("GetId").Return(testUuid)
-		manager.MockTransactionStore.On("Insert", expected).Return(nil)
-
-		res := manager.CreateByRequest(req)
-		assert.NoError(t, res.Error)
-	})
-
-	t.Run("it fails if date is invalid", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		body := rest.TransactionCreateBody{
-			Amount: 15.67,
-		}
-		req.Body = body
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockClock.On("IsDateValid", d).Return(false)
-
-		res := manager.CreateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidDate)
-	})
-
-	t.Run("it fails if note is too long", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-
-		noteValue := genString(config.LimitMaxTransactionNoteChars + 5)
-
-		body := rest.TransactionCreateBody{
-			Note: types.StringPtr(noteValue),
-		}
-
-		req.Body = body
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockClock.On("IsDateValid", d).Return(true)
-
-		res := manager.CreateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidTransactionNote)
-	})
-
-	t.Run("it fails if category doesn't exist", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-
-		body := rest.TransactionCreateBody{
-			CategoryId: types.StringPtr("cat-id"),
-		}
-
-		req.Body = body
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockClock.On("IsDateValid", d).Return(true)
-		manager.MockCategoryStore.On("Get", *body.CategoryId, req.Account.Id).Return(nil, nil)
-
-		res := manager.CreateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidCategoryId)
-	})
-}
-
-func TestTransactionManagerUpdatesByRequest(t *testing.T) {
-	t.Run("it succeeds", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		body := rest.TransactionUpdateBody{
-			Amount: 15.67,
-		}
-		req.ResourceId = testResourceId
-		req.Body = body
-
-		existing := data.Transaction{Amount: 37.80}
-
-		expected := getExpectedTransactionUpdate(body)
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(&existing, nil)
-		manager.MockClock.On("IsDateValid", d).Return(true)
-		manager.MockClock.On("Now").Return(testTimestamp)
-		manager.MockTransactionStore.On("Update", req.ResourceId, req.Account.Id, expected, testTimestamp).Return(true, nil)
-
-		res := manager.UpdateByRequest(req)
-		assert.NoError(t, res.Error)
-	})
-
-	t.Run("it fails if transaction wasn't updated", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		body := rest.TransactionUpdateBody{
-			Amount: 15.67,
-		}
-		req.ResourceId = testResourceId
-		req.Body = body
-
-		existing := data.Transaction{Amount: 37.80}
-
-		expected := getExpectedTransactionUpdate(body)
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(&existing, nil)
-		manager.MockClock.On("IsDateValid", d).Return(true)
-		manager.MockClock.On("Now").Return(testTimestamp)
-		manager.MockTransactionStore.On("Update", req.ResourceId, req.Account.Id, expected, testTimestamp).Return(false, nil)
-
-		res := manager.UpdateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidTransactionId)
-	})
-
-	t.Run("it fails if date is invalid", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		body := rest.TransactionUpdateBody{
-			Amount: 15.67,
-		}
-		req.ResourceId = testResourceId
-		req.Body = body
-
-		existing := data.Transaction{Amount: 37.80}
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(&existing, nil)
-		manager.MockClock.On("IsDateValid", d).Return(false)
-
-		res := manager.UpdateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidDate)
-	})
-
-	t.Run("it fails if note is too long", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		note := genString(config.LimitMaxTransactionNoteChars + 5)
-		body := rest.TransactionUpdateBody{
-			Note:   types.StringPtr(note),
-			Amount: 15.67,
-		}
-		req.ResourceId = testResourceId
-		req.Body = body
-
-		existing := data.Transaction{Amount: 37.80}
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(&existing, nil)
-		manager.MockClock.On("IsDateValid", d).Return(true)
-
-		res := manager.UpdateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidTransactionNote)
-	})
-
-	t.Run("it fails if category doesn't exist", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		body := rest.TransactionUpdateBody{
-			CategoryId: types.StringPtr("new-category-id"),
-			Amount:     15.67,
-		}
-		req.ResourceId = testResourceId
-		req.Body = body
-
-		existing := data.Transaction{Amount: 37.80}
-
-		d := data.NewDate(body.Month, body.Day, body.Year)
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(&existing, nil)
-		manager.MockClock.On("IsDateValid", d).Return(true)
-		manager.MockCategoryStore.On("Get", *body.CategoryId, req.Account.Id).Return(nil, nil)
-
-		res := manager.UpdateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidCategoryId)
-	})
-
-	t.Run("it fails if transaction doesn't exist", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		body := rest.TransactionUpdateBody{
-			Amount: 15.67,
-		}
-		req.ResourceId = testResourceId
-		req.Body = body
-
-		manager.MockTransactionStore.On("Get", req.ResourceId, req.Account.Id).Return(nil, nil)
-
-		res := manager.UpdateByRequest(req)
-		assert.ErrorIs(t, res.Error, rest.ErrInvalidTransactionId)
-	})
-}
-
-func TestTransactionManagerDeletesByRequest(t *testing.T) {
-	t.Run("it succeeds", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		req.ResourceId = testResourceId
-
-		manager.MockTransactionStore.On("Delete", req.ResourceId, req.Account.Id).Return(true, nil)
-
-		res := manager.DeleteByRequest(req)
-		assert.NoError(t, res.Error)
-	})
-
-	t.Run("it fails if transaction wasn't deleted", func(t *testing.T) {
-		manager := transactionManagerMock()
-		req := testRequest()
-		req.ResourceId = testResourceId
-
-		manager.MockTransactionStore.On("Delete", req.ResourceId, req.Account.Id).Return(false, nil)
-
-		res := manager.DeleteByRequest(req)
-		assert.Error(t, res.Error, rest.ErrInvalidTransactionId)
-	})
-}
-
-func getExpectedTransactionUserFilter(q rest.TransactionQuery) data.TransactionFilter {
-	return data.TransactionFilter{
-		Before:      testDate,
-		After:       testDate,
-		GreaterThan: *q.AmountGte,
-		LessThan:    *q.AmountLte,
+func (s *TransactionManagerTestSuite) SetupSuite() {
+	s.store = new(mocks.TransactionStore)
+	s.clock = new(mocks.Clock)
+	s.uid = new(mocks.UIDProvider)
+
+	s.manager = &TransactionManager{
+		store: s.store,
+		clock: s.clock,
+		uid:   s.uid,
 	}
 }
 
-func getExpectedTransactionDefaultFilter() data.TransactionFilter {
-	return data.TransactionFilter{
-		Before:      data.NewDate(1, 1, 1902),
-		After:       data.NewDate(1, 1, math.MaxInt),
-		GreaterThan: math.MaxFloat64,
-		LessThan:    0,
+func (s *TransactionManagerTestSuite) TestGetsTransaction() {
+	expected := &data.Transaction{
+		Id:        "some-transaction-id",
+		AccountId: "some-account",
 	}
+
+	s.store.On("Get", expected.Id, expected.AccountId).Return(expected, nil)
+
+	actual, err := s.manager.Get(expected.Id, expected.AccountId)
+
+	s.NoError(err)
+	s.Equal(*expected, *actual)
 }
 
-func getExpectedCreatedTransaction(body rest.TransactionCreateBody, accountId string) data.Transaction {
-	return data.Transaction{
+func (s *TransactionManagerTestSuite) TestGetsTransactionByPeriodCategory() {
+	accountId := "some-account"
+	categoryId := "category-id"
+	month := 10
+	year := 2023
+
+	expected := []data.Transaction{
+		{Id: "some-transaction-id"},
+	}
+
+	s.store.On("GetByPeriodCategory",
+		accountId,
+		categoryId,
+		month,
+		year,
+	).Return(expected, nil)
+
+	actual, err := s.manager.GetByPeriodCategory(
+		accountId,
+		categoryId,
+		month,
+		year,
+	)
+
+	s.NoError(err)
+	s.ElementsMatch(expected, actual)
+}
+
+func (s *TransactionManagerTestSuite) TestCreatesTransaction() {
+	accountId := "account-id"
+
+	body := rest.TransactionCreateBody{
+		CategoryId: types.StringPtr("category-id"),
+		Note:       types.StringPtr("some note content"),
+		Type:       data.BudgetType_Expense,
+		Amount:     10.89,
+		Month:      4,
+		Day:        5,
+		Year:       2022,
+	}
+
+	expected := data.Transaction{
 		Id:         testUuid,
 		AccountId:  accountId,
 		CategoryId: body.CategoryId,
@@ -336,10 +96,33 @@ func getExpectedCreatedTransaction(body rest.TransactionCreateBody, accountId st
 		CreatedAt:  testTimestamp,
 		UpdatedAt:  testTimestamp,
 	}
+
+	s.clock.On("Now").Return(testTimestamp)
+	s.uid.On("GetId").Return(testUuid)
+	s.store.On("Insert", expected).Return(nil)
+
+	actual, err := s.manager.Create(accountId, body)
+	s.NoError(err)
+	s.Equal(expected, actual)
 }
 
-func getExpectedTransactionUpdate(body rest.TransactionUpdateBody) data.TransactionUpdate {
-	return data.TransactionUpdate{
+func (s *TransactionManagerTestSuite) TestUpdatesTransaction() {
+	existing := &data.Transaction{
+		Id:        "transaction-id",
+		AccountId: "account-id",
+	}
+
+	body := rest.TransactionUpdateBody{
+		CategoryId: types.StringPtr("category-id"),
+		Note:       types.StringPtr("some note content"),
+		Type:       data.BudgetType_Expense,
+		Amount:     10.89,
+		Month:      4,
+		Day:        5,
+		Year:       2022,
+	}
+
+	update := data.TransactionUpdate{
 		CategoryId: body.CategoryId,
 		Note:       body.Note,
 		Type:       body.Type,
@@ -348,5 +131,36 @@ func getExpectedTransactionUpdate(body rest.TransactionUpdateBody) data.Transact
 		Day:        body.Day,
 		Year:       body.Year,
 	}
+
+	s.clock.On("Now").Return(testTimestamp, nil)
+	s.store.On("Update", existing.Id, existing.AccountId, update, testTimestamp).Return(true, nil)
+
+	ok, err := s.manager.Update(existing, body)
+
+	s.NoError(err)
+	s.True(ok)
+	s.Equal(existing, &data.Transaction{
+		Id:         existing.Id,
+		AccountId:  existing.AccountId,
+		CategoryId: body.CategoryId,
+		Note:       body.Note,
+		Type:       body.Type,
+		Amount:     body.Amount,
+		Month:      body.Month,
+		Day:        body.Day,
+		Year:       body.Year,
+		UpdatedAt:  testTimestamp,
+	})
 }
-*/
+
+func (s *TransactionManagerTestSuite) TestDeletesTransaction() {
+	id := "some-transaction-to-delete"
+	account := "some-account-id"
+
+	s.store.On("Delete", id, account).Return(true, nil)
+
+	ok, err := s.manager.Delete(id, account)
+
+	s.NoError(err)
+	s.True(ok)
+}

@@ -69,6 +69,7 @@ func (manager *TransactionManager) Update(existing *data.Transaction, body rest.
 	existing.Month = update.Month
 	existing.Day = update.Day
 	existing.Year = update.Year
+	existing.UpdatedAt = timestamp
 
 	return manager.store.Update(existing.Id, existing.AccountId, update, timestamp)
 }
