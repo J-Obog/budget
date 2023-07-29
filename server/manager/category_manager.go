@@ -56,6 +56,7 @@ func (manager *CategoryManager) Update(existing *data.Category, body rest.Catego
 
 	existing.Name = update.Name
 	existing.Color = update.Color
+	existing.UpdatedAt = timestamp
 
 	return manager.store.Update(existing.Id, existing.AccountId, update, timestamp)
 }

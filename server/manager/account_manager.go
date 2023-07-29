@@ -20,6 +20,7 @@ func (manager *AccountManager) Update(existing *data.Account, body rest.AccountU
 	}
 
 	existing.Name = update.Name
+	existing.UpdatedAt = timestamp
 
 	return manager.store.Update(existing.Id, update, timestamp)
 }

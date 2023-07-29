@@ -61,6 +61,7 @@ func (manager *BudgetManager) Update(existing *data.Budget, body rest.BudgetUpda
 
 	existing.CategoryId = update.CategoryId
 	existing.Projected = body.Projected
+	existing.UpdatedAt = timestamp
 
 	return manager.store.Update(existing.Id, existing.AccountId, update, timestamp)
 }

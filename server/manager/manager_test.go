@@ -7,5 +7,7 @@ import (
 )
 
 func TestManagers(t *testing.T) {
+	suite.Run(t, new(AccountManagerTestSuite))
+	suite.Run(t, new(BudgetManagerTestSuite))
 	suite.Run(t, new(CategoryManagerTestSuite))
 }
