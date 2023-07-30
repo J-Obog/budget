@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/J-Obog/paidoff/data"
+	"github.com/gorilla/schema"
 )
 
 type Request struct {
@@ -16,7 +17,6 @@ type Request struct {
 	Body       []byte
 }
 
-// TODO: make any serializable type alias?
 func ParseBody[T any](jsonb []byte) (T, error) {
 	var t T
 
@@ -36,7 +36,14 @@ func ParseBody[T any](jsonb []byte) (T, error) {
 	return t, nil
 }
 
-func ParseQuery[T any](qmap map[string][]string) (T, error) {
+func ParseQuery[T any](queryMap map[string][]string) (T, error) {
 	var t T
+
+	decoder := schema.NewDecoder()
+
+	if err := decoder.Decode(&t, queryMap); err != nil {
+		return t, &RestError{Msg: "invalid value for parsing query"}
+	}
+
 	return t, nil
 }
