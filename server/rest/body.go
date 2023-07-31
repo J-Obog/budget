@@ -1,20 +1,11 @@
 package rest
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/J-Obog/paidoff/data"
 )
-
-type BudgetQuery struct {
-	Month *int `json:"month"`
-	Year  *int `json:"year"`
-}
-
-type TransactionQuery struct {
-	StartDate *data.Date `json:"startDate"`
-	EndDate   *data.Date `json:"endDate"`
-	MinAmount *float64   `json:"minAmount"`
-	MaxAmount *float64   `json:"maxAmount"`
-}
 
 type AccountUpdateBody struct {
 	Name string `json:"name"`
@@ -60,4 +51,23 @@ type BudgetCreateBody struct {
 type BudgetUpdateBody struct {
 	CategoryId string  `json:"categoryId"`
 	Projected  float64 `json:"projected"`
+}
+
+func ParseBody[T any](jsonb []byte) (T, error) {
+	var t T
+
+	err := json.Unmarshal(jsonb, &t)
+
+	if err != nil {
+		switch jsonErr := err.(type) {
+		case *json.SyntaxError:
+			return t, ErrInvalidJSONBody
+		case *json.UnmarshalTypeError:
+			return t, &RestError{Msg: fmt.Sprintf("invalid value for %s", jsonErr.Field)}
+		default:
+			return t, ErrInternalServer
+		}
+	}
+
+	return t, nil
 }

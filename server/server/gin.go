@@ -17,28 +17,39 @@ type GinServer struct {
 func NewGinServer(config api.APIConfig) *GinServer {
 	router := gin.Default()
 
-	router.GET("/account", ginHandler(config.AccountAPI.Get))
-	router.PUT("/account", ginHandler(config.AccountAPI.Update))
-	router.DELETE("/account", ginHandler(config.AccountAPI.Delete))
+	accountRouter := router.Group("/account")
+	{
+		accountRouter.GET("/", ginHandler(config.AccountAPI.Get))
+		accountRouter.PUT("/", ginHandler(config.AccountAPI.Update))
+		accountRouter.DELETE("/", ginHandler(config.AccountAPI.Delete))
+	}
 
-	router.GET("/category", ginHandler(config.CategoryAPI.GetAll))
+	categoryRouter := router.Group("/category")
+	{
+		categoryRouter.GET("/", ginHandler(config.CategoryAPI.GetAll))
+		categoryRouter.GET("/:id", ginHandler(config.CategoryAPI.Get))
+		categoryRouter.POST("/", ginHandler(config.CategoryAPI.Create))
+		categoryRouter.PUT("/:id", ginHandler(config.CategoryAPI.Update))
+		categoryRouter.DELETE("/:id", ginHandler(config.CategoryAPI.Delete))
+	}
 
-	router.GET("/category/:id", ginHandler(config.CategoryAPI.Get))
-	router.POST("/category", ginHandler(config.CategoryAPI.Create))
-	router.PUT("/category/:id", ginHandler(config.CategoryAPI.Update))
-	router.DELETE("/category/:id", ginHandler(config.CategoryAPI.Delete))
+	transactionRouter := router.Group("/category")
+	{
+		transactionRouter.GET("/", ginHandler(config.TransactionAPI.Filter))
+		transactionRouter.GET("/:id", ginHandler(config.TransactionAPI.Get))
+		transactionRouter.POST("/", ginHandler(config.TransactionAPI.Create))
+		transactionRouter.PUT("/:id", ginHandler(config.TransactionAPI.Update))
+		transactionRouter.DELETE("/:id", ginHandler(config.TransactionAPI.Delete))
+	}
 
-	router.GET("/transaction", ginHandler(config.TransactionAPI.Filter))
-	router.GET("/transaction/:id", ginHandler(config.TransactionAPI.Get))
-	router.POST("/transaction", ginHandler(config.TransactionAPI.Create))
-	router.PUT("/transaction/:id", ginHandler(config.TransactionAPI.Update))
-	router.DELETE("/transaction/:id", ginHandler(config.TransactionAPI.Delete))
-
-	router.GET("/budget", ginHandler(config.BudgetAPI.Filter))
-	router.GET("/budget/:id", ginHandler(config.BudgetAPI.Get))
-	router.POST("/budget", ginHandler(config.BudgetAPI.Create))
-	router.PUT("/budget/:id", ginHandler(config.BudgetAPI.Update))
-	router.DELETE("/budget/:id", ginHandler(config.BudgetAPI.Delete))
+	budgetRouter := router.Group("/budget")
+	{
+		budgetRouter.GET("/", ginHandler(config.BudgetAPI.Filter))
+		budgetRouter.GET("/:id", ginHandler(config.BudgetAPI.Get))
+		budgetRouter.POST("/", ginHandler(config.BudgetAPI.Create))
+		budgetRouter.PUT("/:id", ginHandler(config.BudgetAPI.Update))
+		budgetRouter.DELETE("/:id", ginHandler(config.BudgetAPI.Delete))
+	}
 
 	return &GinServer{
 		router: router,
