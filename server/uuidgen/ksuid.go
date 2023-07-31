@@ -8,6 +8,6 @@ func NewKSUIDProvider() *KSUIDProvider {
 	return &KSUIDProvider{}
 }
 
-func (k *KSUIDProvider) GetId() string {
+func (k *KSUIDProvider) GetUUID() string {
 	return ksuid.New().String()
 }

@@ -13,7 +13,7 @@ type PostgresTransactionStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresTransactionStore) Get(id string, accountId string) (*data.Transaction, error) {
+func (pg *PostgresTransactionStore) GetTransaction(id string, accountId string) (*data.Transaction, error) {
 	var transaction data.Transaction
 
 	err := pg.db.Where(data.Transaction{Id: id, AccountId: accountId}).First(&transaction).Error
@@ -28,7 +28,7 @@ func (pg *PostgresTransactionStore) Get(id string, accountId string) (*data.Tran
 	return nil, err
 }
 
-func (pg *PostgresTransactionStore) GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
+func (pg *PostgresTransactionStore) GetTransactionsByFilter(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
 	transactions := make([]data.Transaction, 0)
 
 	q := pg.db.Where("amount >= ?", filter.GreaterThan)
@@ -45,7 +45,7 @@ func (pg *PostgresTransactionStore) GetBy(accountId string, filter data.Transact
 	return transactions, nil
 }
 
-func (pg *PostgresTransactionStore) GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error) {
+func (pg *PostgresTransactionStore) GetTransactionsByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error) {
 	transactions := make([]data.Transaction, 0)
 
 	query := data.Transaction{
@@ -63,11 +63,11 @@ func (pg *PostgresTransactionStore) GetByPeriodCategory(accountId string, catego
 	return nil, err
 }
 
-func (pg *PostgresTransactionStore) Insert(transaction data.Transaction) error {
+func (pg *PostgresTransactionStore) InsertTransaction(transaction data.Transaction) error {
 	return pg.db.Create(&transaction).Error
 }
 
-func (pg *PostgresTransactionStore) Update(id string, accountId string, update data.TransactionUpdate, timestamp int64) (bool, error) {
+func (pg *PostgresTransactionStore) UpdateTransaction(id string, accountId string, update data.TransactionUpdate, timestamp int64) (bool, error) {
 	q := pg.db.Where("id = ?", id)
 	q = q.Where("account_id = ?", accountId)
 
@@ -85,12 +85,12 @@ func (pg *PostgresTransactionStore) Update(id string, accountId string, update d
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresTransactionStore) Delete(id string, accountId string) (bool, error) {
+func (pg *PostgresTransactionStore) DeleteTransaction(id string, accountId string) (bool, error) {
 	res := pg.db.Delete(data.Transaction{Id: id, AccountId: accountId})
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresTransactionStore) DeleteAll() error {
+func (pg *PostgresTransactionStore) DeleteAllTransactions() error {
 	err := pg.db.Delete(data.Transaction{}).Error
 	return err
 }
