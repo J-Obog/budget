@@ -86,14 +86,14 @@ func (api *CategoryAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	ok, err := api.categoryManager.Update(existing, body)
+	_, err := api.categoryManager.Update(existing, body)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if !ok {
+	/*if !ok {
 		return rest.Err(rest.ErrInvalidCategoryId)
-	}
+	}*/
 
 	return rest.Ok(existing)
 }
@@ -106,14 +106,14 @@ func (api *CategoryAPI) Delete(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	ok, err := api.categoryManager.Delete(categoryId, accountId)
+	_, err := api.categoryManager.Delete(categoryId, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if !ok {
+	/*if !ok {
 		return rest.Err(rest.ErrInvalidCategoryId)
-	}
+	}*/
 
 	return rest.Success()
 }
@@ -147,6 +147,7 @@ func (api *CategoryAPI) validateCreate(body rest.CategoryCreateBody, accountId s
 	return nil
 }
 
+// CheckIfNameIsTaken
 func (api *CategoryAPI) checkCategoryBeingUsed(categoryId string, accountId string) error {
 	budgets, err := api.budgetManager.GetByCategory(accountId, categoryId)
 	if err != nil {

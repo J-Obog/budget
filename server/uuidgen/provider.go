@@ -1,5 +1,5 @@
-package uid
+package uuid
 
-type UUIDProvider interface {
-	GetUUID() string
+type UuidProvider interface {
+	GetUuid() string
 }

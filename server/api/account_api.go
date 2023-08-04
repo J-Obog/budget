@@ -1,13 +1,19 @@
 package api
 
 import (
+	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/J-Obog/paidoff/store"
+	uuid "github.com/J-Obog/paidoff/uuidgen"
 )
 
 type AccountAPI struct {
+	accountStore   store.AccountStore
+	uuidProvider   uuid.UuidProvider
+	clock          clock.Clock
 	accountManager *manager.AccountManager
 }
 

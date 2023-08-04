@@ -24,7 +24,7 @@ func getBudgetId(req *rest.Request) string {
 
 func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 	id := getBudgetId(req)
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	budget, err := api.budgetManager.Get(id, accountId)
 	if err != nil {
@@ -47,7 +47,7 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) Filter(req *rest.Request) *rest.Response {
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	query, err := rest.ParseQuery[rest.BudgetQuery](req.Query)
 	if err != nil {
@@ -63,7 +63,7 @@ func (api *BudgetAPI) Filter(req *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	body, err := rest.ParseBody[rest.BudgetCreateBody](req.Body)
 	if err != nil {
@@ -83,7 +83,7 @@ func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
-	accountId := req.Account.Id
+	accountId := testAccountId
 	budgetId := req.ResourceId
 
 	body, err := rest.ParseBody[rest.BudgetUpdateBody](req.Body)
@@ -113,7 +113,9 @@ func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) Delete(req *rest.Request) *rest.Response {
-	ok, err := api.budgetManager.Delete(req.ResourceId, req.Account.Id)
+	accountId := testAccountId
+
+	ok, err := api.budgetManager.Delete(req.ResourceId, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}

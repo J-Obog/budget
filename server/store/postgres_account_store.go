@@ -12,7 +12,7 @@ type PostgresAccountStore struct {
 	db *gorm.DB
 }
 
-func (pg *PostgresAccountStore) GetAccount(id string) (*data.Account, error) {
+func (pg *PostgresAccountStore) Get(id string) (*data.Account, error) {
 	var account data.Account
 
 	err := pg.db.Where(data.Account{Id: id}).First(&account).Error
@@ -27,11 +27,11 @@ func (pg *PostgresAccountStore) GetAccount(id string) (*data.Account, error) {
 	return nil, err
 }
 
-func (pg *PostgresAccountStore) InsertAccount(account data.Account) error {
+func (pg *PostgresAccountStore) Insert(account data.Account) error {
 	return pg.db.Create(&account).Error
 }
 
-func (pg *PostgresAccountStore) UpdateAccount(id string, update data.AccountUpdate, timestamp int64) (bool, error) {
+func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, timestamp int64) (bool, error) {
 	q := pg.db.Where("id = ?", id)
 
 	res := q.UpdateColumns(&data.Account{
@@ -42,7 +42,7 @@ func (pg *PostgresAccountStore) UpdateAccount(id string, update data.AccountUpda
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresAccountStore) SoftDeleteAccount(id string) (bool, error) {
+func (pg *PostgresAccountStore) SetDeleted(id string) (bool, error) {
 	q := pg.db.Where("id = ?", id)
 
 	res := q.UpdateColumns(&data.Account{
@@ -52,12 +52,12 @@ func (pg *PostgresAccountStore) SoftDeleteAccount(id string) (bool, error) {
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresAccountStore) DeleteAccount(id string) (bool, error) {
+func (pg *PostgresAccountStore) Delete(id string) (bool, error) {
 	res := pg.db.Delete(data.Account{Id: id})
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresAccountStore) DeleteAllAccounts() error {
+func (pg *PostgresAccountStore) DeleteAll() error {
 	err := pg.db.Delete(data.Account{}).Error
 	return err
 }

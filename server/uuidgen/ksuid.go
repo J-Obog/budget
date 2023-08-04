@@ -1,13 +1,13 @@
-package uid
+package uuid
 
 import "github.com/segmentio/ksuid"
 
-type KSUIDProvider struct{}
+type KsuidProvider struct{}
 
-func NewKSUIDProvider() *KSUIDProvider {
-	return &KSUIDProvider{}
+func NewKsuidProvider() *KsuidProvider {
+	return &KsuidProvider{}
 }
 
-func (k *KSUIDProvider) GetUUID() string {
+func (k *KsuidProvider) GetUuid() string {
 	return ksuid.New().String()
 }

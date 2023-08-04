@@ -1,4 +1,4 @@
-package uid
+package uuid
 
 import (
 	"log"
@@ -10,10 +10,10 @@ const (
 	uuidImpl = "ksuid"
 )
 
-func CreateConfig(app *config.AppConfig) UUIDProvider {
+func CreateConfig(app *config.AppConfig) UuidProvider {
 	switch uuidImpl {
 	case "ksuid":
-		return NewKSUIDProvider()
+		return NewKsuidProvider()
 	default:
 		log.Fatal("Not a supported impl for clock")
 	}
