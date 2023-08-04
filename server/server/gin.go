@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/J-Obog/paidoff/api"
-	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/gin-gonic/gin"
 )
@@ -72,17 +71,9 @@ func ginCtxToRequest(c *gin.Context) *rest.Request {
 
 	// TODO: remove dummy account for auth
 	req := &rest.Request{
-		Account: &data.Account{
-			Id: "some-account-id",
-		},
-
 		Url:   c.Request.URL.String(),
 		Query: c.Request.URL.Query(),
 		Body:  b,
-	}
-
-	if id, inRequest := c.Params.Get("id"); inRequest {
-		req.ResourceId = id
 	}
 
 	return req

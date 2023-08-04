@@ -10,7 +10,7 @@ const (
 	uuidImpl = "ksuid"
 )
 
-func CreateConfig(app *config.AppConfig) UuidProvider {
+func NewUuidProvider(app *config.AppConfig) UuidProvider {
 	switch uuidImpl {
 	case "ksuid":
 		return NewKsuidProvider()

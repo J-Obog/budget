@@ -5,9 +5,15 @@ import (
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/J-Obog/paidoff/store"
+	uuid "github.com/J-Obog/paidoff/uuidgen"
 )
 
 type TransactionAPI struct {
+	transactionStore store.TransactionStore
+	categoryStore    store.CategoryStore
+	uuidProvider     uuid.UuidProvider
+
 	transactionManager *manager.TransactionManager
 	categoryManager    *manager.CategoryManager
 }
@@ -25,8 +31,9 @@ func getTransactionId(req *rest.Request) string {
 
 func (api *TransactionAPI) Get(req *rest.Request) *rest.Response {
 	id := getTransactionId(req)
+	accountId := testAccountId
 
-	transaction, err := api.transactionManager.Get(id, req.Account.Id)
+	transaction, err := api.transactionManager.Get(id, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}
@@ -39,7 +46,7 @@ func (api *TransactionAPI) Get(req *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) Filter(req *rest.Request) *rest.Response {
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	query, err := rest.ParseQuery[rest.TransactionQuery](req.Query)
 	if err != nil {
@@ -55,7 +62,7 @@ func (api *TransactionAPI) Filter(req *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) Create(req *rest.Request) *rest.Response {
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	body, err := rest.ParseBody[rest.TransactionCreateBody](req.Body)
 	if err != nil {
@@ -76,7 +83,7 @@ func (api *TransactionAPI) Create(req *rest.Request) *rest.Response {
 
 func (api *TransactionAPI) Update(req *rest.Request) *rest.Response {
 	id := getTransactionId(req)
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	body, err := rest.ParseBody[rest.TransactionUpdateBody](req.Body)
 	if err != nil {
@@ -106,7 +113,7 @@ func (api *TransactionAPI) Update(req *rest.Request) *rest.Response {
 
 func (api *TransactionAPI) Delete(req *rest.Request) *rest.Response {
 	id := getTransactionId(req)
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	ok, err := api.transactionManager.Delete(id, accountId)
 	if err != nil {
