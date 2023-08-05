@@ -25,7 +25,7 @@ func (manager *AccountManager) Get(id string) (*data.Account, error) {
 	return account, nil
 }
 
-func (manager *AccountManager) Update(updated *data.Account, body rest.AccountUpdateBody) error {
+func (manager *AccountManager) Update(updated *data.Account, updateReq rest.AccountUpdateBody) error {
 	return nil
 }
 
