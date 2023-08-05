@@ -2,19 +2,22 @@ package api
 
 import (
 	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/J-Obog/paidoff/store"
 )
 
 type BudgetAPI struct {
-	budgetManager      *manager.BudgetManager
-	transactionManager *manager.TransactionManager
+	budgetStore      store.BudgetStore
+	transactionStore store.TransactionStore
 }
 
-func NewBudgetAPI(budgetManager *manager.BudgetManager, transactionManager *manager.TransactionManager) *BudgetAPI {
+func NewBudgetAPI(
+	budgetStore store.BudgetStore,
+	transactionStore store.TransactionStore,
+) *BudgetAPI {
 	return &BudgetAPI{
-		budgetManager:      budgetManager,
-		transactionManager: transactionManager,
+		budgetStore:      budgetStore,
+		transactionStore: transactionStore,
 	}
 }
 
@@ -26,7 +29,7 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 	id := getBudgetId(req)
 	accountId := testAccountId
 
-	budget, err := api.budgetManager.Get(id, accountId)
+	budget, err := api.budgetStore.Get(id, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}

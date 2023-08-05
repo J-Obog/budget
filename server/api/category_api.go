@@ -1,21 +1,32 @@
 package api
 
 import (
+	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/J-Obog/paidoff/store"
+	uuid "github.com/J-Obog/paidoff/uuidgen"
 )
 
 type CategoryAPI struct {
-	categoryManager *manager.CategoryManager
-	budgetManager   *manager.BudgetManager
+	categoryStore store.CategoryStore
+	budgetStore   store.BudgetStore
+	clock         clock.Clock
+	uuidProvider  uuid.UuidProvider
 }
 
-func NewCategoryAPI(categoryManager *manager.CategoryManager, budgetManager *manager.BudgetManager) *CategoryAPI {
+func NewCategoryAPI(
+	categoryStore store.CategoryStore,
+	budgetStore store.BudgetStore,
+	clock clock.Clock,
+	uuidProvider uuid.UuidProvider,
+) *CategoryAPI {
 	return &CategoryAPI{
-		budgetManager:   budgetManager,
-		categoryManager: categoryManager,
+		categoryStore: categoryStore,
+		budgetStore:   budgetStore,
+		clock:         clock,
+		uuidProvider:  uuidProvider,
 	}
 }
 
@@ -25,8 +36,9 @@ func getCategoryId(req *rest.Request) string {
 
 func (api *CategoryAPI) Get(req *rest.Request) *rest.Response {
 	id := getCategoryId(req)
+	accountId := testAccountId
 
-	category, err := api.categoryManager.Get(id, req.Account.Id)
+	category, err := api.categoryStore.Get(id, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}
@@ -39,7 +51,9 @@ func (api *CategoryAPI) Get(req *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) GetAll(req *rest.Request) *rest.Response {
-	categories, err := api.categoryManager.GetAll(req.Account.Id)
+	accountId := testAccountId
+
+	categories, err := api.categoryStore.GetAll(accountId)
 
 	if err != nil {
 		return rest.Err(err)
@@ -49,7 +63,7 @@ func (api *CategoryAPI) GetAll(req *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) Create(req *rest.Request) *rest.Response {
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	body, err := rest.ParseBody[rest.CategoryCreateBody](req.Body)
 	if err != nil {
@@ -60,24 +74,36 @@ func (api *CategoryAPI) Create(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	category, err := api.categoryManager.Create(accountId, body)
+	timestamp := api.clock.Now()
+	id := api.uuidProvider.GetUuid()
+
+	newCategory := data.Category{
+		Id:        id,
+		AccountId: accountId,
+		Name:      body.Name,
+		Color:     body.Color,
+		UpdatedAt: timestamp,
+		CreatedAt: timestamp,
+	}
+
+	err = api.categoryStore.Insert(newCategory)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	return rest.Ok(category)
+	return rest.Ok(newCategory)
 }
 
 func (api *CategoryAPI) Update(req *rest.Request) *rest.Response {
 	id := getCategoryId(req)
-	accountId := req.Account.Id
+	accountId := testAccountId
 
 	body, err := rest.ParseBody[rest.CategoryUpdateBody](req.Body)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	existing, err := api.categoryManager.Get(id, accountId)
+	existing, err := api.categoryStore.Get(id, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}
@@ -86,14 +112,15 @@ func (api *CategoryAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	_, err := api.categoryManager.Update(existing, body)
+	//timestamp :=
+	ok, err := api.categoryStore.Update(existing, body, timestamp)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	/*if !ok {
+	if !ok {
 		return rest.Err(rest.ErrInvalidCategoryId)
-	}*/
+	}
 
 	return rest.Ok(existing)
 }
