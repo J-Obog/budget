@@ -5,17 +5,17 @@ import (
 	"github.com/J-Obog/paidoff/manager"
 )
 
-type APIConfig struct {
+type ApiService struct {
 	AccountAPI     *AccountAPI
 	BudgetAPI      *BudgetAPI
 	TransactionAPI *TransactionAPI
 	CategoryAPI    *CategoryAPI
 }
 
-func CreateConfig(app *config.AppConfig) *APIConfig {
+func CreateConfig(app *config.AppConfig) *ApiService {
 	managerCfg := manager.CreateConfig(app)
 
-	return &APIConfig{
+	return &ApiService{
 		AccountAPI:     NewAccountAPI(managerCfg.AccountManager),
 		CategoryAPI:    NewCategoryAPI(managerCfg.CategoryManager, managerCfg.BudgetManager),
 		TransactionAPI: NewTransactionAPI(managerCfg.TransactionManager, managerCfg.CategoryManager),
