@@ -4,31 +4,54 @@ import (
 	"testing"
 
 	"github.com/J-Obog/paidoff/config"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+)
+
+const (
+	testQueueName = "test-queue"
 )
 
 func TestQueue(t *testing.T) {
+	suite.Run(t, new(QueueTestSuite))
+}
+
+type QueueTestSuite struct {
+	suite.Suite
+	queue Queue
+}
+
+func (s *QueueTestSuite) SetupSuite() {
 	cfg := config.Get()
-	q := GetConfiguredQueue(cfg)
+	s.queue = NewQueue(cfg)
+}
 
-	err := q.Flush(testQueueName)
-	assert.NoError(t, err)
+func (s *QueueTestSuite) SetupTest() {
+	err := s.queue.Flush(testQueueName)
+	s.NoError(err)
+}
 
-	t.Run("it pushes and pops message and acks message", func(t *testing.T) {
-		msg := testMessage()
+func (s *QueueTestSuite) TestPushesAndPopsMessage() {
+	msg := Message{Id: "some-id", Data: "some payload"}
 
-		err := q.Push(msg, testQueueName)
-		assert.NoError(t, err)
+	err := s.queue.Push(msg, testQueueName)
+	s.NoError(err)
 
-		m, err := q.Pop(testQueueName)
-		assert.NoError(t, err)
-		assert.Equal(t, msg, *m)
+	m, err := s.queue.Pop(testQueueName)
+	s.NoError(err)
+	s.Equal(msg, *m)
 
-		err = q.Ack(m.Id)
-		assert.NoError(t, err)
+}
 
-		msgs, err := q.Pop(testQueueName)
-		assert.NoError(t, err)
-		assert.Nil(t, msgs)
-	})
+func (s *QueueTestSuite) TestDeletesAccount() {
+	msg := Message{Id: "some-id", Data: "some payload"}
+
+	err := s.queue.Push(msg, testQueueName)
+	s.NoError(err)
+
+	err = s.queue.Ack(msg.Id)
+	s.NoError(err)
+
+	m, err := s.queue.Pop(testQueueName)
+	s.NoError(err)
+	s.Nil(m)
 }
