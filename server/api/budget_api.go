@@ -2,22 +2,23 @@ package api
 
 import (
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
-	"github.com/J-Obog/paidoff/store"
 )
 
 type BudgetAPI struct {
-	budgetStore      store.BudgetStore
-	transactionStore store.TransactionStore
+	budgetManager      manager.BudgetManager
+	transactionManager manager.TransactionManager
+	categoryManager    manager.CategoryManager
 }
 
 func NewBudgetAPI(
-	budgetStore store.BudgetStore,
-	transactionStore store.TransactionStore,
+	budgetManager manager.BudgetManager,
+	transactionManager manager.TransactionManager,
 ) *BudgetAPI {
 	return &BudgetAPI{
-		budgetStore:      budgetStore,
-		transactionStore: transactionStore,
+		budgetManager:      budgetManager,
+		transactionManager: transactionManager,
 	}
 }
 
@@ -29,40 +30,22 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 	id := getBudgetId(req)
 	accountId := testAccountId
 
-	budget, err := api.budgetStore.Get(id, accountId)
+	budget, err := api.budgetManager.Get(id, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if budget == nil {
-		return rest.Err(rest.ErrInvalidBudgetId)
-	}
-
-	total, err := api.getBudgetTotal(*budget)
+	budgetm, err := api.getMaterializedBudget(*budget)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	return rest.Ok(data.BudgetMaterialized{
-		Budget: *budget,
-		Actual: total,
-	})
+	return rest.Ok(budgetm)
 }
 
+// TODO: Check if
 func (api *BudgetAPI) Filter(req *rest.Request) *rest.Response {
-	accountId := testAccountId
-
-	query, err := rest.ParseQuery[rest.BudgetQuery](req.Query)
-	if err != nil {
-		return rest.Err(err)
-	}
-
-	budgets, err := api.budgetManager.GetByQuery(accountId, query)
-	if err != nil {
-		return rest.Err(err)
-	}
-
-	return rest.Ok(budgets)
+	return nil
 }
 
 func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
@@ -77,17 +60,17 @@ func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	budget, err := api.budgetManager.Create(accountId, body)
+	newBudget, err := api.budgetManager.Create(accountId, body)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	return rest.Ok(budget)
+	return rest.Ok(newBudget)
 }
 
 func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-	budgetId := req.ResourceId
+	budgetId := getBudgetId(req)
 
 	body, err := rest.ParseBody[rest.BudgetUpdateBody](req.Body)
 	if err != nil {
@@ -103,13 +86,8 @@ func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	ok, err := api.budgetManager.Update(existing, body)
-	if err != nil {
+	if err := api.budgetManager.Update(existing, body); err != nil {
 		return rest.Err(err)
-	}
-
-	if !ok {
-		return rest.Err(rest.ErrInvalidBudgetId)
 	}
 
 	return rest.Ok(existing)
@@ -117,29 +95,27 @@ func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 
 func (api *BudgetAPI) Delete(req *rest.Request) *rest.Response {
 	accountId := testAccountId
+	id := getBudgetId(req)
 
-	ok, err := api.budgetManager.Delete(req.ResourceId, accountId)
-	if err != nil {
+	if err := api.budgetManager.Delete(id, accountId); err != nil {
 		return rest.Err(err)
-	}
-
-	if !ok {
-		return rest.Err(rest.ErrInvalidBudgetId)
 	}
 
 	return rest.Success()
 }
 
 func (api *BudgetAPI) validateCreate(body rest.BudgetCreateBody, accountId string) error {
-	if err := isDateValid(body.Month, 1, body.Year); err != nil {
+	d := data.NewDate(body.Month, 1, body.Year)
+
+	if err := d.IsValid(); err != nil {
 		return err
 	}
 
-	if err := api.checkCategoryExists(body.CategoryId, accountId); err != nil {
+	if _, err := api.categoryManager.Get(body.CategoryId, accountId); err != nil {
 		return err
 	}
 
-	if err := api.checkCategoryIsUnique(body.CategoryId, accountId, body.Month, body.Year); err != nil {
+	if err := api.budgetManager.CheckCategoryNotInPeriod(body.CategoryId, accountId, body.Month, body.Year); err != nil {
 		return err
 	}
 
@@ -147,16 +123,12 @@ func (api *BudgetAPI) validateCreate(body rest.BudgetCreateBody, accountId strin
 }
 
 func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpdateBody) error {
-	if existing == nil {
-		return rest.ErrInvalidBudgetId
-	}
-
 	if body.CategoryId != existing.CategoryId {
-		if err := api.checkCategoryExists(body.CategoryId, existing.AccountId); err != nil {
+		if _, err := api.categoryManager.Get(body.CategoryId, existing.AccountId); err != nil {
 			return err
 		}
 
-		if err := api.checkCategoryIsUnique(body.CategoryId, existing.AccountId, existing.Month, existing.Year); err != nil {
+		if err := api.budgetManager.CheckCategoryNotInPeriod(body.CategoryId, existing.AccountId, existing.Month, existing.Year); err != nil {
 			return err
 		}
 	}
@@ -164,33 +136,7 @@ func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpda
 	return nil
 }
 
-func (api *BudgetAPI) checkCategoryIsUnique(categoryId string, accountId string, month int, year int) error {
-	budget, err := api.budgetManager.GetByPeriodCategory(accountId, categoryId, month, year)
-	if err != nil {
-		return err
-	}
-
-	if budget != nil {
-		return rest.ErrCategoryAlreadyInBudgetPeriod
-	}
-
-	return nil
-}
-
-func (api *BudgetAPI) checkCategoryExists(categoryId string, accountId string) error {
-	category, err := api.budgetManager.Get(categoryId, accountId)
-	if err != nil {
-		return err
-	}
-
-	if category == nil {
-		return rest.ErrInvalidCategoryId
-	}
-
-	return nil
-}
-
-func (api *BudgetAPI) getBudgetTotal(budget data.Budget) (float64, error) {
+func (api *BudgetAPI) getMaterializedBudget(budget data.Budget) (data.BudgetMaterialized, error) {
 	accountId := budget.AccountId
 	categoryId := budget.CategoryId
 	month := budget.Month
@@ -200,7 +146,7 @@ func (api *BudgetAPI) getBudgetTotal(budget data.Budget) (float64, error) {
 	transactions, err := api.transactionManager.GetByPeriodCategory(accountId, categoryId, month, year)
 
 	if err != nil {
-		return total, err
+		return data.BudgetMaterialized{}, err
 
 	}
 
@@ -213,5 +159,10 @@ func (api *BudgetAPI) getBudgetTotal(budget data.Budget) (float64, error) {
 		total += netMove
 	}
 
-	return total, nil
+	m := data.BudgetMaterialized{
+		Budget: budget,
+		Actual: total,
+	}
+
+	return m, nil
 }

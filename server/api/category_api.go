@@ -57,7 +57,7 @@ func (api *CategoryAPI) Create(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	if err := api.validateCreate(body, accountId); err != nil {
+	if err := api.validateCreate(accountId, body); err != nil {
 		return rest.Err(err)
 	}
 

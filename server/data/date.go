@@ -13,3 +13,7 @@ func NewDate(month int, day int, year int) Date {
 		Year:  year,
 	}
 }
+
+func (d *Date) IsValid() error {
+	return nil
+}

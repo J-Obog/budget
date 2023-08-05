@@ -10,9 +10,9 @@ import (
 )
 
 type TransactionAPI struct {
-	transactionStore store.TransactionStore
-	categoryStore    store.CategoryStore
-	uuidProvider     uuid.UuidProvider
+	transactionManager store.TransactionStore
+	categoryStore      store.CategoryStore
+	uuidProvider       uuid.UuidProvider
 
 	transactionManager *manager.TransactionManager
 	categoryManager    *manager.CategoryManager
