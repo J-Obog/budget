@@ -11,7 +11,7 @@ const (
 func NewServer(cfg *config.AppConfig) Server {
 	switch serverImpl {
 	case "gin":
-		return NewGinServer(cfg.ServerAddress, cfg.ServerPort)
+		return NewGinServer()
 
 	default:
 		panic("no implementation for server")

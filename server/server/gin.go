@@ -12,17 +12,13 @@ import (
 )
 
 type GinServer struct {
-	router  *gin.Engine
-	srv     *http.Server
-	address string
-	port    int
+	router *gin.Engine
+	srv    *http.Server
 }
 
-func NewGinServer(address string, port int) *GinServer {
+func NewGinServer() *GinServer {
 	return &GinServer{
-		router:  gin.Default(),
-		address: address,
-		port:    port,
+		router: gin.Default(),
 	}
 }
 
@@ -67,9 +63,9 @@ func (g *GinServer) RegisterRoute(method string, url string, rh RouteHandler) {
 	}
 }
 
-func (g *GinServer) Start() {
+func (g *GinServer) Start(address string, port int) {
 	g.srv = &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", g.address, g.port),
+		Addr:    fmt.Sprintf("%s:%d", address, port),
 		Handler: g.router,
 	}
 
