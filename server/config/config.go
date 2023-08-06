@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/caarlos0/env"
 	"github.com/joho/godotenv"
 )
 
@@ -16,20 +17,22 @@ const (
 )
 
 type AppConfig struct {
-	PostgresUrl string `json:"postgresUrl"`
-	RabbitMqUrl string `json:"rabbitMqUrl"`
+	PostgresUrl string `env:"POSTGRES_URL"`
+	RabbitMqUrl string `env:"RABBIT_MQ_URL"`
 }
 
 func Get() *AppConfig {
-	env := os.Getenv("APP_ENV")
-	if env == "dev" {
+	environment := os.Getenv("APP_ENV")
+	if environment == "dev" {
 		if err := godotenv.Load("../.env"); err != nil {
 			log.Fatal(err)
 		}
 	}
+	cfg := &AppConfig{}
 
-	return &AppConfig{
-		PostgresUrl: os.Getenv("POSTGRES_URL"),
-		RabbitMqUrl: os.Getenv("RABBIT_MQ_URL"),
+	if err := env.Parse(cfg); err != nil {
+		panic(err)
 	}
+
+	return cfg
 }
