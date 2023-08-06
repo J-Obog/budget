@@ -17,8 +17,10 @@ const (
 )
 
 type AppConfig struct {
-	PostgresUrl string `env:"POSTGRES_URL"`
-	RabbitMqUrl string `env:"RABBIT_MQ_URL"`
+	PostgresUrl   string `env:"POSTGRES_URL"`
+	RabbitMqUrl   string `env:"RABBIT_MQ_URL"`
+	ServerAddress string `env:"SERVER_ADDRESS"`
+	ServerPort    int    `env:"SERVER_PORT"`
 }
 
 func Get() *AppConfig {

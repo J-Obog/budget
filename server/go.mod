@@ -6,6 +6,7 @@ require github.com/go-redis/redis/v9 v9.0.0-rc.2
 
 require (
 	github.com/bytedance/sonic v1.10.0-rc2 // indirect
+	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/caarlos0/env/v9 v9.0.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
