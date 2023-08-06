@@ -10,7 +10,7 @@ const (
 	clockImpl = "system"
 )
 
-func CreateConfig(app *config.AppConfig) Clock {
+func NewClock(app *config.AppConfig) Clock {
 	switch clockImpl {
 	case "system":
 		return NewSystemClock()

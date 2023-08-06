@@ -7,18 +7,20 @@ import (
 )
 
 type BudgetAPI struct {
-	budgetManager      manager.BudgetManager
-	transactionManager manager.TransactionManager
-	categoryManager    manager.CategoryManager
+	budgetManager      *manager.BudgetManager
+	transactionManager *manager.TransactionManager
+	categoryManager    *manager.CategoryManager
 }
 
 func NewBudgetAPI(
-	budgetManager manager.BudgetManager,
-	transactionManager manager.TransactionManager,
+	budgetManager *manager.BudgetManager,
+	transactionManager *manager.TransactionManager,
+	categoryManager *manager.CategoryManager,
 ) *BudgetAPI {
 	return &BudgetAPI{
 		budgetManager:      budgetManager,
 		transactionManager: transactionManager,
+		categoryManager:    categoryManager,
 	}
 }
 

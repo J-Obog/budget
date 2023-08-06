@@ -8,13 +8,13 @@ import (
 )
 
 type CategoryAPI struct {
-	categoryManager manager.CategoryManager
-	budgetManager   manager.BudgetManager
+	categoryManager *manager.CategoryManager
+	budgetManager   *manager.BudgetManager
 }
 
 func NewCategoryAPI(
-	categoryManager manager.CategoryManager,
-	budgetManager manager.BudgetManager,
+	categoryManager *manager.CategoryManager,
+	budgetManager *manager.BudgetManager,
 ) *CategoryAPI {
 	return &CategoryAPI{
 		categoryManager: categoryManager,

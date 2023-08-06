@@ -8,10 +8,10 @@ import (
 )
 
 type AccountAPI struct {
-	accountManager manager.AccountManager
+	accountManager *manager.AccountManager
 }
 
-func NewAccountAPI(accountManager manager.AccountManager) *AccountAPI {
+func NewAccountAPI(accountManager *manager.AccountManager) *AccountAPI {
 	return &AccountAPI{
 		accountManager: accountManager,
 	}

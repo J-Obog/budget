@@ -12,6 +12,16 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
+func NewAccountManager(
+	store store.AccountStore,
+	clock clock.Clock,
+) *AccountManager {
+	return &AccountManager{
+		store: store,
+		clock: clock,
+	}
+}
+
 func (manager *AccountManager) Get(id string) (*data.Account, error) {
 	account, err := manager.store.Get(id)
 	if err != nil {

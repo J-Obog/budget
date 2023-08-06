@@ -14,6 +14,18 @@ type CategoryManager struct {
 	clock        clock.Clock
 }
 
+func NewCategoryManager(
+	store store.CategoryStore,
+	uuidProvider uuid.UuidProvider,
+	clock clock.Clock,
+) *CategoryManager {
+	return &CategoryManager{
+		store:        store,
+		uuidProvider: uuidProvider,
+		clock:        clock,
+	}
+}
+
 func (manager *CategoryManager) Get(id string, accountId string) (*data.Category, error) {
 	return nil, nil
 }
