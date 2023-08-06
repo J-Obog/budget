@@ -80,7 +80,7 @@ var (
 )
 
 type RestError struct {
-	Msg    string
+	Msg    string `json:"message"`
 	Status int
 }
 

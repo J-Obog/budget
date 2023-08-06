@@ -22,7 +22,7 @@ func NewGinServer() *GinServer {
 	}
 }
 
-func (g *GinServer) RegisterRoute(method string, url string, rh RouteHandler) {
+func (g *GinServer) RegisterRoute(method string, url string, rh rest.RouteHandler) {
 	ginFn := func(c *gin.Context) {
 		//TODO: handle error when reading body
 
@@ -36,13 +36,12 @@ func (g *GinServer) RegisterRoute(method string, url string, rh RouteHandler) {
 		}
 
 		res := rh(req)
-		respb, code := res.ToJSON()
 
-		if code == 500 {
-			//log error
+		if res.Status == 500 {
+			log.Printf("ERROR[5XX]: %s\n", res.InternalErrMsg)
 		}
 
-		c.JSON(code, respb)
+		c.JSON(res.Status, res.Data)
 	}
 
 	switch method {

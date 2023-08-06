@@ -1,18 +1,17 @@
 package rest
 
-import (
-	"encoding/json"
-	"fmt"
-)
+import "net/http"
 
 type Response struct {
-	Data  any
-	Error error
+	Data           any
+	Status         int
+	InternalErrMsg string
 }
 
 func Ok(v any) *Response {
 	return &Response{
-		Data: v,
+		Data:   v,
+		Status: http.StatusOK,
 	}
 }
 
@@ -21,31 +20,18 @@ func Success() *Response {
 }
 
 func Err(err error) *Response {
-	return &Response{
-		Error: err,
-	}
-}
+	res := new(Response)
 
-func getErrBody(errMsg string) []byte {
-	return []byte(fmt.Sprintf(`{"error": {"message": %s}}`, errMsg))
-}
+	restErr, ok := err.(*RestError)
 
-func (res *Response) ToJSON() ([]byte, int) {
-	if res.Error != nil {
-		restErr, isHandledError := res.Error.(*RestError)
-
-		if isHandledError {
-			return getErrBody(restErr.Error()), restErr.Status
-		}
-
-		return getErrBody(ErrInternalServer.Error()), ErrInternalServer.Status
+	if ok {
+		res.Data = restErr
+		res.Status = restErr.Status
+	} else {
+		res.Data = ErrInternalServer
+		res.Status = restErr.Status
+		res.InternalErrMsg = err.Error()
 	}
 
-	b, err := json.Marshal(res.Data)
-
-	if err != nil {
-		return getErrBody(ErrInternalServer.Error()), ErrInternalServer.Status
-	}
-
-	return b, 200
+	return res
 }
