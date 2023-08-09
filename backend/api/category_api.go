@@ -22,12 +22,8 @@ func NewCategoryAPI(
 	}
 }
 
-func getCategoryId(req *rest.Request) string {
-	return ""
-}
-
 func (api *CategoryAPI) Get(req *rest.Request) *rest.Response {
-	id := getCategoryId(req)
+	id := req.Params.GetCategoryId()
 	accountId := testAccountId
 
 	category, err := api.categoryManager.Get(id, accountId)
@@ -70,7 +66,7 @@ func (api *CategoryAPI) Create(req *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) Update(req *rest.Request) *rest.Response {
-	id := getCategoryId(req)
+	id := req.Params.GetCategoryId()
 	accountId := testAccountId
 
 	body, err := rest.ParseBody[rest.CategoryUpdateBody](req.Body)
@@ -95,7 +91,7 @@ func (api *CategoryAPI) Update(req *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) Delete(req *rest.Request) *rest.Response {
-	id := getCategoryId(req)
+	id := req.Params.GetCategoryId()
 	accountId := testAccountId
 
 	if err := api.validateDelete(id, accountId); err != nil {

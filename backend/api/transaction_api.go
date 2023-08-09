@@ -22,12 +22,8 @@ func NewTransactionAPI(
 	}
 }
 
-func getTransactionId(req *rest.Request) string {
-	return ""
-}
-
 func (api *TransactionAPI) Get(req *rest.Request) *rest.Response {
-	id := getTransactionId(req)
+	id := req.Params.GetTransactionId()
 	accountId := testAccountId
 
 	transaction, err := api.transactionManager.Get(id, accountId)
@@ -64,7 +60,7 @@ func (api *TransactionAPI) Create(req *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) Update(req *rest.Request) *rest.Response {
-	id := getTransactionId(req)
+	id := req.Params.GetTransactionId()
 	accountId := testAccountId
 
 	body, err := rest.ParseBody[rest.TransactionUpdateBody](req.Body)
@@ -89,7 +85,7 @@ func (api *TransactionAPI) Update(req *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) Delete(req *rest.Request) *rest.Response {
-	id := getTransactionId(req)
+	id := req.Params.GetTransactionId()
 	accountId := testAccountId
 
 	err := api.transactionManager.Delete(id, accountId)

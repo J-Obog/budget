@@ -50,3 +50,28 @@ func (manager *TransactionManager) GetByPeriodCategory(
 ) ([]data.Transaction, error) {
 	return nil, nil
 }
+
+func (manager *TransactionManager) GetTotalForPeriodCategory(
+	accountId string,
+	categoryId string,
+	month int,
+	year int,
+) (float64, error) {
+	total := 0.00
+	transactions, err := manager.store.GetByPeriodCategory(accountId, categoryId, month, year)
+
+	if err != nil {
+		return total, err
+	}
+
+	for _, transaction := range transactions {
+		netMove := transaction.Amount
+		if transaction.Type == data.BudgetType_Expense {
+			netMove *= -1
+		}
+
+		total += netMove
+	}
+
+	return total, nil
+}

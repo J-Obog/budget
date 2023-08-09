@@ -24,12 +24,8 @@ func NewBudgetAPI(
 	}
 }
 
-func getBudgetId(req *rest.Request) string {
-	return ""
-}
-
 func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
-	id := getBudgetId(req)
+	id := req.Params.GetBudgetId()
 	accountId := testAccountId
 
 	budget, err := api.budgetManager.Get(id, accountId)
@@ -72,14 +68,14 @@ func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
 
 func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-	budgetId := getBudgetId(req)
+	id := req.Params.GetBudgetId()
 
 	body, err := rest.ParseBody[rest.BudgetUpdateBody](req.Body)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	existing, err := api.budgetManager.Get(budgetId, accountId)
+	existing, err := api.budgetManager.Get(id, accountId)
 	if err != nil {
 		return rest.Err(err)
 	}
@@ -97,7 +93,7 @@ func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 
 func (api *BudgetAPI) Delete(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-	id := getBudgetId(req)
+	id := req.Params.GetBudgetId()
 
 	if err := api.budgetManager.Delete(id, accountId); err != nil {
 		return rest.Err(err)
@@ -139,32 +135,16 @@ func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpda
 }
 
 func (api *BudgetAPI) getMaterializedBudget(budget data.Budget) (data.BudgetMaterialized, error) {
-	accountId := budget.AccountId
-	categoryId := budget.CategoryId
-	month := budget.Month
-	year := budget.Year
+	budgetMaterialized := data.BudgetMaterialized{Budget: budget}
 
-	total := 0.00
-	transactions, err := api.transactionManager.GetByPeriodCategory(accountId, categoryId, month, year)
+	total, err := api.transactionManager.GetTotalForPeriodCategory(
+		budget.AccountId,
+		budget.CategoryId,
+		budget.Month,
+		budget.Year,
+	)
 
-	if err != nil {
-		return data.BudgetMaterialized{}, err
+	budgetMaterialized.Actual = total
 
-	}
-
-	for _, transaction := range transactions {
-		netMove := transaction.Amount
-		if transaction.Type == data.BudgetType_Expense {
-			netMove *= -1
-		}
-
-		total += netMove
-	}
-
-	m := data.BudgetMaterialized{
-		Budget: budget,
-		Actual: total,
-	}
-
-	return m, nil
+	return budgetMaterialized, err
 }

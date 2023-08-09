@@ -32,15 +32,6 @@ func (manager *AccountManager) Update(existing data.Account, updateReq rest.Acco
 	return nil
 }
 
-func (manager *AccountManager) DeleteForRequest(id string) error {
-	ok, err := manager.store.Delete(id)
-	if err != nil {
-		return err
-	}
-
-	if !ok {
-		return rest.ErrInvalidAccountId
-	}
-
-	return nil
+func (manager *AccountManager) Delete(id string) (bool, error) {
+	return  manager.store.Delete(id)
 }

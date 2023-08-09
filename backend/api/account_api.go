@@ -19,10 +19,14 @@ func NewAccountAPI(accountManager *manager.AccountManager) *AccountAPI {
 
 func (api *AccountAPI) Get(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-
 	account, err := api.accountManager.Get(accountId)
+
 	if err != nil {
-		rest.Err(err)
+		return rest.Err(err)
+	}
+
+	if account == nil {
+		return rest.Err(rest.ErrInvalidAccountId)
 	}
 
 	return rest.Ok(account)
@@ -30,15 +34,20 @@ func (api *AccountAPI) Get(req *rest.Request) *rest.Response {
 
 func (api *AccountAPI) Update(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-
 	body, err := rest.ParseBody[rest.AccountUpdateBody](req.Body)
+
 	if err != nil {
 		return rest.Err(err)
 	}
 
 	account, err := api.accountManager.Get(accountId)
+
 	if err != nil {
 		return rest.Err(err)
+	}
+
+	if account == nil {
+		return rest.Err(rest.ErrInvalidAccountId)
 	}
 
 	if err := api.validateUpdate(account, body); err != nil {
@@ -54,9 +63,14 @@ func (api *AccountAPI) Update(req *rest.Request) *rest.Response {
 
 func (api *AccountAPI) Delete(req *rest.Request) *rest.Response {
 	accountId := testAccountId
+	ok, err := api.accountManager.Delete(accountId)
 
-	if err := api.accountManager.Delete(accountId); err != nil {
+	if err != nil {
 		return rest.Err(err)
+	}
+
+	if !ok {
+		return rest.Err(rest.ErrInvalidAccountId)
 	}
 
 	return rest.Success()
