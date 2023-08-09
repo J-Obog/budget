@@ -19,8 +19,11 @@ type Budget struct {
 }
 
 type BudgetUpdate struct {
+	Id         string
+	AccountId  string
 	CategoryId string
 	Projected  float64
+	Timestamp  int64
 }
 
 type BudgetFilter struct {

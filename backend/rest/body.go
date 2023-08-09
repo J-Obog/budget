@@ -7,6 +7,13 @@ import (
 	"github.com/J-Obog/paidoff/data"
 )
 
+type JSONSerializable struct {
+}
+
+func (j *JSONSerializable) ToBytes() []byte {
+	return
+}
+
 type AccountUpdateBody struct {
 	Name string `json:"name"`
 }

@@ -27,23 +27,69 @@ func NewBudgetManager(
 }
 
 func (manager *BudgetManager) Get(id string, accountId string) (*data.Budget, error) {
-	return nil, nil
+	return manager.store.Get(id, accountId)
 }
 
-func (manager *BudgetManager) Create(accountId string, createReq rest.BudgetCreateBody) (data.Budget, error) {
-	return data.Budget{}, nil
+func (manager *BudgetManager) Create(accountId string, reqBody rest.BudgetCreateBody) (data.Budget, error) {
+	timestamp := manager.clock.Now()
+	uuid := manager.uuidProvider.GetUuid()
+
+	newBudget := data.Budget{
+		Id:         uuid,
+		AccountId:  accountId,
+		CategoryId: reqBody.CategoryId,
+		Month:      reqBody.Month,
+		Year:       reqBody.Year,
+		Projected:  reqBody.Projected,
+		CreatedAt:  timestamp,
+		UpdatedAt:  timestamp,
+	}
+
+	if err := manager.store.Insert(newBudget); err != nil {
+		return data.Budget{}, err
+	}
+
+	return newBudget, nil
 }
 
-func (manager *BudgetManager) Update(updated *data.Budget, updateReq rest.BudgetUpdateBody) error {
-	return nil
+func (manager *BudgetManager) Update(
+	id string,
+	accountId string,
+	reqBody rest.BudgetUpdateBody,
+) (int64, error) {
+	timestamp := manager.clock.Now()
+
+	update := data.BudgetUpdate{
+		Id:         id,
+		AccountId:  accountId,
+		CategoryId: reqBody.CategoryId,
+		Projected:  reqBody.Projected,
+		Timestamp:  timestamp,
+	}
+
+	ok, err := manager.store.Update(update)
+	if err != nil {
+		return -1, err
+	}
+
+	if !ok {
+		return -1, nil
+	}
+
+	return timestamp, nil
 }
 
-func (manager *BudgetManager) Delete(id string, accountId string) error {
-	return nil
+func (manager *BudgetManager) Delete(id string, accountId string) (bool, error) {
+	return manager.store.Delete(id, accountId)
 }
 
-func (manager *BudgetManager) CategoryIsUsed(categoryId string, accountId string) (bool, error) {
-	return false, nil
+func (manager *BudgetManager) CategoryIsNotUsed(categoryId string, accountId string) (bool, error) {
+	budgets, err := manager.store.GetByCategory(accountId, categoryId)
+	if err != nil {
+		return false, err
+	}
+
+	return len(budgets) == 0, nil
 }
 
 func (manager *BudgetManager) CategoryIsUniqueForPeriod(
@@ -52,5 +98,10 @@ func (manager *BudgetManager) CategoryIsUniqueForPeriod(
 	month int,
 	year int,
 ) (bool, error) {
-	return false, nil
+	budget, err := manager.store.GetByPeriodCategory(accountId, categoryId, month, year)
+	if err != nil {
+		return false, err
+	}
+
+	return budget == nil, nil
 }

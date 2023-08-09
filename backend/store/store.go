@@ -29,7 +29,7 @@ type BudgetStore interface {
 	GetByCategory(accountId string, categoryId string) ([]data.Budget, error)
 	GetBy(accountId string, filter data.BudgetFilter) ([]data.Budget, error)
 	Insert(budget data.Budget) error
-	Update(id string, accountId string, update data.BudgetUpdate, timestamp int64) (bool, error)
+	Update(update data.BudgetUpdate) (bool, error)
 	Delete(id string, accountId string) (bool, error)
 	DeleteAll() error
 }
