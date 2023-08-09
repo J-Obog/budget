@@ -10,6 +10,8 @@ type Category struct {
 }
 
 type CategoryUpdate struct {
-	Name  string
-	Color uint
+	Id        string
+	AccountId string
+	Name      string
+	Color     uint
 }

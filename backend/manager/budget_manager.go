@@ -42,10 +42,15 @@ func (manager *BudgetManager) Delete(id string, accountId string) error {
 	return nil
 }
 
-func (manager *BudgetManager) CheckCategoryNotInUse(categoryId string, accountId string) error {
-	return nil
+func (manager *BudgetManager) CategoryIsUsed(categoryId string, accountId string) (bool, error) {
+	return false, nil
 }
 
-func (manager *BudgetManager) CheckCategoryNotInPeriod(categoryId string, accountId string, month int, year int) error {
-	return nil
+func (manager *BudgetManager) CategoryIsUniqueForPeriod(
+	categoryId string,
+	accountId string,
+	month int,
+	year int,
+) (bool, error) {
+	return false, nil
 }

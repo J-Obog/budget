@@ -42,10 +42,14 @@ func (manager *CategoryManager) Update(updated *data.Category, updateReq rest.Ca
 	return nil
 }
 
-func (manager *CategoryManager) Delete(id string, accountId string) error {
-	return nil
+func (manager *CategoryManager) Delete(id string, accountId string) (bool, error) {
+	return false, nil
 }
 
-func (manager *CategoryManager) CheckNameNotTaken(accountId string, name string) error {
-	return nil
+func (manager *CategoryManager) Exists(id string, accountId string) (bool, error) {
+	return false, nil
+}
+
+func (manager *CategoryManager) NameIsUnique(accountId string, name string) (bool, error) {
+	return false, nil
 }

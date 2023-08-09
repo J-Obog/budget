@@ -12,10 +12,7 @@ type AccountManager struct {
 	clock clock.Clock
 }
 
-func NewAccountManager(
-	store store.AccountStore,
-	clock clock.Clock,
-) *AccountManager {
+func NewAccountManager(store store.AccountStore, clock clock.Clock) *AccountManager {
 	return &AccountManager{
 		store: store,
 		clock: clock,
@@ -28,10 +25,6 @@ func (manager *AccountManager) Get(id string) (*data.Account, error) {
 		return nil, err
 	}
 
-	if account == nil {
-		return nil, rest.ErrInvalidAccountId
-	}
-
 	return account, nil
 }
 
@@ -39,7 +32,7 @@ func (manager *AccountManager) Update(updated *data.Account, updateReq rest.Acco
 	return nil
 }
 
-func (manager *AccountManager) Delete(id string) error {
+func (manager *AccountManager) DeleteForRequest(id string) error {
 	ok, err := manager.store.Delete(id)
 	if err != nil {
 		return err
