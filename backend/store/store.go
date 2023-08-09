@@ -18,7 +18,7 @@ type CategoryStore interface {
 	GetByName(accountId string, name string) (*data.Category, error)
 	GetAll(accountId string) ([]data.Category, error)
 	Insert(category data.Category) error
-	Update(id string, accountId string, update data.CategoryUpdate, timestamp int64) (bool, error)
+	Update(update data.CategoryUpdate) (bool, error)
 	Delete(id string, accountId string) (bool, error)
 	DeleteAll() error
 }

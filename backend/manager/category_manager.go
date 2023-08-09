@@ -27,29 +27,78 @@ func NewCategoryManager(
 }
 
 func (manager *CategoryManager) Get(id string, accountId string) (*data.Category, error) {
-	return nil, nil
+	return manager.store.Get(id, accountId)
 }
 
 func (manager *CategoryManager) GetAll(accountId string) ([]data.Category, error) {
-	return nil, nil
+	return manager.store.GetAll(accountId)
 }
 
-func (manager *CategoryManager) Create(accountId string, createReq rest.CategoryCreateBody) (data.Category, error) {
-	return data.Category{}, nil
+func (manager *CategoryManager) Create(accountId string, reqBody rest.CategoryCreateBody) (data.Category, error) {
+	timestamp := manager.clock.Now()
+	uuid := manager.uuidProvider.GetUuid()
+
+	newCategory := data.Category{
+		Id:        uuid,
+		AccountId: accountId,
+		Name:      reqBody.Name,
+		Color:     reqBody.Color,
+		CreatedAt: timestamp,
+		UpdatedAt: timestamp,
+	}
+
+	if err := manager.store.Insert(newCategory); err != nil {
+		return data.Category{}, err
+	}
+
+	return newCategory, nil
 }
 
-func (manager *CategoryManager) Update(updated *data.Category, updateReq rest.CategoryUpdateBody) error {
-	return nil
+func (manager *CategoryManager) Update(
+	id string,
+	accountId string,
+	reqBody rest.CategoryUpdateBody,
+) (*data.CategoryUpdate, error) {
+	timestamp := manager.clock.Now()
+
+	update := &data.CategoryUpdate{
+		Id:        id,
+		AccountId: accountId,
+		Name:      reqBody.Name,
+		Color:     reqBody.Color,
+		Timestamp: timestamp,
+	}
+
+	ok, err := manager.store.Update(*update)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		return nil, nil
+	}
+
+	return update, nil
 }
 
 func (manager *CategoryManager) Delete(id string, accountId string) (bool, error) {
-	return false, nil
+	return manager.Delete(id, accountId)
 }
 
 func (manager *CategoryManager) Exists(id string, accountId string) (bool, error) {
-	return false, nil
+	category, err := manager.Get(id, accountId)
+	if err != nil {
+		return false, nil
+	}
+
+	return category != nil, nil
 }
 
 func (manager *CategoryManager) NameIsUnique(accountId string, name string) (bool, error) {
-	return false, nil
+	category, err := manager.store.GetByName(accountId, name)
+	if err != nil {
+		return false, err
+	}
+
+	return category == nil, nil
 }

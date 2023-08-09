@@ -14,4 +14,5 @@ type CategoryUpdate struct {
 	AccountId string
 	Name      string
 	Color     uint
+	Timestamp int64
 }

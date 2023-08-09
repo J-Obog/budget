@@ -12,5 +12,7 @@ type Account struct {
 }
 
 type AccountUpdate struct {
-	Name string
+	Id        string
+	Name      string
+	Timestamp int64
 }

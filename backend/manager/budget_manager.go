@@ -56,10 +56,10 @@ func (manager *BudgetManager) Update(
 	id string,
 	accountId string,
 	reqBody rest.BudgetUpdateBody,
-) (int64, error) {
+) (*data.BudgetUpdate, error) {
 	timestamp := manager.clock.Now()
 
-	update := data.BudgetUpdate{
+	update := &data.BudgetUpdate{
 		Id:         id,
 		AccountId:  accountId,
 		CategoryId: reqBody.CategoryId,
@@ -67,13 +67,13 @@ func (manager *BudgetManager) Update(
 		Timestamp:  timestamp,
 	}
 
-	ok, err := manager.store.Update(update)
+	ok, err := manager.store.Update(*update)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 
 	if !ok {
-		return -1, nil
+		return update, nil
 	}
 
 	return timestamp, nil
