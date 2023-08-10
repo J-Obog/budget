@@ -46,24 +46,26 @@ func (api *AccountAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	if account == nil {
-		return rest.Err(rest.ErrInvalidAccountId)
-	}
-
 	if err := api.validateUpdate(account, body); err != nil {
 		return rest.Err(err)
 	}
 
-	if err := api.accountManager.Update(account, body); err != nil {
+	accountUpdate, err := api.accountManager.Update(accountId, body)
+	if err != nil {
 		return rest.Err(err)
 	}
 
+	if accountUpdate == nil {
+		return rest.Err(rest.ErrInvalidAccountId)
+	}
+
+	account.UpdatedAt = accountUpdate.Timestamp
 	return rest.Ok(account)
 }
 
 func (api *AccountAPI) Delete(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-	ok, err := api.accountManager.Delete(accountId)
+	ok, err := api.accountManager.SoftDelete(accountId)
 
 	if err != nil {
 		return rest.Err(err)
@@ -77,6 +79,10 @@ func (api *AccountAPI) Delete(req *rest.Request) *rest.Response {
 }
 
 func (api *AccountAPI) validateUpdate(existing *data.Account, body rest.AccountUpdateBody) error {
+	if existing == nil {
+		return rest.ErrInvalidAccountId
+	}
+
 	if body.Name != existing.Name {
 		if err := api.checkAccountName(body.Name); err != nil {
 			return err

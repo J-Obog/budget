@@ -7,8 +7,8 @@ import (
 type AccountStore interface {
 	Get(id string) (*data.Account, error)
 	Insert(account data.Account) error
-	Update(id string, update data.AccountUpdate, timestamp int64) (bool, error)
-	SetDeleted(id string) (bool, error)
+	Update(update data.AccountUpdate) (bool, error)
+	SoftDelete(id string) (bool, error)
 	Delete(id string) (bool, error)
 	DeleteAll() error
 }

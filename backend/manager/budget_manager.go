@@ -76,7 +76,7 @@ func (manager *BudgetManager) Update(
 		return update, nil
 	}
 
-	return timestamp, nil
+	return update, nil
 }
 
 func (manager *BudgetManager) Delete(id string, accountId string) (bool, error) {

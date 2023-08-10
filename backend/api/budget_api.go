@@ -33,6 +33,10 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
+	if budget == nil {
+		return rest.Err(rest.ErrInvalidBudgetId)
+	}
+
 	budgetm, err := api.getMaterializedBudget(*budget)
 	if err != nil {
 		return rest.Err(err)
@@ -41,20 +45,20 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 	return rest.Ok(budgetm)
 }
 
-// TODO: Check if
+// TODO: Check if this shpuld be converted to 'GetForPeriod'
 func (api *BudgetAPI) Filter(req *rest.Request) *rest.Response {
 	return nil
 }
 
 func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-
 	body, err := rest.ParseBody[rest.BudgetCreateBody](req.Body)
+
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if err := api.validateCreate(body, accountId); err != nil {
+	if err := api.validateCreate(accountId, body); err != nil {
 		return rest.Err(err)
 	}
 
@@ -69,65 +73,114 @@ func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
 func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 	accountId := testAccountId
 	id := req.Params.GetBudgetId()
-
 	body, err := rest.ParseBody[rest.BudgetUpdateBody](req.Body)
+
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	existing, err := api.budgetManager.Get(id, accountId)
+	budget, err := api.budgetManager.Get(id, accountId)
+
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if err := api.validateUpdate(existing, body); err != nil {
+	if err := api.validateUpdate(budget, body); err != nil {
 		return rest.Err(err)
 	}
 
-	if err := api.budgetManager.Update(existing, body); err != nil {
+	budgetUpdate, err := api.budgetManager.Update(id, accountId, body)
+
+	if err != nil {
 		return rest.Err(err)
 	}
 
-	return rest.Ok(existing)
+	if budgetUpdate == nil {
+		return rest.Err(rest.ErrInvalidBudgetId)
+	}
+
+	budget.UpdatedAt = budgetUpdate.Timestamp
+	return rest.Ok(budget)
 }
 
 func (api *BudgetAPI) Delete(req *rest.Request) *rest.Response {
 	accountId := testAccountId
 	id := req.Params.GetBudgetId()
+	ok, err := api.budgetManager.Delete(id, accountId)
 
-	if err := api.budgetManager.Delete(id, accountId); err != nil {
+	if err != nil {
 		return rest.Err(err)
+	}
+
+	if !ok {
+		return rest.Err(rest.ErrInvalidBudgetId)
 	}
 
 	return rest.Success()
 }
 
-func (api *BudgetAPI) validateCreate(body rest.BudgetCreateBody, accountId string) error {
+func (api *BudgetAPI) validateCreate(accountId string, body rest.BudgetCreateBody) error {
 	d := data.NewDate(body.Month, 1, body.Year)
 
 	if err := d.IsValid(); err != nil {
 		return err
 	}
 
-	if _, err := api.categoryManager.Get(body.CategoryId, accountId); err != nil {
+	ok, err := api.categoryManager.Exists(body.CategoryId, accountId)
+	if err != nil {
 		return err
 	}
 
-	if err := api.budgetManager.CheckCategoryNotInPeriod(body.CategoryId, accountId, body.Month, body.Year); err != nil {
+	if !ok {
+		return rest.ErrInvalidCategoryId
+	}
+
+	ok, err = api.budgetManager.CategoryIsUniqueForPeriod(
+		body.CategoryId,
+		accountId,
+		body.Month,
+		body.Year,
+	)
+
+	if err != nil {
 		return err
+	}
+
+	if !ok {
+		return rest.ErrCategoryAlreadyInBudgetPeriod
 	}
 
 	return nil
 }
 
 func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpdateBody) error {
+	if existing == nil {
+		return rest.ErrInvalidBudgetId
+	}
+
 	if body.CategoryId != existing.CategoryId {
-		if _, err := api.categoryManager.Get(body.CategoryId, existing.AccountId); err != nil {
+		ok, err := api.categoryManager.Exists(body.CategoryId, existing.AccountId)
+		if err != nil {
 			return err
 		}
 
-		if err := api.budgetManager.CheckCategoryNotInPeriod(body.CategoryId, existing.AccountId, existing.Month, existing.Year); err != nil {
+		if !ok {
+			return rest.ErrInvalidCategoryId
+		}
+
+		ok, err = api.budgetManager.CategoryIsUniqueForPeriod(
+			body.CategoryId,
+			existing.AccountId,
+			existing.Month,
+			existing.Year,
+		)
+
+		if err != nil {
 			return err
+		}
+
+		if !ok {
+			return rest.ErrCategoryAlreadyInBudgetPeriod
 		}
 	}
 
@@ -136,7 +189,6 @@ func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpda
 
 func (api *BudgetAPI) getMaterializedBudget(budget data.Budget) (data.BudgetMaterialized, error) {
 	budgetMaterialized := data.BudgetMaterialized{Budget: budget}
-
 	total, err := api.transactionManager.GetTotalForPeriodCategory(
 		budget.AccountId,
 		budget.CategoryId,
@@ -145,6 +197,5 @@ func (api *BudgetAPI) getMaterializedBudget(budget data.Budget) (data.BudgetMate
 	)
 
 	budgetMaterialized.Actual = total
-
 	return budgetMaterialized, err
 }
