@@ -33,10 +33,11 @@ func (api *AccountAPI) Get(req *rest.Request) *rest.Response {
 }
 
 func (api *AccountAPI) Update(req *rest.Request) *rest.Response {
-	accountId := testAccountId
-	body, err := rest.ParseBody[rest.AccountUpdateBody](req.Body)
+	var body rest.AccountUpdateBody
 
-	if err != nil {
+	accountId := testAccountId
+
+	if err := req.Body.To(&body); err != nil {
 		return rest.Err(err)
 	}
 

@@ -4,7 +4,7 @@ type RouteHandler func(*Request) *Response
 
 type Request struct {
 	Url    string
-	Query  map[string][]string
+	Query  Query
 	Params PathParams
-	Body   []byte
+	Body   JSONBody
 }

@@ -1,30 +1,27 @@
 package rest
 
 import (
-	"github.com/J-Obog/paidoff/data"
 	"github.com/gorilla/schema"
 )
 
-type BudgetQuery struct {
-	Month *int `schema:"month"`
-	Year  *int `schema:"year"`
-}
+type Query map[string][]string
 
-type TransactionQuery struct {
-	StartDate *data.Date `schema:"startDate"`
-	EndDate   *data.Date `schema:"endDate"`
-	MinAmount *float64   `schema:"minAmount"`
-	MaxAmount *float64   `schema:"maxAmount"`
-}
+func (q Query) From(obj any) error {
+	encoder := schema.NewEncoder()
 
-func ParseQuery[T any](queryMap map[string][]string) (T, error) {
-	var t T
-
-	decoder := schema.NewDecoder()
-
-	if err := decoder.Decode(&t, queryMap); err != nil {
-		return t, &RestError{Msg: "invalid value for parsing query"}
+	if err := encoder.Encode(obj, q); err != nil {
+		return err
 	}
 
-	return t, nil
+	return nil
+}
+
+func (q Query) To(obj any) error {
+	decoder := schema.NewDecoder()
+
+	if err := decoder.Decode(obj, q); err != nil {
+		return &RestError{Msg: "invalid value for parsing query"}
+	}
+
+	return nil
 }

@@ -51,10 +51,10 @@ func (api *BudgetAPI) Filter(req *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
+	var body rest.BudgetCreateBody
 	accountId := testAccountId
-	body, err := rest.ParseBody[rest.BudgetCreateBody](req.Body)
 
-	if err != nil {
+	if err := req.Body.To(&body); err != nil {
 		return rest.Err(err)
 	}
 
@@ -71,11 +71,11 @@ func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
 }
 
 func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
+	var body rest.BudgetUpdateBody
 	accountId := testAccountId
 	id := req.Params.GetBudgetId()
-	body, err := rest.ParseBody[rest.BudgetUpdateBody](req.Body)
 
-	if err != nil {
+	if err := req.Body.To(&body); err != nil {
 		return rest.Err(err)
 	}
 

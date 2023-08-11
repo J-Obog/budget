@@ -46,10 +46,10 @@ func (api *CategoryAPI) GetAll(req *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) Create(req *rest.Request) *rest.Response {
+	var body rest.CategoryCreateBody
 	accountId := testAccountId
 
-	body, err := rest.ParseBody[rest.CategoryCreateBody](req.Body)
-	if err != nil {
+	if err := req.Body.To(&body); err != nil {
 		return rest.Err(err)
 	}
 
@@ -66,11 +66,11 @@ func (api *CategoryAPI) Create(req *rest.Request) *rest.Response {
 }
 
 func (api *CategoryAPI) Update(req *rest.Request) *rest.Response {
+	var body rest.CategoryUpdateBody
 	id := req.Params.GetCategoryId()
 	accountId := testAccountId
 
-	body, err := rest.ParseBody[rest.CategoryUpdateBody](req.Body)
-	if err != nil {
+	if err := req.Body.To(&body); err != nil {
 		return rest.Err(err)
 	}
 

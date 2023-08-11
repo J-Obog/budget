@@ -40,10 +40,10 @@ func (api *TransactionAPI) Filter(req *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) Create(req *rest.Request) *rest.Response {
+	var body rest.TransactionCreateBody
 	accountId := testAccountId
 
-	body, err := rest.ParseBody[rest.TransactionCreateBody](req.Body)
-	if err != nil {
+	if err := req.Body.To(&body); err != nil {
 		return rest.Err(err)
 	}
 
@@ -60,11 +60,11 @@ func (api *TransactionAPI) Create(req *rest.Request) *rest.Response {
 }
 
 func (api *TransactionAPI) Update(req *rest.Request) *rest.Response {
+	var body rest.TransactionUpdateBody
 	id := req.Params.GetTransactionId()
 	accountId := testAccountId
 
-	body, err := rest.ParseBody[rest.TransactionUpdateBody](req.Body)
-	if err != nil {
+	if err := req.Body.To(&body); err != nil {
 		return rest.Err(err)
 	}
 
