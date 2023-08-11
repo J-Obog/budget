@@ -1,6 +1,8 @@
 package manager
 
 import (
+	"encoding/json"
+
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/queue"
@@ -65,12 +67,7 @@ func (manager *CategoryManager) Update(existing *data.Category, body rest.Catego
 }
 
 func (manager *CategoryManager) Delete(id string, accountId string) (bool, error) {
-	msg := queue.CategoryDeletedMessage{
-		CategoryId: id,
-		AccountId:  accountId,
-	}
-
-	if err := manager.queue.Push(msg, queue.QueueName_CategoryDeleted); err != nil {
+	if err := manager.enqueueCategoryDeleteMsg(id, accountId); err != nil {
 		return false, err
 	}
 
@@ -93,4 +90,24 @@ func (manager *CategoryManager) NameIsUnique(accountId string, name string) (boo
 	}
 
 	return category == nil, nil
+}
+
+func (manager *CategoryManager) enqueueCategoryDeleteMsg(categoryId string, accountId string) error {
+	categoryDeleteMsg := queue.CategoryDeletedMessage{
+		CategoryId: categoryId,
+		AccountId:  accountId,
+	}
+
+	bytes, err := json.Marshal(&categoryDeleteMsg)
+
+	if err != nil {
+		return err
+	}
+
+	queueMsg := queue.Message{
+		Id:   manager.uuidProvider.GetUuid(),
+		Body: bytes,
+	}
+
+	return manager.queue.Push(queueMsg, queue.QueueName_CategoryDeleted)
 }

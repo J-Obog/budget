@@ -54,7 +54,6 @@ func (mq *RabbitMqQueue) Push(message Message, queueName string) error {
 }
 
 func (mq *RabbitMqQueue) Pop(queueName string) (*Message, error) {
-
 	d, ok, err := mq.channel.Get(queueName, false)
 
 	if err != nil {

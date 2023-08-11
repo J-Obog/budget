@@ -1,8 +1,8 @@
 package queue
 
 type Message struct {
-	Id   string      `json:"id"`
-	Data interface{} `json:"data"`
+	Id   string `json:"id"`
+	Body []byte `json:"body"`
 }
 
 type CategoryDeletedMessage struct {
