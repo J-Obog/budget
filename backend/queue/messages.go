@@ -6,5 +6,6 @@ type Message struct {
 }
 
 type CategoryDeletedMessage struct {
+	AccountId  string `json:"accountId"`
 	CategoryId string `json:"categoryId"`
 }

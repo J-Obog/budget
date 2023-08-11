@@ -3,6 +3,7 @@ package manager
 import (
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/data"
+	"github.com/J-Obog/paidoff/queue"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/store"
 	uuid "github.com/J-Obog/paidoff/uuidgen"
@@ -12,6 +13,7 @@ type CategoryManager struct {
 	store        store.CategoryStore
 	uuidProvider uuid.UuidProvider
 	clock        clock.Clock
+	queue        queue.Queue
 }
 
 func NewCategoryManager(
@@ -63,6 +65,15 @@ func (manager *CategoryManager) Update(existing *data.Category, body rest.Catego
 }
 
 func (manager *CategoryManager) Delete(id string, accountId string) (bool, error) {
+	msg := queue.CategoryDeletedMessage{
+		CategoryId: id,
+		AccountId:  accountId,
+	}
+
+	if err := manager.queue.Push(msg, queue.QueueName_CategoryDeleted); err != nil {
+		return false, err
+	}
+
 	return manager.Delete(id, accountId)
 }
 
