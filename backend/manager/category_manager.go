@@ -54,31 +54,12 @@ func (manager *CategoryManager) Create(accountId string, reqBody rest.CategoryCr
 	return newCategory, nil
 }
 
-func (manager *CategoryManager) Update(
-	id string,
-	accountId string,
-	reqBody rest.CategoryUpdateBody,
-) (*data.CategoryUpdate, error) {
-	timestamp := manager.clock.Now()
+func (manager *CategoryManager) Update(existing *data.Category, body rest.CategoryUpdateBody) (bool, error) {
+	existing.Name = body.Name
+	existing.Color = body.Color
+	existing.UpdatedAt = manager.clock.Now()
 
-	update := &data.CategoryUpdate{
-		Id:        id,
-		AccountId: accountId,
-		Name:      reqBody.Name,
-		Color:     reqBody.Color,
-		Timestamp: timestamp,
-	}
-
-	ok, err := manager.store.Update(*update)
-	if err != nil {
-		return nil, err
-	}
-
-	if !ok {
-		return nil, nil
-	}
-
-	return update, nil
+	return manager.store.Update(*existing)
 }
 
 func (manager *CategoryManager) Delete(id string, accountId string) (bool, error) {

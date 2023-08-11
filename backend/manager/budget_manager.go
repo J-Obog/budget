@@ -52,31 +52,12 @@ func (manager *BudgetManager) Create(accountId string, reqBody rest.BudgetCreate
 	return newBudget, nil
 }
 
-func (manager *BudgetManager) Update(
-	id string,
-	accountId string,
-	reqBody rest.BudgetUpdateBody,
-) (*data.BudgetUpdate, error) {
-	timestamp := manager.clock.Now()
+func (manager *BudgetManager) Update(existing *data.Budget, body rest.BudgetUpdateBody) (bool, error) {
+	existing.CategoryId = body.CategoryId
+	existing.Projected = body.Projected
+	existing.UpdatedAt = manager.clock.Now()
 
-	update := &data.BudgetUpdate{
-		Id:         id,
-		AccountId:  accountId,
-		CategoryId: reqBody.CategoryId,
-		Projected:  reqBody.Projected,
-		Timestamp:  timestamp,
-	}
-
-	ok, err := manager.store.Update(*update)
-	if err != nil {
-		return nil, err
-	}
-
-	if !ok {
-		return update, nil
-	}
-
-	return update, nil
+	return manager.store.Update(*existing)
 }
 
 func (manager *BudgetManager) Delete(id string, accountId string) (bool, error) {

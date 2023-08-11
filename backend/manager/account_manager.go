@@ -28,28 +28,11 @@ func (manager *AccountManager) Get(id string) (*data.Account, error) {
 	return account, nil
 }
 
-func (manager *AccountManager) Update(
-	id string,
-	reqBody rest.AccountUpdateBody,
-) (*data.AccountUpdate, error) {
-	timestamp := manager.clock.Now()
+func (manager *AccountManager) Update(existing *data.Account, body rest.AccountUpdateBody) (bool, error) {
+	existing.Name = body.Name
+	existing.UpdatedAt = manager.clock.Now()
 
-	update := &data.AccountUpdate{
-		Id:        id,
-		Name:      reqBody.Name,
-		Timestamp: timestamp,
-	}
-
-	ok, err := manager.store.Update(*update)
-	if err != nil {
-		return nil, err
-	}
-
-	if !ok {
-		return update, nil
-	}
-
-	return update, nil
+	return manager.store.Update(*existing)
 }
 
 func (manager *AccountManager) SoftDelete(id string) (bool, error) {

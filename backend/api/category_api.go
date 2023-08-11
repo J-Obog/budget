@@ -83,8 +83,14 @@ func (api *CategoryAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	if err := api.categoryManager.Update(existing, body); err != nil {
+	ok, err := api.categoryManager.Update(existing, body)
+
+	if err != nil {
 		return rest.Err(err)
+	}
+
+	if !ok {
+		return rest.Err(rest.ErrInvalidCategoryId)
 	}
 
 	return rest.Ok(existing)
@@ -98,15 +104,31 @@ func (api *CategoryAPI) Delete(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	if err := api.categoryManager.Delete(id, accountId); err != nil {
+	ok, err := api.categoryManager.Delete(id, accountId)
+
+	if err != nil {
 		return rest.Err(err)
+	}
+
+	if !ok {
+		return rest.Err(rest.ErrInvalidCategoryId)
 	}
 
 	return rest.Success()
 }
 
 func (api *CategoryAPI) validateDelete(id string, accountId string) error {
-	return api.budgetManager.CheckCategoryNotInUse(id, accountId)
+	ok, err := api.budgetManager.CategoryIsNotUsed(id, accountId)
+
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return rest.ErrCategoryCurrentlyInUse
+	}
+
+	return nil
 }
 
 func (api *CategoryAPI) validateUpdate(existing *data.Category, body rest.CategoryUpdateBody) error {
@@ -114,8 +136,15 @@ func (api *CategoryAPI) validateUpdate(existing *data.Category, body rest.Catego
 		if err := api.checkName(body.Name); err != nil {
 			return err
 		}
-		if err := api.budgetManager.CheckCategoryNotInUse(existing.AccountId, body.Name); err != nil {
+
+		ok, err := api.categoryManager.NameIsUnique(existing.AccountId, body.Name)
+
+		if err != nil {
 			return err
+		}
+
+		if !ok {
+			return rest.ErrCategoryNameAlreadyExists
 		}
 	}
 
@@ -127,7 +156,17 @@ func (api *CategoryAPI) validateCreate(accountId string, body rest.CategoryCreat
 		return err
 	}
 
-	return api.categoryManager.CheckNameNotTaken(accountId, body.Name)
+	ok, err := api.categoryManager.NameIsUnique(accountId, body.Name)
+
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return rest.ErrCategoryNameAlreadyExists
+	}
+
+	return nil
 }
 
 func (api *CategoryAPI) checkName(name string) error {

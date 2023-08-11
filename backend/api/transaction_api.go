@@ -77,8 +77,14 @@ func (api *TransactionAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	if err := api.transactionManager.Update(existing, body); err != nil {
+	ok, err := api.transactionManager.Update(existing, body)
+
+	if err != nil {
 		return rest.Err(err)
+	}
+
+	if !ok {
+		return rest.Err(rest.ErrInvalidTransactionId)
 	}
 
 	return rest.Ok(existing)

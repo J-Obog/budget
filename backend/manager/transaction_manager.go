@@ -27,19 +27,55 @@ func NewTransactionManager(
 }
 
 func (manager *TransactionManager) Get(id string, accountId string) (*data.Transaction, error) {
-	return nil, nil
+	return manager.store.Get(id, accountId)
 }
 
-func (manager *TransactionManager) Create(accountId string, createReq rest.TransactionCreateBody) (data.Transaction, error) {
-	return data.Transaction{}, nil
+func (manager *TransactionManager) Create(
+	accountId string,
+	body rest.TransactionCreateBody,
+) (data.Transaction, error) {
+	timestamp := manager.clock.Now()
+	uuid := manager.uuidProvider.GetUuid()
+
+	newTransaction := data.Transaction{
+		Id:         uuid,
+		AccountId:  accountId,
+		CategoryId: body.CategoryId,
+		Note:       body.Note,
+		Type:       body.Type,
+		Amount:     body.Amount,
+		Month:      body.Month,
+		Day:        body.Day,
+		Year:       body.Year,
+		CreatedAt:  timestamp,
+		UpdatedAt:  timestamp,
+	}
+
+	if err := manager.store.Insert(newTransaction); err != nil {
+		return data.Transaction{}, err
+	}
+
+	return newTransaction, nil
 }
 
-func (manager *TransactionManager) Update(updated *data.Transaction, updateReq rest.TransactionUpdateBody) error {
-	return nil
+func (manager *TransactionManager) Update(
+	existing *data.Transaction,
+	body rest.TransactionUpdateBody,
+) (bool, error) {
+	existing.CategoryId = body.CategoryId
+	existing.Note = body.Note
+	existing.Type = body.Type
+	existing.Amount = body.Amount
+	existing.Month = body.Month
+	existing.Day = body.Day
+	existing.Year = body.Year
+	existing.UpdatedAt = manager.clock.Now()
+
+	return manager.store.Update(*existing)
 }
 
 func (manager *TransactionManager) Delete(id string, accountId string) error {
-	return nil
+	return manager.Delete(id, accountId)
 }
 
 func (manager *TransactionManager) GetByPeriodCategory(

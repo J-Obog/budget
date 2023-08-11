@@ -50,16 +50,15 @@ func (api *AccountAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	accountUpdate, err := api.accountManager.Update(accountId, body)
+	ok, err := api.accountManager.Update(account, body)
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if accountUpdate == nil {
+	if !ok {
 		return rest.Err(rest.ErrInvalidAccountId)
 	}
 
-	account.UpdatedAt = accountUpdate.Timestamp
 	return rest.Ok(account)
 }
 

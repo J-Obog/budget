@@ -89,17 +89,16 @@ func (api *BudgetAPI) Update(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
-	budgetUpdate, err := api.budgetManager.Update(id, accountId, body)
+	ok, err := api.budgetManager.Update(budget, body)
 
 	if err != nil {
 		return rest.Err(err)
 	}
 
-	if budgetUpdate == nil {
+	if !ok {
 		return rest.Err(rest.ErrInvalidBudgetId)
 	}
 
-	budget.UpdatedAt = budgetUpdate.Timestamp
 	return rest.Ok(budget)
 }
 
