@@ -12,6 +12,14 @@ type Queue struct {
 	mock.Mock
 }
 
+type Queue_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *Queue) EXPECT() *Queue_Expecter {
+	return &Queue_Expecter{mock: &_m.Mock}
+}
+
 // Ack provides a mock function with given fields: messageId
 func (_m *Queue) Ack(messageId string) error {
 	ret := _m.Called(messageId)
@@ -26,6 +34,34 @@ func (_m *Queue) Ack(messageId string) error {
 	return r0
 }
 
+// Queue_Ack_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Ack'
+type Queue_Ack_Call struct {
+	*mock.Call
+}
+
+// Ack is a helper method to define mock.On call
+//   - messageId string
+func (_e *Queue_Expecter) Ack(messageId interface{}) *Queue_Ack_Call {
+	return &Queue_Ack_Call{Call: _e.mock.On("Ack", messageId)}
+}
+
+func (_c *Queue_Ack_Call) Run(run func(messageId string)) *Queue_Ack_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *Queue_Ack_Call) Return(_a0 error) *Queue_Ack_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Queue_Ack_Call) RunAndReturn(run func(string) error) *Queue_Ack_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Flush provides a mock function with given fields: queueName
 func (_m *Queue) Flush(queueName string) error {
 	ret := _m.Called(queueName)
@@ -38,6 +74,34 @@ func (_m *Queue) Flush(queueName string) error {
 	}
 
 	return r0
+}
+
+// Queue_Flush_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Flush'
+type Queue_Flush_Call struct {
+	*mock.Call
+}
+
+// Flush is a helper method to define mock.On call
+//   - queueName string
+func (_e *Queue_Expecter) Flush(queueName interface{}) *Queue_Flush_Call {
+	return &Queue_Flush_Call{Call: _e.mock.On("Flush", queueName)}
+}
+
+func (_c *Queue_Flush_Call) Run(run func(queueName string)) *Queue_Flush_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *Queue_Flush_Call) Return(_a0 error) *Queue_Flush_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Queue_Flush_Call) RunAndReturn(run func(string) error) *Queue_Flush_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // Pop provides a mock function with given fields: queueName
@@ -66,6 +130,34 @@ func (_m *Queue) Pop(queueName string) (*queue.Message, error) {
 	return r0, r1
 }
 
+// Queue_Pop_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Pop'
+type Queue_Pop_Call struct {
+	*mock.Call
+}
+
+// Pop is a helper method to define mock.On call
+//   - queueName string
+func (_e *Queue_Expecter) Pop(queueName interface{}) *Queue_Pop_Call {
+	return &Queue_Pop_Call{Call: _e.mock.On("Pop", queueName)}
+}
+
+func (_c *Queue_Pop_Call) Run(run func(queueName string)) *Queue_Pop_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *Queue_Pop_Call) Return(_a0 *queue.Message, _a1 error) *Queue_Pop_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *Queue_Pop_Call) RunAndReturn(run func(string) (*queue.Message, error)) *Queue_Pop_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Push provides a mock function with given fields: message, queueName
 func (_m *Queue) Push(message queue.Message, queueName string) error {
 	ret := _m.Called(message, queueName)
@@ -78,6 +170,35 @@ func (_m *Queue) Push(message queue.Message, queueName string) error {
 	}
 
 	return r0
+}
+
+// Queue_Push_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Push'
+type Queue_Push_Call struct {
+	*mock.Call
+}
+
+// Push is a helper method to define mock.On call
+//   - message queue.Message
+//   - queueName string
+func (_e *Queue_Expecter) Push(message interface{}, queueName interface{}) *Queue_Push_Call {
+	return &Queue_Push_Call{Call: _e.mock.On("Push", message, queueName)}
+}
+
+func (_c *Queue_Push_Call) Run(run func(message queue.Message, queueName string)) *Queue_Push_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(queue.Message), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *Queue_Push_Call) Return(_a0 error) *Queue_Push_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Queue_Push_Call) RunAndReturn(run func(queue.Message, string) error) *Queue_Push_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewQueue creates a new instance of Queue. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

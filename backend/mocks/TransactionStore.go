@@ -12,6 +12,14 @@ type TransactionStore struct {
 	mock.Mock
 }
 
+type TransactionStore_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *TransactionStore) EXPECT() *TransactionStore_Expecter {
+	return &TransactionStore_Expecter{mock: &_m.Mock}
+}
+
 // Delete provides a mock function with given fields: id, accountId
 func (_m *TransactionStore) Delete(id string, accountId string) (bool, error) {
 	ret := _m.Called(id, accountId)
@@ -36,6 +44,35 @@ func (_m *TransactionStore) Delete(id string, accountId string) (bool, error) {
 	return r0, r1
 }
 
+// TransactionStore_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
+type TransactionStore_Delete_Call struct {
+	*mock.Call
+}
+
+// Delete is a helper method to define mock.On call
+//   - id string
+//   - accountId string
+func (_e *TransactionStore_Expecter) Delete(id interface{}, accountId interface{}) *TransactionStore_Delete_Call {
+	return &TransactionStore_Delete_Call{Call: _e.mock.On("Delete", id, accountId)}
+}
+
+func (_c *TransactionStore_Delete_Call) Run(run func(id string, accountId string)) *TransactionStore_Delete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *TransactionStore_Delete_Call) Return(_a0 bool, _a1 error) *TransactionStore_Delete_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *TransactionStore_Delete_Call) RunAndReturn(run func(string, string) (bool, error)) *TransactionStore_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteAll provides a mock function with given fields:
 func (_m *TransactionStore) DeleteAll() error {
 	ret := _m.Called()
@@ -48,6 +85,33 @@ func (_m *TransactionStore) DeleteAll() error {
 	}
 
 	return r0
+}
+
+// TransactionStore_DeleteAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteAll'
+type TransactionStore_DeleteAll_Call struct {
+	*mock.Call
+}
+
+// DeleteAll is a helper method to define mock.On call
+func (_e *TransactionStore_Expecter) DeleteAll() *TransactionStore_DeleteAll_Call {
+	return &TransactionStore_DeleteAll_Call{Call: _e.mock.On("DeleteAll")}
+}
+
+func (_c *TransactionStore_DeleteAll_Call) Run(run func()) *TransactionStore_DeleteAll_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *TransactionStore_DeleteAll_Call) Return(_a0 error) *TransactionStore_DeleteAll_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *TransactionStore_DeleteAll_Call) RunAndReturn(run func() error) *TransactionStore_DeleteAll_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // Get provides a mock function with given fields: id, accountId
@@ -76,6 +140,35 @@ func (_m *TransactionStore) Get(id string, accountId string) (*data.Transaction,
 	return r0, r1
 }
 
+// TransactionStore_Get_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Get'
+type TransactionStore_Get_Call struct {
+	*mock.Call
+}
+
+// Get is a helper method to define mock.On call
+//   - id string
+//   - accountId string
+func (_e *TransactionStore_Expecter) Get(id interface{}, accountId interface{}) *TransactionStore_Get_Call {
+	return &TransactionStore_Get_Call{Call: _e.mock.On("Get", id, accountId)}
+}
+
+func (_c *TransactionStore_Get_Call) Run(run func(id string, accountId string)) *TransactionStore_Get_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *TransactionStore_Get_Call) Return(_a0 *data.Transaction, _a1 error) *TransactionStore_Get_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *TransactionStore_Get_Call) RunAndReturn(run func(string, string) (*data.Transaction, error)) *TransactionStore_Get_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetBy provides a mock function with given fields: accountId, filter
 func (_m *TransactionStore) GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
 	ret := _m.Called(accountId, filter)
@@ -100,6 +193,35 @@ func (_m *TransactionStore) GetBy(accountId string, filter data.TransactionFilte
 	}
 
 	return r0, r1
+}
+
+// TransactionStore_GetBy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBy'
+type TransactionStore_GetBy_Call struct {
+	*mock.Call
+}
+
+// GetBy is a helper method to define mock.On call
+//   - accountId string
+//   - filter data.TransactionFilter
+func (_e *TransactionStore_Expecter) GetBy(accountId interface{}, filter interface{}) *TransactionStore_GetBy_Call {
+	return &TransactionStore_GetBy_Call{Call: _e.mock.On("GetBy", accountId, filter)}
+}
+
+func (_c *TransactionStore_GetBy_Call) Run(run func(accountId string, filter data.TransactionFilter)) *TransactionStore_GetBy_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(data.TransactionFilter))
+	})
+	return _c
+}
+
+func (_c *TransactionStore_GetBy_Call) Return(_a0 []data.Transaction, _a1 error) *TransactionStore_GetBy_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *TransactionStore_GetBy_Call) RunAndReturn(run func(string, data.TransactionFilter) ([]data.Transaction, error)) *TransactionStore_GetBy_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // GetByPeriodCategory provides a mock function with given fields: accountId, categoryId, month, year
@@ -128,6 +250,37 @@ func (_m *TransactionStore) GetByPeriodCategory(accountId string, categoryId str
 	return r0, r1
 }
 
+// TransactionStore_GetByPeriodCategory_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByPeriodCategory'
+type TransactionStore_GetByPeriodCategory_Call struct {
+	*mock.Call
+}
+
+// GetByPeriodCategory is a helper method to define mock.On call
+//   - accountId string
+//   - categoryId string
+//   - month int
+//   - year int
+func (_e *TransactionStore_Expecter) GetByPeriodCategory(accountId interface{}, categoryId interface{}, month interface{}, year interface{}) *TransactionStore_GetByPeriodCategory_Call {
+	return &TransactionStore_GetByPeriodCategory_Call{Call: _e.mock.On("GetByPeriodCategory", accountId, categoryId, month, year)}
+}
+
+func (_c *TransactionStore_GetByPeriodCategory_Call) Run(run func(accountId string, categoryId string, month int, year int)) *TransactionStore_GetByPeriodCategory_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string), args[2].(int), args[3].(int))
+	})
+	return _c
+}
+
+func (_c *TransactionStore_GetByPeriodCategory_Call) Return(_a0 []data.Transaction, _a1 error) *TransactionStore_GetByPeriodCategory_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *TransactionStore_GetByPeriodCategory_Call) RunAndReturn(run func(string, string, int, int) ([]data.Transaction, error)) *TransactionStore_GetByPeriodCategory_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Insert provides a mock function with given fields: transaction
 func (_m *TransactionStore) Insert(transaction data.Transaction) error {
 	ret := _m.Called(transaction)
@@ -142,28 +295,84 @@ func (_m *TransactionStore) Insert(transaction data.Transaction) error {
 	return r0
 }
 
-// Update provides a mock function with given fields: id, accountId, update, timestamp
-func (_m *TransactionStore) Update(id string, accountId string, update data.TransactionUpdate, timestamp int64) (bool, error) {
-	ret := _m.Called(id, accountId, update, timestamp)
+// TransactionStore_Insert_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Insert'
+type TransactionStore_Insert_Call struct {
+	*mock.Call
+}
+
+// Insert is a helper method to define mock.On call
+//   - transaction data.Transaction
+func (_e *TransactionStore_Expecter) Insert(transaction interface{}) *TransactionStore_Insert_Call {
+	return &TransactionStore_Insert_Call{Call: _e.mock.On("Insert", transaction)}
+}
+
+func (_c *TransactionStore_Insert_Call) Run(run func(transaction data.Transaction)) *TransactionStore_Insert_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(data.Transaction))
+	})
+	return _c
+}
+
+func (_c *TransactionStore_Insert_Call) Return(_a0 error) *TransactionStore_Insert_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *TransactionStore_Insert_Call) RunAndReturn(run func(data.Transaction) error) *TransactionStore_Insert_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Update provides a mock function with given fields: update
+func (_m *TransactionStore) Update(update data.Transaction) (bool, error) {
+	ret := _m.Called(update)
 
 	var r0 bool
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string, data.TransactionUpdate, int64) (bool, error)); ok {
-		return rf(id, accountId, update, timestamp)
+	if rf, ok := ret.Get(0).(func(data.Transaction) (bool, error)); ok {
+		return rf(update)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, data.TransactionUpdate, int64) bool); ok {
-		r0 = rf(id, accountId, update, timestamp)
+	if rf, ok := ret.Get(0).(func(data.Transaction) bool); ok {
+		r0 = rf(update)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, data.TransactionUpdate, int64) error); ok {
-		r1 = rf(id, accountId, update, timestamp)
+	if rf, ok := ret.Get(1).(func(data.Transaction) error); ok {
+		r1 = rf(update)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// TransactionStore_Update_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Update'
+type TransactionStore_Update_Call struct {
+	*mock.Call
+}
+
+// Update is a helper method to define mock.On call
+//   - update data.Transaction
+func (_e *TransactionStore_Expecter) Update(update interface{}) *TransactionStore_Update_Call {
+	return &TransactionStore_Update_Call{Call: _e.mock.On("Update", update)}
+}
+
+func (_c *TransactionStore_Update_Call) Run(run func(update data.Transaction)) *TransactionStore_Update_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(data.Transaction))
+	})
+	return _c
+}
+
+func (_c *TransactionStore_Update_Call) Return(_a0 bool, _a1 error) *TransactionStore_Update_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *TransactionStore_Update_Call) RunAndReturn(run func(data.Transaction) (bool, error)) *TransactionStore_Update_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewTransactionStore creates a new instance of TransactionStore. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

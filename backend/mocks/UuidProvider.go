@@ -9,6 +9,14 @@ type UuidProvider struct {
 	mock.Mock
 }
 
+type UuidProvider_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *UuidProvider) EXPECT() *UuidProvider_Expecter {
+	return &UuidProvider_Expecter{mock: &_m.Mock}
+}
+
 // GetUuid provides a mock function with given fields:
 func (_m *UuidProvider) GetUuid() string {
 	ret := _m.Called()
@@ -21,6 +29,33 @@ func (_m *UuidProvider) GetUuid() string {
 	}
 
 	return r0
+}
+
+// UuidProvider_GetUuid_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUuid'
+type UuidProvider_GetUuid_Call struct {
+	*mock.Call
+}
+
+// GetUuid is a helper method to define mock.On call
+func (_e *UuidProvider_Expecter) GetUuid() *UuidProvider_GetUuid_Call {
+	return &UuidProvider_GetUuid_Call{Call: _e.mock.On("GetUuid")}
+}
+
+func (_c *UuidProvider_GetUuid_Call) Run(run func()) *UuidProvider_GetUuid_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *UuidProvider_GetUuid_Call) Return(_a0 string) *UuidProvider_GetUuid_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *UuidProvider_GetUuid_Call) RunAndReturn(run func() string) *UuidProvider_GetUuid_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewUuidProvider creates a new instance of UuidProvider. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

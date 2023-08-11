@@ -9,6 +9,14 @@ type Clock struct {
 	mock.Mock
 }
 
+type Clock_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *Clock) EXPECT() *Clock_Expecter {
+	return &Clock_Expecter{mock: &_m.Mock}
+}
+
 // CurrentMonth provides a mock function with given fields:
 func (_m *Clock) CurrentMonth() int {
 	ret := _m.Called()
@@ -21,6 +29,33 @@ func (_m *Clock) CurrentMonth() int {
 	}
 
 	return r0
+}
+
+// Clock_CurrentMonth_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CurrentMonth'
+type Clock_CurrentMonth_Call struct {
+	*mock.Call
+}
+
+// CurrentMonth is a helper method to define mock.On call
+func (_e *Clock_Expecter) CurrentMonth() *Clock_CurrentMonth_Call {
+	return &Clock_CurrentMonth_Call{Call: _e.mock.On("CurrentMonth")}
+}
+
+func (_c *Clock_CurrentMonth_Call) Run(run func()) *Clock_CurrentMonth_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *Clock_CurrentMonth_Call) Return(_a0 int) *Clock_CurrentMonth_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Clock_CurrentMonth_Call) RunAndReturn(run func() int) *Clock_CurrentMonth_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // CurrentYear provides a mock function with given fields:
@@ -37,6 +72,33 @@ func (_m *Clock) CurrentYear() int {
 	return r0
 }
 
+// Clock_CurrentYear_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CurrentYear'
+type Clock_CurrentYear_Call struct {
+	*mock.Call
+}
+
+// CurrentYear is a helper method to define mock.On call
+func (_e *Clock_Expecter) CurrentYear() *Clock_CurrentYear_Call {
+	return &Clock_CurrentYear_Call{Call: _e.mock.On("CurrentYear")}
+}
+
+func (_c *Clock_CurrentYear_Call) Run(run func()) *Clock_CurrentYear_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *Clock_CurrentYear_Call) Return(_a0 int) *Clock_CurrentYear_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Clock_CurrentYear_Call) RunAndReturn(run func() int) *Clock_CurrentYear_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Now provides a mock function with given fields:
 func (_m *Clock) Now() int64 {
 	ret := _m.Called()
@@ -49,6 +111,33 @@ func (_m *Clock) Now() int64 {
 	}
 
 	return r0
+}
+
+// Clock_Now_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Now'
+type Clock_Now_Call struct {
+	*mock.Call
+}
+
+// Now is a helper method to define mock.On call
+func (_e *Clock_Expecter) Now() *Clock_Now_Call {
+	return &Clock_Now_Call{Call: _e.mock.On("Now")}
+}
+
+func (_c *Clock_Now_Call) Run(run func()) *Clock_Now_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *Clock_Now_Call) Return(_a0 int64) *Clock_Now_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Clock_Now_Call) RunAndReturn(run func() int64) *Clock_Now_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewClock creates a new instance of Clock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

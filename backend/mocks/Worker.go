@@ -9,6 +9,14 @@ type Worker struct {
 	mock.Mock
 }
 
+type Worker_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *Worker) EXPECT() *Worker_Expecter {
+	return &Worker_Expecter{mock: &_m.Mock}
+}
+
 // Work provides a mock function with given fields:
 func (_m *Worker) Work() error {
 	ret := _m.Called()
@@ -21,6 +29,33 @@ func (_m *Worker) Work() error {
 	}
 
 	return r0
+}
+
+// Worker_Work_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Work'
+type Worker_Work_Call struct {
+	*mock.Call
+}
+
+// Work is a helper method to define mock.On call
+func (_e *Worker_Expecter) Work() *Worker_Work_Call {
+	return &Worker_Work_Call{Call: _e.mock.On("Work")}
+}
+
+func (_c *Worker_Work_Call) Run(run func()) *Worker_Work_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *Worker_Work_Call) Return(_a0 error) *Worker_Work_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *Worker_Work_Call) RunAndReturn(run func() error) *Worker_Work_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewWorker creates a new instance of Worker. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

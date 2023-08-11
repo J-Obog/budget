@@ -12,6 +12,14 @@ type AccountStore struct {
 	mock.Mock
 }
 
+type AccountStore_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *AccountStore) EXPECT() *AccountStore_Expecter {
+	return &AccountStore_Expecter{mock: &_m.Mock}
+}
+
 // Delete provides a mock function with given fields: id
 func (_m *AccountStore) Delete(id string) (bool, error) {
 	ret := _m.Called(id)
@@ -36,6 +44,34 @@ func (_m *AccountStore) Delete(id string) (bool, error) {
 	return r0, r1
 }
 
+// AccountStore_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
+type AccountStore_Delete_Call struct {
+	*mock.Call
+}
+
+// Delete is a helper method to define mock.On call
+//   - id string
+func (_e *AccountStore_Expecter) Delete(id interface{}) *AccountStore_Delete_Call {
+	return &AccountStore_Delete_Call{Call: _e.mock.On("Delete", id)}
+}
+
+func (_c *AccountStore_Delete_Call) Run(run func(id string)) *AccountStore_Delete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *AccountStore_Delete_Call) Return(_a0 bool, _a1 error) *AccountStore_Delete_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *AccountStore_Delete_Call) RunAndReturn(run func(string) (bool, error)) *AccountStore_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteAll provides a mock function with given fields:
 func (_m *AccountStore) DeleteAll() error {
 	ret := _m.Called()
@@ -48,6 +84,33 @@ func (_m *AccountStore) DeleteAll() error {
 	}
 
 	return r0
+}
+
+// AccountStore_DeleteAll_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteAll'
+type AccountStore_DeleteAll_Call struct {
+	*mock.Call
+}
+
+// DeleteAll is a helper method to define mock.On call
+func (_e *AccountStore_Expecter) DeleteAll() *AccountStore_DeleteAll_Call {
+	return &AccountStore_DeleteAll_Call{Call: _e.mock.On("DeleteAll")}
+}
+
+func (_c *AccountStore_DeleteAll_Call) Run(run func()) *AccountStore_DeleteAll_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run()
+	})
+	return _c
+}
+
+func (_c *AccountStore_DeleteAll_Call) Return(_a0 error) *AccountStore_DeleteAll_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *AccountStore_DeleteAll_Call) RunAndReturn(run func() error) *AccountStore_DeleteAll_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // Get provides a mock function with given fields: id
@@ -76,6 +139,34 @@ func (_m *AccountStore) Get(id string) (*data.Account, error) {
 	return r0, r1
 }
 
+// AccountStore_Get_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Get'
+type AccountStore_Get_Call struct {
+	*mock.Call
+}
+
+// Get is a helper method to define mock.On call
+//   - id string
+func (_e *AccountStore_Expecter) Get(id interface{}) *AccountStore_Get_Call {
+	return &AccountStore_Get_Call{Call: _e.mock.On("Get", id)}
+}
+
+func (_c *AccountStore_Get_Call) Run(run func(id string)) *AccountStore_Get_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *AccountStore_Get_Call) Return(_a0 *data.Account, _a1 error) *AccountStore_Get_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *AccountStore_Get_Call) RunAndReturn(run func(string) (*data.Account, error)) *AccountStore_Get_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Insert provides a mock function with given fields: account
 func (_m *AccountStore) Insert(account data.Account) error {
 	ret := _m.Called(account)
@@ -90,8 +181,36 @@ func (_m *AccountStore) Insert(account data.Account) error {
 	return r0
 }
 
-// SetDeleted provides a mock function with given fields: id
-func (_m *AccountStore) SetDeleted(id string) (bool, error) {
+// AccountStore_Insert_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Insert'
+type AccountStore_Insert_Call struct {
+	*mock.Call
+}
+
+// Insert is a helper method to define mock.On call
+//   - account data.Account
+func (_e *AccountStore_Expecter) Insert(account interface{}) *AccountStore_Insert_Call {
+	return &AccountStore_Insert_Call{Call: _e.mock.On("Insert", account)}
+}
+
+func (_c *AccountStore_Insert_Call) Run(run func(account data.Account)) *AccountStore_Insert_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(data.Account))
+	})
+	return _c
+}
+
+func (_c *AccountStore_Insert_Call) Return(_a0 error) *AccountStore_Insert_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *AccountStore_Insert_Call) RunAndReturn(run func(data.Account) error) *AccountStore_Insert_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SoftDelete provides a mock function with given fields: id
+func (_m *AccountStore) SoftDelete(id string) (bool, error) {
 	ret := _m.Called(id)
 
 	var r0 bool
@@ -114,28 +233,84 @@ func (_m *AccountStore) SetDeleted(id string) (bool, error) {
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: id, update, timestamp
-func (_m *AccountStore) Update(id string, update data.AccountUpdate, timestamp int64) (bool, error) {
-	ret := _m.Called(id, update, timestamp)
+// AccountStore_SoftDelete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SoftDelete'
+type AccountStore_SoftDelete_Call struct {
+	*mock.Call
+}
+
+// SoftDelete is a helper method to define mock.On call
+//   - id string
+func (_e *AccountStore_Expecter) SoftDelete(id interface{}) *AccountStore_SoftDelete_Call {
+	return &AccountStore_SoftDelete_Call{Call: _e.mock.On("SoftDelete", id)}
+}
+
+func (_c *AccountStore_SoftDelete_Call) Run(run func(id string)) *AccountStore_SoftDelete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *AccountStore_SoftDelete_Call) Return(_a0 bool, _a1 error) *AccountStore_SoftDelete_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *AccountStore_SoftDelete_Call) RunAndReturn(run func(string) (bool, error)) *AccountStore_SoftDelete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// Update provides a mock function with given fields: update
+func (_m *AccountStore) Update(update data.Account) (bool, error) {
+	ret := _m.Called(update)
 
 	var r0 bool
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, data.AccountUpdate, int64) (bool, error)); ok {
-		return rf(id, update, timestamp)
+	if rf, ok := ret.Get(0).(func(data.Account) (bool, error)); ok {
+		return rf(update)
 	}
-	if rf, ok := ret.Get(0).(func(string, data.AccountUpdate, int64) bool); ok {
-		r0 = rf(id, update, timestamp)
+	if rf, ok := ret.Get(0).(func(data.Account) bool); ok {
+		r0 = rf(update)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(string, data.AccountUpdate, int64) error); ok {
-		r1 = rf(id, update, timestamp)
+	if rf, ok := ret.Get(1).(func(data.Account) error); ok {
+		r1 = rf(update)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// AccountStore_Update_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Update'
+type AccountStore_Update_Call struct {
+	*mock.Call
+}
+
+// Update is a helper method to define mock.On call
+//   - update data.Account
+func (_e *AccountStore_Expecter) Update(update interface{}) *AccountStore_Update_Call {
+	return &AccountStore_Update_Call{Call: _e.mock.On("Update", update)}
+}
+
+func (_c *AccountStore_Update_Call) Run(run func(update data.Account)) *AccountStore_Update_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(data.Account))
+	})
+	return _c
+}
+
+func (_c *AccountStore_Update_Call) Return(_a0 bool, _a1 error) *AccountStore_Update_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *AccountStore_Update_Call) RunAndReturn(run func(data.Account) (bool, error)) *AccountStore_Update_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewAccountStore creates a new instance of AccountStore. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

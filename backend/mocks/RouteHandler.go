@@ -12,6 +12,14 @@ type RouteHandler struct {
 	mock.Mock
 }
 
+type RouteHandler_Expecter struct {
+	mock *mock.Mock
+}
+
+func (_m *RouteHandler) EXPECT() *RouteHandler_Expecter {
+	return &RouteHandler_Expecter{mock: &_m.Mock}
+}
+
 // Execute provides a mock function with given fields: _a0
 func (_m *RouteHandler) Execute(_a0 *rest.Request) *rest.Response {
 	ret := _m.Called(_a0)
@@ -26,6 +34,34 @@ func (_m *RouteHandler) Execute(_a0 *rest.Request) *rest.Response {
 	}
 
 	return r0
+}
+
+// RouteHandler_Execute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Execute'
+type RouteHandler_Execute_Call struct {
+	*mock.Call
+}
+
+// Execute is a helper method to define mock.On call
+//   - _a0 *rest.Request
+func (_e *RouteHandler_Expecter) Execute(_a0 interface{}) *RouteHandler_Execute_Call {
+	return &RouteHandler_Execute_Call{Call: _e.mock.On("Execute", _a0)}
+}
+
+func (_c *RouteHandler_Execute_Call) Run(run func(_a0 *rest.Request)) *RouteHandler_Execute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(*rest.Request))
+	})
+	return _c
+}
+
+func (_c *RouteHandler_Execute_Call) Return(_a0 *rest.Response) *RouteHandler_Execute_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *RouteHandler_Execute_Call) RunAndReturn(run func(*rest.Request) *rest.Response) *RouteHandler_Execute_Call {
+	_c.Call.Return(run)
+	return _c
 }
 
 // NewRouteHandler creates a new instance of RouteHandler. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

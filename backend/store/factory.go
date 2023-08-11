@@ -1,14 +1,5 @@
 package store
 
-import (
-	"log"
-
-	"github.com/J-Obog/paidoff/config"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-)
-
 const (
 	storeImpl = "postgres"
 )
@@ -20,7 +11,7 @@ type StoreService struct {
 	TransactionStore TransactionStore
 }
 
-func NewStoreService(app *config.AppConfig) *StoreService {
+/*func NewStoreService(app *config.AppConfig) *StoreService {
 	switch storeImpl {
 	case "postgres":
 		pgDb, err := gorm.Open(postgres.Open(app.PostgresUrl), &gorm.Config{
@@ -43,3 +34,4 @@ func NewStoreService(app *config.AppConfig) *StoreService {
 
 	return nil
 }
+*/
