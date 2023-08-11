@@ -7,6 +7,7 @@ import (
 
 const (
 	testTimestamp = 123456789
+	testUuid      = "test-uuid-123"
 )
 
 type ManagerTestSuite struct {
