@@ -22,6 +22,12 @@ func (s *BudgetApiTestSuite) SetupSuite() {
 func (s *BudgetApiTestSuite) SetupTest() {
 	err := s.budgetStore.DeleteAll()
 	s.NoError(err)
+
+	err = s.transactionStore.DeleteAll()
+	s.NoError(err)
+
+	err = s.categoryStore.DeleteAll()
+	s.NoError(err)
 }
 
 func (s *BudgetApiTestSuite) TestGets() {
