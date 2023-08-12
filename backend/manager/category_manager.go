@@ -22,11 +22,13 @@ func NewCategoryManager(
 	store store.CategoryStore,
 	uuidProvider uuid.UuidProvider,
 	clock clock.Clock,
+	queue queue.Queue,
 ) *CategoryManager {
 	return &CategoryManager{
 		store:        store,
 		uuidProvider: uuidProvider,
 		clock:        clock,
+		queue:        queue,
 	}
 }
 
