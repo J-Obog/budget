@@ -1,6 +1,9 @@
 package api
 
 import (
+	"net/http"
+	"reflect"
+
 	"github.com/J-Obog/paidoff/clock"
 	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/manager"
@@ -42,10 +45,21 @@ func (s *ApiTestSuite) initDependencies() {
 	s.transactionManager = manager.NewTransactionManager(s.transactionStore, uuidProvider, clock)
 }
 
-func (s *ApiTestSuite) ResponseBodyEquals(res *rest.Response, expectedBody any) {
-	s.Equal(res.Data, expectedBody)
+func (s *ApiTestSuite) OkResponse(res *rest.Response, expectedShema any) {
+	s.Equal(reflect.TypeOf(res.Data), reflect.TypeOf(expectedShema))
+	s.Equal(res.Status, http.StatusOK)
 }
 
-func (s *ApiTestSuite) StatusCodeEquals(res *rest.Response, expectedCode int) {
-	s.Equal(res.Status, expectedCode)
+func (s *ApiTestSuite) ErrRepsonse(res *rest.Response, expectedError *rest.RestError) {
+	s.Equal(res.Data, expectedError)
+	s.Equal(res.Status, expectedError.Status)
+}
+
+func (s *ApiTestSuite) getJSONBody(obj any) rest.JSONBody {
+	var jsonb rest.JSONBody
+
+	err := jsonb.From(obj)
+	s.NoError(err)
+
+	return jsonb
 }

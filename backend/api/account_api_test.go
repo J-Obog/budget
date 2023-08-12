@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 )
@@ -23,60 +21,37 @@ func (s *AccountApiTestSuite) SetupTest() {
 }
 
 func (s *AccountApiTestSuite) TestGets() {
+	s.accountStore.Insert(data.Account{Id: testAccountId})
+
 	req := &rest.Request{}
-	account := data.Account{Id: testAccountId}
-	s.accountStore.Insert(account)
-
 	res := s.api.Get(req)
-
-	s.ResponseBodyEquals(res, account)
-	s.StatusCodeEquals(res, http.StatusOK)
+	s.OkResponse(res, data.Account{})
 }
 
 func (s *AccountApiTestSuite) TestGetFailsIfNoAccountExists() {
 	req := &rest.Request{}
 	res := s.api.Get(req)
-
-	s.ResponseBodyEquals(res, rest.ErrInvalidAccountId)
-	s.StatusCodeEquals(res, rest.ErrInvalidAccountId.Status)
+	s.ErrRepsonse(res, rest.ErrInvalidAccountId)
 }
 
 func (s *AccountApiTestSuite) TestUpdates() {
-	account := data.Account{Id: testAccountId, Name: "Old Name"}
-	s.accountStore.Insert(account)
+	s.accountStore.Insert(data.Account{Id: testAccountId})
 
-	var jsonb rest.JSONBody
 	reqBody := rest.AccountUpdateBody{Name: "New Name"}
-
-	err := jsonb.From(&reqBody)
-	s.NoError(err)
-
-	req := &rest.Request{Body: jsonb}
-
+	req := &rest.Request{Body: s.getJSONBody(reqBody)}
 	res := s.api.Update(req)
-	updatedAccount := res.Data.(data.Account)
-
-	s.Equal(updatedAccount.Name, reqBody.Name)
-	s.StatusCodeEquals(res, http.StatusOK)
+	s.OkResponse(res, data.Account{})
 }
 
 func (s *AccountApiTestSuite) TestUpdateFailsIfNoAccountExists() {
-	var jsonb rest.JSONBody
 	reqBody := rest.AccountUpdateBody{Name: "New Name"}
-
-	err := jsonb.From(&reqBody)
-	s.NoError(err)
-
-	req := &rest.Request{Body: jsonb}
-
+	req := &rest.Request{Body: s.getJSONBody(reqBody)}
 	res := s.api.Update(req)
-	s.ResponseBodyEquals(res, rest.ErrInvalidAccountId)
-	s.StatusCodeEquals(res, rest.ErrInvalidAccountId.Status)
+	s.ErrRepsonse(res, rest.ErrInvalidAccountId)
 }
 
 func (s *AccountApiTestSuite) TestUpdateFailsIfAccountNameIsInvalid() {
-	account := data.Account{Id: testAccountId, Name: "Old Name"}
-	s.accountStore.Insert(account)
+	s.accountStore.Insert(data.Account{Id: testAccountId})
 
 	cases := []struct {
 		scenario    string
@@ -88,36 +63,24 @@ func (s *AccountApiTestSuite) TestUpdateFailsIfAccountNameIsInvalid() {
 
 	for _, testCase := range cases {
 		s.Run(testCase.scenario, func() {
-			var jsonb rest.JSONBody
 			reqBody := rest.AccountUpdateBody{Name: testCase.accountName}
-
-			err := jsonb.From(&reqBody)
-			s.NoError(err)
-
-			req := &rest.Request{Body: jsonb}
+			req := &rest.Request{Body: s.getJSONBody(reqBody)}
 			res := s.api.Update(req)
-
-			s.ResponseBodyEquals(res, rest.ErrInvalidAccountName)
-			s.StatusCodeEquals(res, rest.ErrInvalidAccountName.Status)
+			s.ErrRepsonse(res, rest.ErrInvalidAccountName)
 		})
 	}
 }
 
 func (s *AccountApiTestSuite) TestDeletes() {
-	account := data.Account{Id: testAccountId}
-	s.accountStore.Insert(account)
+	s.accountStore.Insert(data.Account{Id: testAccountId})
 
 	req := &rest.Request{}
 	res := s.api.Delete(req)
-
-	s.ResponseBodyEquals(res, rest.Success().Data)
-	s.StatusCodeEquals(res, http.StatusOK)
+	s.OkResponse(res, rest.Success().Data)
 }
 
 func (s *AccountApiTestSuite) TestDeleteFailsIfNoAccountExists() {
 	req := &rest.Request{}
 	res := s.api.Delete(req)
-
-	s.ResponseBodyEquals(res, rest.ErrInvalidAccountId)
-	s.StatusCodeEquals(res, rest.ErrInvalidAccountId.Status)
+	s.ErrRepsonse(res, rest.ErrInvalidAccountId)
 }

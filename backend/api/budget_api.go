@@ -125,16 +125,7 @@ func (api *BudgetAPI) validateCreate(accountId string, body rest.BudgetCreateBod
 		return err
 	}
 
-	ok, err := api.categoryManager.Exists(body.CategoryId, accountId)
-	if err != nil {
-		return err
-	}
-
-	if !ok {
-		return rest.ErrInvalidCategoryId
-	}
-
-	ok, err = api.budgetManager.CategoryIsUniqueForPeriod(
+	ok, err := api.budgetManager.CategoryIsUniqueForPeriod(
 		body.CategoryId,
 		accountId,
 		body.Month,
@@ -149,6 +140,15 @@ func (api *BudgetAPI) validateCreate(accountId string, body rest.BudgetCreateBod
 		return rest.ErrCategoryAlreadyInBudgetPeriod
 	}
 
+	ok, err = api.categoryManager.Exists(body.CategoryId, accountId)
+	if err != nil {
+		return err
+	}
+
+	if !ok {
+		return rest.ErrInvalidCategoryId
+	}
+
 	return nil
 }
 
@@ -158,16 +158,7 @@ func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpda
 	}
 
 	if body.CategoryId != existing.CategoryId {
-		ok, err := api.categoryManager.Exists(body.CategoryId, existing.AccountId)
-		if err != nil {
-			return err
-		}
-
-		if !ok {
-			return rest.ErrInvalidCategoryId
-		}
-
-		ok, err = api.budgetManager.CategoryIsUniqueForPeriod(
+		ok, err := api.budgetManager.CategoryIsUniqueForPeriod(
 			body.CategoryId,
 			existing.AccountId,
 			existing.Month,
@@ -181,6 +172,16 @@ func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpda
 		if !ok {
 			return rest.ErrCategoryAlreadyInBudgetPeriod
 		}
+
+		ok, err = api.categoryManager.Exists(body.CategoryId, existing.AccountId)
+		if err != nil {
+			return err
+		}
+
+		if !ok {
+			return rest.ErrInvalidCategoryId
+		}
+
 	}
 
 	return nil
