@@ -7,7 +7,7 @@ import (
 
 type JSONBody []byte
 
-func (j JSONBody) From() error {
+func (j JSONBody) From(obj any) error {
 	return nil
 }
 
