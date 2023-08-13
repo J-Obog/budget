@@ -25,6 +25,7 @@ type AppConfig struct {
 
 func Get() *AppConfig {
 	environment := os.Getenv("APP_ENV")
+
 	if environment == "dev" {
 		if err := godotenv.Load("../.env"); err != nil {
 			log.Fatal(err)

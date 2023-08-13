@@ -1,6 +1,8 @@
 package store
 
 import (
+	"fmt"
+
 	"github.com/J-Obog/paidoff/config"
 	"github.com/stretchr/testify/suite"
 )
@@ -19,6 +21,7 @@ type StoreTestSuite struct {
 
 func (s *StoreTestSuite) SetupSuite() {
 	cfg := config.Get()
+	fmt.Println(cfg)
 	svc := NewStoreService(cfg)
 	s.accountStore = svc.AccountStore
 	s.budgetStore = svc.BudgetStore

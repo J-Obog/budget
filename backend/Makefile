@@ -9,7 +9,5 @@ create-queues:
 	python rabbitmqadmin declare queue name="test.queue" -U $(RABBIT_MQ_ADMIN_URL)
 	python rabbitmqadmin declare queue name="category.deleted" -U $(RABBIT_MQ_ADMIN_URL)
 
-.PHONY: test
 test: db-migrate create-queues
-	export APP_ENV=dev
-	gotest ./... -count=1 -v
+	export APP_ENV=dev && gotest ./... -count=1 -v
