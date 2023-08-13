@@ -6,7 +6,7 @@ import (
 	"github.com/J-Obog/paidoff/api"
 )
 
-func RegisterRoutes(s Server, apiSvc api.ApiService) {
+func RegisterRoutes(s Server, apiSvc *api.ApiService) {
 	s.RegisterRoute(http.MethodGet, "/account", apiSvc.AccountAPI.Get)
 	s.RegisterRoute(http.MethodPut, "/account", apiSvc.AccountAPI.Update)
 	s.RegisterRoute(http.MethodDelete, "/account", apiSvc.AccountAPI.Delete)

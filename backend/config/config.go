@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -24,6 +25,7 @@ type AppConfig struct {
 }
 
 func Get() *AppConfig {
+	fmt.Println(os.Getwd())
 	environment := os.Getenv("APP_ENV")
 
 	if environment == "dev" {

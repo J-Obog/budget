@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 
@@ -26,13 +25,12 @@ func (g *GinServer) RegisterRoute(method string, url string, rh rest.RouteHandle
 	ginFn := func(c *gin.Context) {
 		//TODO: handle error when reading body
 
-		b, _ := io.ReadAll(c.Request.Body)
+		//b, _ := io.ReadAll(c.Request.Body)
 
-		// TODO: remove dummy account for auth
 		req := &rest.Request{
-			Url:   c.Request.URL.String(),
-			Query: c.Request.URL.Query(),
-			Body:  b,
+			Url: c.Request.URL.String(),
+			//Query: c.Request.URL.Query(),
+			//Body:  b,
 		}
 
 		res := rh(req)
@@ -70,11 +68,9 @@ func (g *GinServer) Start(address string, port int) {
 
 	log.Printf("starting server on address %s, port %d\n", address, port)
 
-	go func() {
-		if err := g.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("server error %s", err)
-		}
-	}()
+	if err := g.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("server error %s", err)
+	}
 }
 
 func (g *GinServer) Stop() error {
