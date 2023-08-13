@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	testQueueName = "test-queue"
+	testQueueName = "test.queue"
 )
 
 func TestQueue(t *testing.T) {
