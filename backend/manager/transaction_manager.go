@@ -74,17 +74,8 @@ func (manager *TransactionManager) Update(
 	return manager.store.Update(*existing)
 }
 
-func (manager *TransactionManager) Delete(id string, accountId string) error {
-	return manager.Delete(id, accountId)
-}
-
-func (manager *TransactionManager) GetByPeriodCategory(
-	accountId string,
-	categoryId string,
-	month int,
-	year int,
-) ([]data.Transaction, error) {
-	return nil, nil
+func (manager *TransactionManager) Delete(id string, accountId string) (bool, error) {
+	return manager.store.Delete(id, accountId)
 }
 
 func (manager *TransactionManager) GetTotalForPeriodCategory(
@@ -109,5 +100,5 @@ func (manager *TransactionManager) GetTotalForPeriodCategory(
 		total += netMove
 	}
 
-	return total, nil
+	return round(total, 2), nil
 }
