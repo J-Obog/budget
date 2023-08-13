@@ -17,14 +17,10 @@ const (
 )
 
 type AppConfig struct {
-	PostgresUser     string `env:"POSTGRES_USER"`
-	PostgresPassword string `env:"POSTGRES_PASSWORD"`
-	PostgresHost     string `env:"POSTGRES_HOST"`
-	PostgresPort     string `env:"POSTGRES_PORT"`
-	PostgresDb       string `env:"POSTGRES_DB"`
-	RabbitMqUrl      string `env:"RABBIT_MQ_URL"`
-	ServerAddress    string `env:"SERVER_ADDRESS"`
-	ServerPort       int    `env:"SERVER_PORT"`
+	PostgresUrl   string `env:"POSTGRES_URL"`
+	RabbitMqUrl   string `env:"RABBIT_MQ_URL"`
+	ServerAddress string `env:"SERVER_ADDRESS"`
+	ServerPort    int    `env:"SERVER_PORT"`
 }
 
 func Get() *AppConfig {
