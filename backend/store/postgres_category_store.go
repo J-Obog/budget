@@ -57,15 +57,11 @@ func (pg *PostgresCategoryStore) Insert(category data.Category) error {
 	return pg.db.Create(&category).Error
 }
 
-func (pg *PostgresCategoryStore) Update(id string, accountId string, update data.CategoryUpdate, timestamp int64) (bool, error) {
-	q := pg.db.Where("id = ?", id)
-	q = q.Where("account_id = ?", accountId)
-
-	res := q.UpdateColumns(&data.Category{
-		Name:      update.Name,
-		Color:     update.Color,
-		UpdatedAt: timestamp,
-	})
+func (pg *PostgresCategoryStore) Update(updated data.Category) (bool, error) {
+	res := pg.db.Where(
+		"id = ? AND account_id = ?",
+		updated.Id,
+		updated.AccountId).UpdateColumns(&updated)
 
 	return (res.RowsAffected == 1), res.Error
 }

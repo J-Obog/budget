@@ -30,14 +30,13 @@ func (pg *PostgresBudgetStore) Get(id string, accountId string) (*data.Budget, e
 func (pg *PostgresBudgetStore) GetByPeriodCategory(accountId string, categoryId string, month int, year int) (*data.Budget, error) {
 	var budget data.Budget
 
-	q := data.Budget{
+	err := pg.db.Where(&data.Budget{
 		AccountId:  accountId,
 		CategoryId: categoryId,
 		Month:      month,
 		Year:       year,
-	}
+	}).First(&budget).Error
 
-	err := pg.db.Where(q).First(&budget).Error
 	if err == nil {
 		return types.Ptr[data.Budget](budget), nil
 	}
@@ -52,12 +51,11 @@ func (pg *PostgresBudgetStore) GetByPeriodCategory(accountId string, categoryId 
 func (pg *PostgresBudgetStore) GetByCategory(accountId string, categoryId string) ([]data.Budget, error) {
 	budgets := make([]data.Budget, 0)
 
-	query := data.Budget{
+	err := pg.db.Where(&data.Budget{
 		AccountId:  accountId,
 		CategoryId: categoryId,
-	}
+	}).Find(&budgets).Error
 
-	err := pg.db.Where(query).Find(&budgets).Error
 	if err == nil {
 		return budgets, nil
 	}
@@ -68,13 +66,12 @@ func (pg *PostgresBudgetStore) GetByCategory(accountId string, categoryId string
 func (pg *PostgresBudgetStore) GetBy(accountId string, filter data.BudgetFilter) ([]data.Budget, error) {
 	budgets := make([]data.Budget, 0)
 
-	query := data.Budget{
+	err := pg.db.Where(&data.Budget{
 		AccountId: accountId,
 		Month:     filter.Month,
 		Year:      filter.Year,
-	}
+	}).Find(&budgets).Error
 
-	err := pg.db.Where(query).Find(&budgets).Error
 	if err == nil {
 		return budgets, nil
 	}
@@ -86,15 +83,11 @@ func (pg *PostgresBudgetStore) Insert(budget data.Budget) error {
 	return pg.db.Create(&budget).Error
 }
 
-func (pg *PostgresBudgetStore) Update(id string, accountId string, update data.BudgetUpdate, timestamp int64) (bool, error) {
-	q := pg.db.Where("id = ?", id)
-	q = q.Where("account_id = ?", accountId)
-
-	res := q.UpdateColumns(&data.Budget{
-		CategoryId: update.CategoryId,
-		Projected:  update.Projected,
-		UpdatedAt:  timestamp,
-	})
+func (pg *PostgresBudgetStore) Update(updated data.Budget) (bool, error) {
+	res := pg.db.Where(
+		"id = ? AND account_id = ?",
+		updated.Id,
+		updated.AccountId).UpdateColumns(&updated)
 
 	return (res.RowsAffected == 1), res.Error
 }

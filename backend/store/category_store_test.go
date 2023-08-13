@@ -3,44 +3,35 @@ package store
 import (
 	"fmt"
 
-	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/suite"
 )
 
 type CategoryStoreTestSuite struct {
-	suite.Suite
-	store CategoryStore
-}
-
-func (s *CategoryStoreTestSuite) SetupSuite() {
-	cfg := config.Get()
-	svc := GetConfiguredStoreService(cfg)
-	s.store = svc.CategoryStore
+	StoreTestSuite
 }
 
 func (s *CategoryStoreTestSuite) SetupTest() {
-	err := s.store.DeleteAll()
+	err := s.categoryStore.DeleteAll()
 	s.NoError(err)
 }
 
-func (s *CategoryStoreTestSuite) TestInsertsAndGetsCategory() {
+func (s *CategoryStoreTestSuite) TestInsertAndGet() {
 	category := data.Category{
 		Id:        "category-id",
 		CreatedAt: testTimestamp,
 		UpdatedAt: testTimestamp,
 	}
 
-	err := s.store.Insert(category)
+	err := s.categoryStore.Insert(category)
 	s.NoError(err)
 
-	found, err := s.store.Get(category.Id, category.AccountId)
+	actual, err := s.categoryStore.Get(category.Id, category.AccountId)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(category, *found)
+	s.NotNil(actual)
+	s.Equal(category, *actual)
 }
 
-func (s *CategoryStoreTestSuite) TestGetsCategoryByName() {
+func (s *CategoryStoreTestSuite) TestGetByName() {
 	category := data.Category{
 		Id:        "category-id",
 		AccountId: "account-id",
@@ -49,19 +40,19 @@ func (s *CategoryStoreTestSuite) TestGetsCategoryByName() {
 		UpdatedAt: testTimestamp,
 	}
 
-	err := s.store.Insert(category)
+	err := s.categoryStore.Insert(category)
 	s.NoError(err)
 
-	found, err := s.store.GetByName(category.AccountId, category.Name)
+	actual, err := s.categoryStore.GetByName(category.AccountId, category.Name)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(category, *found)
+	s.NotNil(actual)
+	s.Equal(category, *actual)
 }
 
-func (s *CategoryStoreTestSuite) TestGetsAllCategories() {
+func (s *CategoryStoreTestSuite) TestGetAll() {
 	accountId := "some-account-id"
 
-	expected := []data.Category{}
+	categories := []data.Category{}
 
 	for i := 0; i < 5; i++ {
 		category := data.Category{
@@ -71,50 +62,45 @@ func (s *CategoryStoreTestSuite) TestGetsAllCategories() {
 			UpdatedAt: testTimestamp,
 		}
 
-		expected = append(expected, category)
+		categories = append(categories, category)
 
-		err := s.store.Insert(category)
+		err := s.categoryStore.Insert(category)
 		s.NoError(err)
 	}
 
-	found, err := s.store.GetAll(accountId)
+	actual, err := s.categoryStore.GetAll(accountId)
 	s.NoError(err)
-	s.ElementsMatch(found, expected)
+	s.ElementsMatch(actual, categories)
 }
 
-func (s *CategoryStoreTestSuite) TestUpdatesCategory() {
+func (s *CategoryStoreTestSuite) TestUpdate() {
 	category := data.Category{Id: "category-id"}
 
-	err := s.store.Insert(category)
+	err := s.categoryStore.Insert(category)
 	s.NoError(err)
 
-	update := data.CategoryUpdate{
-		Name:  "Baz",
-		Color: 11111,
-	}
+	category.Color = 12345
 
-	ok, err := s.store.Update(category.Id, category.AccountId, update, testTimestamp)
+	ok, err := s.categoryStore.Update(category)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(category.Id, category.AccountId)
+	actual, err := s.categoryStore.Get(category.Id, category.AccountId)
 	s.NoError(err)
-	s.Equal(found.Name, update.Name)
-	s.Equal(found.Color, update.Color)
-	s.Equal(found.UpdatedAt, testTimestamp)
+	s.Equal(actual, category)
 }
 
-func (s *CategoryStoreTestSuite) TestDeletesCategory() {
+func (s *CategoryStoreTestSuite) TestDelete() {
 	category := data.Category{Id: "category-id"}
 
-	err := s.store.Insert(category)
+	err := s.categoryStore.Insert(category)
 	s.NoError(err)
 
-	ok, err := s.store.Delete(category.Id, category.AccountId)
+	ok, err := s.categoryStore.Delete(category.Id, category.AccountId)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(category.Id, category.AccountId)
+	actual, err := s.categoryStore.Get(category.Id, category.AccountId)
 	s.NoError(err)
-	s.Nil(found)
+	s.Nil(actual)
 }

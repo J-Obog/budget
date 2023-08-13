@@ -7,7 +7,7 @@ import (
 type AccountStore interface {
 	Get(id string) (*data.Account, error)
 	Insert(account data.Account) error
-	Update(update data.Account) (bool, error)
+	Update(updated data.Account) (bool, error)
 	SoftDelete(id string) (bool, error)
 	Delete(id string) (bool, error)
 	DeleteAll() error
@@ -18,7 +18,7 @@ type CategoryStore interface {
 	GetByName(accountId string, name string) (*data.Category, error)
 	GetAll(accountId string) ([]data.Category, error)
 	Insert(category data.Category) error
-	Update(update data.Category) (bool, error)
+	Update(updated data.Category) (bool, error)
 	Delete(id string, accountId string) (bool, error)
 	DeleteAll() error
 }
@@ -29,7 +29,7 @@ type BudgetStore interface {
 	GetByCategory(accountId string, categoryId string) ([]data.Budget, error)
 	GetBy(accountId string, filter data.BudgetFilter) ([]data.Budget, error)
 	Insert(budget data.Budget) error
-	Update(update data.Budget) (bool, error)
+	Update(updated data.Budget) (bool, error)
 	Delete(id string, accountId string) (bool, error)
 	DeleteAll() error
 }
@@ -39,7 +39,7 @@ type TransactionStore interface {
 	GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error)
 	GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error)
 	Insert(transaction data.Transaction) error
-	Update(update data.Transaction) (bool, error)
+	Update(updated data.Transaction) (bool, error)
 	Delete(id string, accountId string) (bool, error)
 	DeleteAll() error
 }

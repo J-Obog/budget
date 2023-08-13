@@ -3,25 +3,15 @@ package store
 import (
 	"fmt"
 
-	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/J-Obog/paidoff/types"
-	"github.com/stretchr/testify/suite"
 )
 
 type TransactionStoreTestSuite struct {
-	suite.Suite
-	store TransactionStore
-}
-
-func (s *TransactionStoreTestSuite) SetupSuite() {
-	cfg := config.Get()
-	svc := GetConfiguredStoreService(cfg)
-	s.store = svc.TransactionStore
+	StoreTestSuite
 }
 
 func (s *TransactionStoreTestSuite) SetupTest() {
-	err := s.store.DeleteAll()
+	err := s.transactionStore.DeleteAll()
 	s.NoError(err)
 }
 
@@ -32,26 +22,26 @@ func (s *TransactionStoreTestSuite) TestInsertsAndGetsTransaction() {
 		UpdatedAt: testTimestamp,
 	}
 
-	err := s.store.Insert(transaction)
+	err := s.transactionStore.Insert(transaction)
 	s.NoError(err)
 
-	found, err := s.store.Get(transaction.Id, transaction.AccountId)
+	actual, err := s.transactionStore.Get(transaction.Id, transaction.AccountId)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(transaction, *found)
+	s.NotNil(actual)
+	s.Equal(transaction, *actual)
 }
 
 // TODO: implement
 func (s *TransactionStoreTestSuite) TestGetsTransactionsByFilter() {
 }
 
-func (s *TransactionStoreTestSuite) TestGetsTransactionsByPeriodCategory() {
+func (s *TransactionStoreTestSuite) TestGetByPeriodCategory() {
 	accountId := "some-account-id"
 	categoryId := "some-category-id"
 	month := 10
 	year := 2024
 
-	expected := []data.Transaction{}
+	transactions := []data.Transaction{}
 
 	for i := 0; i < 5; i++ {
 		transaction := data.Transaction{
@@ -64,62 +54,45 @@ func (s *TransactionStoreTestSuite) TestGetsTransactionsByPeriodCategory() {
 			UpdatedAt:  testTimestamp,
 		}
 
-		expected = append(expected, transaction)
+		transactions = append(transactions, transaction)
 
-		err := s.store.Insert(transaction)
+		err := s.transactionStore.Insert(transaction)
 		s.NoError(err)
 	}
 
-	found, err := s.store.GetByPeriodCategory(accountId, categoryId, month, year)
+	actual, err := s.transactionStore.GetByPeriodCategory(accountId, categoryId, month, year)
 	s.NoError(err)
-	s.ElementsMatch(found, expected)
+	s.ElementsMatch(actual, transactions)
 }
 
-func (s *TransactionStoreTestSuite) TestUpdatesTransaction() {
+func (s *TransactionStoreTestSuite) TestUpdate() {
 	transaction := data.Transaction{Id: "transaction-id"}
 
-	err := s.store.Insert(transaction)
+	err := s.transactionStore.Insert(transaction)
 	s.NoError(err)
 
-	update := data.TransactionUpdate{
-		CategoryId: types.StringPtr("category-id"),
-		Note:       types.StringPtr("Some note"),
-		Type:       data.BudgetType_Income,
-		Amount:     123.45,
-		Month:      11,
-		Day:        7,
-		Year:       2023,
-	}
+	transaction.Amount = 123.45
 
-	ok, err := s.store.Update(transaction.Id, transaction.AccountId, update, testTimestamp)
+	ok, err := s.transactionStore.Update(transaction)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(transaction.Id, transaction.AccountId)
+	actual, err := s.transactionStore.Get(transaction.Id, transaction.AccountId)
 	s.NoError(err)
-	s.Equal(*found.CategoryId, *update.CategoryId)
-	s.Equal(*found.Note, *update.Note)
-	s.Equal(found.Type, update.Type)
-	s.Equal(found.Amount, update.Amount)
-	s.Equal(found.Month, update.Month)
-	s.Equal(found.Day, update.Day)
-	s.Equal(found.Year, update.Year)
-	s.Equal(*found.CategoryId, *update.CategoryId)
-
-	s.Equal(found.UpdatedAt, testTimestamp)
+	s.Equal(actual, transaction)
 }
 
-func (s *TransactionStoreTestSuite) TestDeletesTransaction() {
+func (s *TransactionStoreTestSuite) TestDelete() {
 	transaction := data.Transaction{Id: "transaction-id"}
 
-	err := s.store.Insert(transaction)
+	err := s.transactionStore.Insert(transaction)
 	s.NoError(err)
 
-	ok, err := s.store.Delete(transaction.Id, transaction.AccountId)
+	ok, err := s.transactionStore.Delete(transaction.Id, transaction.AccountId)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(transaction.Id, transaction.AccountId)
+	actual, err := s.transactionStore.Get(transaction.Id, transaction.AccountId)
 	s.NoError(err)
-	s.Nil(found)
+	s.Nil(actual)
 }

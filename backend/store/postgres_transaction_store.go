@@ -48,14 +48,13 @@ func (pg *PostgresTransactionStore) GetBy(accountId string, filter data.Transact
 func (pg *PostgresTransactionStore) GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error) {
 	transactions := make([]data.Transaction, 0)
 
-	query := data.Transaction{
+	err := pg.db.Where(&data.Transaction{
 		AccountId:  accountId,
 		CategoryId: types.StringPtr(categoryId),
 		Month:      month,
 		Year:       year,
-	}
+	}).Find(&transactions).Error
 
-	err := pg.db.Where(query).Find(&transactions).Error
 	if err == nil {
 		return transactions, nil
 	}
@@ -67,20 +66,11 @@ func (pg *PostgresTransactionStore) Insert(transaction data.Transaction) error {
 	return pg.db.Create(&transaction).Error
 }
 
-func (pg *PostgresTransactionStore) Update(id string, accountId string, update data.TransactionUpdate, timestamp int64) (bool, error) {
-	q := pg.db.Where("id = ?", id)
-	q = q.Where("account_id = ?", accountId)
-
-	res := q.UpdateColumns(&data.Transaction{
-		CategoryId: update.CategoryId,
-		Note:       update.Note,
-		Type:       update.Type,
-		Amount:     update.Amount,
-		Month:      update.Month,
-		Day:        update.Day,
-		Year:       update.Year,
-		UpdatedAt:  timestamp,
-	})
+func (pg *PostgresTransactionStore) Update(updated data.Transaction) (bool, error) {
+	res := pg.db.Where(
+		"id = ? AND account_id = ?",
+		updated.Id,
+		updated.AccountId).UpdateColumns(&updated)
 
 	return (res.RowsAffected == 1), res.Error
 }

@@ -3,44 +3,35 @@ package store
 import (
 	"fmt"
 
-	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/suite"
 )
 
 type BudgetStoreTestSuite struct {
-	suite.Suite
-	store BudgetStore
-}
-
-func (s *BudgetStoreTestSuite) SetupSuite() {
-	cfg := config.Get()
-	svc := GetConfiguredStoreService(cfg)
-	s.store = svc.BudgetStore
+	StoreTestSuite
 }
 
 func (s *BudgetStoreTestSuite) SetupTest() {
-	err := s.store.DeleteAll()
+	err := s.budgetStore.DeleteAll()
 	s.NoError(err)
 }
 
-func (s *BudgetStoreTestSuite) TestInsertsAndGetsBudget() {
+func (s *BudgetStoreTestSuite) TestInsertAndGet() {
 	budget := data.Budget{
 		Id:        "budget-id",
 		CreatedAt: testTimestamp,
 		UpdatedAt: testTimestamp,
 	}
 
-	err := s.store.Insert(budget)
+	err := s.budgetStore.Insert(budget)
 	s.NoError(err)
 
-	found, err := s.store.Get(budget.Id, budget.AccountId)
+	actual, err := s.budgetStore.Get(budget.Id, budget.AccountId)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(budget, *found)
+	s.NotNil(actual)
+	s.Equal(budget, *actual)
 }
 
-func (s *BudgetStoreTestSuite) TestGetsBudgetByPeriodCategory() {
+func (s *BudgetStoreTestSuite) TestGetByPeriodCategory() {
 	budget := data.Budget{
 		Id:         "some-account-id",
 		CategoryId: "some-category-id",
@@ -50,20 +41,25 @@ func (s *BudgetStoreTestSuite) TestGetsBudgetByPeriodCategory() {
 		UpdatedAt:  testTimestamp,
 	}
 
-	err := s.store.Insert(budget)
+	err := s.budgetStore.Insert(budget)
 	s.NoError(err)
 
-	found, err := s.store.GetByPeriodCategory(budget.AccountId, budget.CategoryId, budget.Month, budget.Year)
+	actual, err := s.budgetStore.GetByPeriodCategory(
+		budget.AccountId,
+		budget.CategoryId,
+		budget.Month,
+		budget.Year,
+	)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(budget, *found)
+	s.NotNil(actual)
+	s.Equal(budget, *actual)
 }
 
-func (s *BudgetStoreTestSuite) TestGetsBudgetsByCategory() {
+func (s *BudgetStoreTestSuite) TestGetByCategory() {
 	categoryId := "some-category-id"
 	accountId := "some-account-id"
 
-	expected := []data.Budget{}
+	budgets := []data.Budget{}
 
 	for i := 0; i < 5; i++ {
 		budget := data.Budget{
@@ -74,54 +70,49 @@ func (s *BudgetStoreTestSuite) TestGetsBudgetsByCategory() {
 			UpdatedAt:  testTimestamp,
 		}
 
-		expected = append(expected, budget)
+		budgets = append(budgets, budget)
 
-		err := s.store.Insert(budget)
+		err := s.budgetStore.Insert(budget)
 		s.NoError(err)
 	}
 
-	found, err := s.store.GetByCategory(accountId, categoryId)
+	found, err := s.budgetStore.GetByCategory(accountId, categoryId)
 	s.NoError(err)
-	s.ElementsMatch(found, expected)
+	s.ElementsMatch(found, budgets)
 }
 
 // TODO: implement
 func (s *BudgetStoreTestSuite) TestGetsBudgetsByFilter() {
 }
 
-func (s *BudgetStoreTestSuite) TestUpdatesBudget() {
+func (s *BudgetStoreTestSuite) TestUpdate() {
 	budget := data.Budget{Id: "budget-id"}
 
-	err := s.store.Insert(budget)
+	err := s.budgetStore.Insert(budget)
 	s.NoError(err)
 
-	update := data.BudgetUpdate{
-		CategoryId: "some-category-id",
-		Projected:  10.56,
-	}
+	budget.Month = 10
 
-	ok, err := s.store.Update(budget.Id, budget.AccountId, update, testTimestamp)
+	ok, err := s.budgetStore.Update(budget)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(budget.Id, budget.AccountId)
+	actual, err := s.budgetStore.Get(budget.Id, budget.AccountId)
 	s.NoError(err)
-	s.Equal(found.CategoryId, update.CategoryId)
-	s.Equal(found.Projected, update.Projected)
-	s.Equal(found.UpdatedAt, testTimestamp)
+	s.Equal(actual, budget)
 }
 
-func (s *BudgetStoreTestSuite) TestDeletesBudget() {
+func (s *BudgetStoreTestSuite) TestDelete() {
 	budget := data.Budget{Id: "budget-id"}
 
-	err := s.store.Insert(budget)
+	err := s.budgetStore.Insert(budget)
 	s.NoError(err)
 
-	ok, err := s.store.Delete(budget.Id, budget.AccountId)
+	ok, err := s.budgetStore.Delete(budget.Id, budget.AccountId)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(budget.Id, budget.AccountId)
+	actual, err := s.budgetStore.Get(budget.Id, budget.AccountId)
 	s.NoError(err)
-	s.Nil(found)
+	s.Nil(actual)
 }

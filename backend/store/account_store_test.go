@@ -1,88 +1,79 @@
 package store
 
 import (
-	"github.com/J-Obog/paidoff/config"
 	"github.com/J-Obog/paidoff/data"
-	"github.com/stretchr/testify/suite"
 )
 
 type AccountStoreTestSuite struct {
-	suite.Suite
-	store AccountStore
-}
-
-func (s *AccountStoreTestSuite) SetupSuite() {
-	cfg := config.Get()
-	svc := GetConfiguredStoreService(cfg)
-	s.store = svc.AccountStore
+	StoreTestSuite
 }
 
 func (s *AccountStoreTestSuite) SetupTest() {
-	err := s.store.DeleteAll()
+	err := s.accountStore.DeleteAll()
 	s.NoError(err)
 }
 
-func (s *AccountStoreTestSuite) TestInsertsAndGetsAccount() {
+func (s *AccountStoreTestSuite) TestInsertAndGet() {
 	account := data.Account{
 		Id:        "account-id",
 		CreatedAt: testTimestamp,
 		UpdatedAt: testTimestamp,
 	}
 
-	err := s.store.Insert(account)
+	err := s.accountStore.Insert(account)
 	s.NoError(err)
 
-	found, err := s.store.Get(account.Id)
+	actual, err := s.accountStore.Get(account.Id)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(account, *found)
+	s.NotNil(actual)
+	s.Equal(account, *actual)
 }
 
-func (s *AccountStoreTestSuite) TestUpdatesAccount() {
+func (s *AccountStoreTestSuite) TestUpdate() {
 	account := data.Account{Id: "account-id"}
-	update := data.AccountUpdate{Name: "New Account Name"}
 
-	err := s.store.Insert(account)
+	err := s.accountStore.Insert(account)
 	s.NoError(err)
 
-	ok, err := s.store.Update(account.Id, update, testTimestamp)
+	account.Email = "some-email"
+
+	ok, err := s.accountStore.Update(account)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(account.Id)
+	actual, err := s.accountStore.Get(account.Id)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(found.Name, update.Name)
-	s.Equal(found.UpdatedAt, testTimestamp)
+	s.NotNil(actual)
+	s.Equal(account, actual)
 }
 
-func (s *AccountStoreTestSuite) TestMarksAccountAsDeleted() {
+func (s *AccountStoreTestSuite) TestSoftDelete() {
 	account := data.Account{Id: "account-id", IsDeleted: false}
 
-	err := s.store.Insert(account)
+	err := s.accountStore.Insert(account)
 	s.NoError(err)
 
-	ok, err := s.store.SetDeleted(account.Id)
+	ok, err := s.accountStore.SoftDelete(account.Id)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(account.Id)
+	actual, err := s.accountStore.Get(account.Id)
 	s.NoError(err)
-	s.NotNil(found)
-	s.Equal(found.IsDeleted, true)
+	s.NotNil(actual)
+	s.Equal(actual.IsDeleted, true)
 }
 
-func (s *AccountStoreTestSuite) TestDeletesAccount() {
+func (s *AccountStoreTestSuite) TestDelete() {
 	account := data.Account{Id: "account-id"}
 
-	err := s.store.Insert(account)
+	err := s.accountStore.Insert(account)
 	s.NoError(err)
 
-	ok, err := s.store.Delete(account.Id)
+	ok, err := s.accountStore.Delete(account.Id)
 	s.NoError(err)
 	s.True(ok)
 
-	found, err := s.store.Get(account.Id)
+	actual, err := s.accountStore.Get(account.Id)
 	s.NoError(err)
-	s.Nil(found)
+	s.Nil(actual)
 }

@@ -31,24 +31,13 @@ func (pg *PostgresAccountStore) Insert(account data.Account) error {
 	return pg.db.Create(&account).Error
 }
 
-func (pg *PostgresAccountStore) Update(id string, update data.AccountUpdate, timestamp int64) (bool, error) {
-	q := pg.db.Where("id = ?", id)
-
-	res := q.UpdateColumns(&data.Account{
-		Name:      update.Name,
-		UpdatedAt: timestamp,
-	})
-
+func (pg *PostgresAccountStore) Update(updated data.Account) (bool, error) {
+	res := pg.db.UpdateColumns(&updated)
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresAccountStore) SetDeleted(id string) (bool, error) {
-	q := pg.db.Where("id = ?", id)
-
-	res := q.UpdateColumns(&data.Account{
-		IsDeleted: true,
-	})
-
+func (pg *PostgresAccountStore) SoftDelete(id string) (bool, error) {
+	res := pg.db.Where("id = ?", id).UpdateColumns(&data.Account{IsDeleted: true})
 	return (res.RowsAffected == 1), res.Error
 }
 
