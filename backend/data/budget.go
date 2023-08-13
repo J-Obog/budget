@@ -3,8 +3,8 @@ package data
 type BudgetType string
 
 const (
-	BudgetType_Income  BudgetType = "Income"
-	BudgetType_Expense BudgetType = "Expense"
+	BudgetType_Income  BudgetType = "INCOME"
+	BudgetType_Expense BudgetType = "EXPENSE"
 )
 
 type Budget struct {

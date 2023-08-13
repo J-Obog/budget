@@ -5,7 +5,7 @@ type Transaction struct {
 	AccountId  string     `json:"accountId"`
 	CategoryId *string    `json:"categoryId"`
 	Note       *string    `json:"note"`
-	Type       BudgetType `json:"budgetType"`
+	Type       BudgetType `json:"type"`
 	Amount     float64    `json:"amount"`
 	Month      int        `json:"month"`
 	Day        int        `json:"day"`

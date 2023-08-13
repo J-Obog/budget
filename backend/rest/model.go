@@ -31,7 +31,7 @@ type CategoryCreateBody struct {
 type TransactionUpdateBody struct {
 	CategoryId *string         `json:"categoryId"`
 	Note       *string         `json:"note"`
-	Type       data.BudgetType `json:"budgetType"`
+	Type       data.BudgetType `json:"type"`
 	Amount     float64         `json:"amount"`
 	Month      int             `json:"month"`
 	Day        int             `json:"day"`
@@ -41,7 +41,7 @@ type TransactionUpdateBody struct {
 type TransactionCreateBody struct {
 	CategoryId *string         `json:"categoryId"`
 	Note       *string         `json:"note"`
-	Type       data.BudgetType `json:"budgetType"`
+	Type       data.BudgetType `json:"type"`
 	Amount     float64         `json:"amount"`
 	Month      int             `json:"month"`
 	Day        int             `json:"day"`

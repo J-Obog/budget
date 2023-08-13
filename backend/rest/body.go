@@ -5,9 +5,11 @@ import (
 	"fmt"
 )
 
-type JSONBody []byte
+type JSONBody struct {
+	bytes []byte
+}
 
-func (j JSONBody) getRestError(err error) *RestError {
+func (j *JSONBody) getRestError(err error) *RestError {
 	switch jsonErr := err.(type) {
 	case *json.SyntaxError:
 		return ErrInvalidJSONBody
@@ -18,20 +20,20 @@ func (j JSONBody) getRestError(err error) *RestError {
 	}
 }
 
-func (j JSONBody) From(obj any) error {
+func (j *JSONBody) From(obj any) error {
 	bytes, err := json.Marshal(obj)
 
 	if err != nil {
 		return j.getRestError(err)
 	}
 
-	j = bytes
+	j.bytes = bytes
 
 	return nil
 }
 
-func (j JSONBody) To(obj any) error {
-	err := json.Unmarshal(j, obj)
+func (j *JSONBody) To(obj any) error {
+	err := json.Unmarshal(j.bytes, obj)
 
 	if err != nil {
 		return j.getRestError(err)
