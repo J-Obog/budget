@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -23,14 +24,19 @@ func NewGinServer() *GinServer {
 
 func (g *GinServer) RegisterRoute(method string, url string, rh rest.RouteHandler) {
 	ginFn := func(c *gin.Context) {
-		//TODO: handle error when reading body
+		//TODO: handle error when reading body?
+		p := rest.PathParams{}
+		b, _ := io.ReadAll(c.Request.Body)
 
-		//b, _ := io.ReadAll(c.Request.Body)
+		for _, param := range c.Params {
+			p[param.Key] = param.Value
+		}
 
 		req := &rest.Request{
-			Url: c.Request.URL.String(),
+			Url:    c.Request.URL.String(),
+			Params: p,
 			//Query: c.Request.URL.Query(),
-			//Body:  b,
+			Body: rest.NewJSONBody(b),
 		}
 
 		res := rh(req)

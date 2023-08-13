@@ -9,6 +9,10 @@ type JSONBody struct {
 	bytes []byte
 }
 
+func NewJSONBody(b []byte) *JSONBody {
+	return &JSONBody{bytes: b}
+}
+
 func (j *JSONBody) getRestError(err error) *RestError {
 	switch jsonErr := err.(type) {
 	case *json.SyntaxError:

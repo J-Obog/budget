@@ -6,5 +6,5 @@ type Request struct {
 	Url    string
 	Query  Query
 	Params PathParams
-	Body   JSONBody
+	Body   *JSONBody
 }

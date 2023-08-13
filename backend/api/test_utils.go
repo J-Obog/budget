@@ -73,8 +73,8 @@ func (s *ApiTestSuite) ErrRepsonse(res *rest.Response, expectedError *rest.RestE
 	s.Equal(expectedError.Status, res.Status)
 }
 
-func (s *ApiTestSuite) getJSONBody(obj any) rest.JSONBody {
-	var jsonb rest.JSONBody
+func (s *ApiTestSuite) getJSONBody(obj any) *rest.JSONBody {
+	var jsonb *rest.JSONBody
 
 	err := jsonb.From(obj)
 	s.NoError(err)

@@ -22,7 +22,7 @@ var (
 	}
 
 	ErrInvalidAccountName = &RestError{
-		Msg:    "invalid value for name",
+		Msg:    "invalid value for account name",
 		Status: Code_400,
 	}
 
@@ -42,33 +42,33 @@ var (
 	}
 
 	ErrInvalidTransactionNote = &RestError{
-		Msg:    "invalid value for note",
+		Msg:    "invalid value for transaction note",
 		Status: Code_400,
 	}
 
 	ErrInvalidCategoryName = &RestError{
-		Msg:    "invalid value for name",
+		Msg:    "invalid value for category name",
 		Status: Code_400,
 	}
 
 	//404 errors
 	ErrInvalidBudgetId = &RestError{
-		Msg:    "category name already exists",
+		Msg:    "invalid budget id",
 		Status: Code_404,
 	}
 
 	ErrInvalidCategoryId = &RestError{
-		Msg:    "category name already exists",
+		Msg:    "invalid category id",
 		Status: Code_404,
 	}
 
 	ErrInvalidTransactionId = &RestError{
-		Msg:    "category name already exists",
+		Msg:    "invalid transaction id",
 		Status: Code_404,
 	}
 
 	ErrInvalidAccountId = &RestError{
-		Msg:    "category name already exists",
+		Msg:    "invalid account id",
 		Status: Code_404,
 	}
 
