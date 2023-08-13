@@ -5,5 +5,9 @@ MIGRATION_PATH = ./migrations/migration.sql
 db-migrate:
 	psql -f $(MIGRATION_PATH) $(POSTGRES_URL)
 
-test: db-migrate
+create-queues:
+	python rabbitmqadmin declare queue name="test.queue" -U $(RABBIT_MQ_ADMIN_URL)
+	python rabbitmqadmin declare queue name="category.deleted" -U $(RABBIT_MQ_ADMIN_URL)
+
+test: db-migrate create-queues
 	go test ./...
