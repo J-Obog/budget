@@ -57,7 +57,10 @@ func (s *AccountApiTestSuite) TestUpdateFailsIfNoAccountExists() {
 
 func (s *AccountApiTestSuite) TestUpdateFailsIfAccountNameIsInvalid() {
 	s.accountStore.Insert(data.Account{Id: testAccountId})
-	invalidNames := []string{}
+	invalidNames := []string{
+		veryLongAccountName,
+		veryShortAccountName,
+	}
 
 	for _, name := range invalidNames {
 		reqBody := rest.AccountUpdateBody{Name: name}

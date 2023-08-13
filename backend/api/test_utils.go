@@ -14,6 +14,24 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+var (
+	veryLongAccountName     = genString(config.LimitMaxAccountNameChars + 1)
+	veryShortAccountName    = genString(config.LimitMinAccountNameChars - 1)
+	veryLongCategoryName    = genString(config.LimitMaxCategoryNameChars + 1)
+	veryShortCategoryName   = genString(config.LimitMinCategoryNameChars - 1)
+	veryLongTransactionNote = genString(config.LimitMaxTransactionNoteChars + 1)
+)
+
+func genString(length int) string {
+	var s string
+
+	for i := 0; i < length; i++ {
+		s += "F"
+	}
+
+	return s
+}
+
 type ApiTestSuite struct {
 	suite.Suite
 	accountStore       store.AccountStore

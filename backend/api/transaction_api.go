@@ -31,6 +31,10 @@ func (api *TransactionAPI) Get(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
+	if transaction == nil {
+		return rest.Err(rest.ErrInvalidTransactionId)
+	}
+
 	return rest.Ok(transaction)
 }
 
@@ -111,22 +115,29 @@ func (api *TransactionAPI) validateUpdate(existing *data.Transaction, body rest.
 		return rest.ErrInvalidTransactionId
 	}
 
-	if err := isDateValid(body.Month, body.Day, body.Year); err != nil {
-		return err
+	d := data.NewDate(body.Month, body.Day, body.Year)
+
+	if ok := d.IsValid(); !ok {
+		return rest.ErrInvalidDate
 	}
 
 	if body.Note != nil {
-		if existing.Note == nil || (*existing.Note != *body.Note) {
-			if err := api.checkNote(*body.Note); err != nil {
-				return err
-			}
+		if err := api.checkNote(*body.Note); err != nil {
+			return err
 		}
+
 	}
 
 	if body.CategoryId != nil {
 		if existing.CategoryId == nil || (*existing.CategoryId != *body.CategoryId) {
-			if _, err := api.categoryManager.Get(*body.CategoryId, existing.AccountId); err != nil {
+			ok, err := api.categoryManager.Exists(*body.CategoryId, existing.AccountId)
+
+			if err != nil {
 				return err
+			}
+
+			if !ok {
+				return rest.ErrInvalidCategoryId
 			}
 		}
 	}
@@ -148,8 +159,14 @@ func (api *TransactionAPI) validateCreate(accountId string, body rest.Transactio
 	}
 
 	if body.CategoryId != nil {
-		if _, err := api.categoryManager.Get(*body.CategoryId, accountId); err != nil {
+		ok, err := api.categoryManager.Exists(*body.CategoryId, accountId)
+
+		if err != nil {
 			return err
+		}
+
+		if !ok {
+			return rest.ErrInvalidCategoryId
 		}
 	}
 

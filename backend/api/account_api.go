@@ -83,10 +83,8 @@ func (api *AccountAPI) validateUpdate(existing *data.Account, body rest.AccountU
 		return rest.ErrInvalidAccountId
 	}
 
-	if body.Name != existing.Name {
-		if err := api.checkAccountName(body.Name); err != nil {
-			return err
-		}
+	if err := api.checkAccountName(body.Name); err != nil {
+		return err
 	}
 
 	return nil

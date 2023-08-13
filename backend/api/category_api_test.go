@@ -82,7 +82,10 @@ func (s *CategoryApiTestSuite) TestUpdateFailsIfNameIsInvalid() {
 	categoryId := "category-123"
 	s.categoryStore.Insert(data.Category{Id: categoryId, AccountId: testAccountId})
 
-	invalidNames := []string{}
+	invalidNames := []string{
+		veryLongCategoryName,
+		veryShortCategoryName,
+	}
 
 	for _, invalidName := range invalidNames {
 		reqBody := rest.CategoryUpdateBody{Name: invalidName, Color: 1011011}

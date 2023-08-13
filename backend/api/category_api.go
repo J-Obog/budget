@@ -140,11 +140,11 @@ func (api *CategoryAPI) validateUpdate(existing *data.Category, body rest.Catego
 		return rest.ErrInvalidCategoryId
 	}
 
-	if body.Name != existing.Name {
-		if err := api.checkName(body.Name); err != nil {
-			return err
-		}
+	if err := api.checkName(body.Name); err != nil {
+		return err
+	}
 
+	if body.Name != existing.Name {
 		ok, err := api.categoryManager.NameIsUnique(existing.AccountId, body.Name)
 
 		if err != nil {

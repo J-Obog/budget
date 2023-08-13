@@ -1,10 +1,17 @@
 package api
 
 import (
+	"testing"
+
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
 	"github.com/J-Obog/paidoff/types"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestTransactionApi(t *testing.T) {
+	suite.Run(t, new(TransactionApiTestSuite))
+}
 
 type TransactionApiTestSuite struct {
 	ApiTestSuite
@@ -32,7 +39,7 @@ func (s *TransactionApiTestSuite) TestGets() {
 	s.transactionStore.Insert(data.Transaction{Id: transactionId, AccountId: testAccountId})
 	req := &rest.Request{Params: rest.PathParams{"transactionId": transactionId}}
 	res := s.api.Get(req)
-	s.OkResponse(res, data.Transaction{})
+	s.OkResponse(res, &data.Transaction{})
 }
 
 func (s *TransactionApiTestSuite) TestGetFailsIfNoTransactionExists() {
@@ -56,7 +63,7 @@ func (s *TransactionApiTestSuite) TestUpdates() {
 
 	req := &rest.Request{Body: s.getJSONBody(reqBody), Params: rest.PathParams{"transactionId": transactionId}}
 	res := s.api.Update(req)
-	s.OkResponse(res, data.Transaction{})
+	s.OkResponse(res, &data.Transaction{})
 }
 
 func (s *TransactionApiTestSuite) TestUpdateFailsIfNoTransactionExists() {
@@ -115,7 +122,7 @@ func (s *TransactionApiTestSuite) TestUpdateFailsIfNoCategoryExists() {
 
 func (s *TransactionApiTestSuite) TestUpdateFailsIfNoteIsTooLong() {
 	transactionId := "transaction-123"
-	longNote := ""
+	longNote := veryLongTransactionNote
 	s.transactionStore.Insert(data.Transaction{Id: transactionId, AccountId: testAccountId})
 
 	reqBody := rest.TransactionUpdateBody{
@@ -163,7 +170,7 @@ func (s *TransactionApiTestSuite) TestCreateFailsIfDateIsInvalid() {
 }
 
 func (s *TransactionApiTestSuite) TestCreateFailsIfNoteIsTooLong() {
-	longNote := ""
+	longNote := veryLongTransactionNote
 
 	reqBody := rest.TransactionCreateBody{
 		Note:   types.StringPtr(longNote),
@@ -201,7 +208,7 @@ func (s *TransactionApiTestSuite) TestDeletes() {
 	s.transactionStore.Insert(data.Transaction{Id: transactionId, AccountId: testAccountId})
 	req := &rest.Request{Params: rest.PathParams{"transactionId": transactionId}}
 	res := s.api.Delete(req)
-	s.ErrRepsonse(res, rest.ErrInvalidTransactionId)
+	s.OkResponse(res, rest.Success().Data)
 }
 
 func (s *TransactionApiTestSuite) TestDeleteFailsIfNoTransactionExists() {
