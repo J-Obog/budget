@@ -27,7 +27,7 @@ type BudgetStore interface {
 	Get(id string, accountId string) (*data.Budget, error)
 	GetByPeriodCategory(accountId string, categoryId string, month int, year int) (*data.Budget, error)
 	GetByCategory(accountId string, categoryId string) ([]data.Budget, error)
-	GetBy(accountId string, filter data.BudgetFilter) ([]data.Budget, error)
+	GetByPeriod(accountId string, month int, year int) ([]data.Budget, error)
 	Insert(budget data.Budget) error
 	Update(updated data.Budget) (bool, error)
 	Delete(id string, accountId string) (bool, error)

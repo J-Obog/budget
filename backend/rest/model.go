@@ -2,7 +2,7 @@ package rest
 
 import "github.com/J-Obog/paidoff/data"
 
-type BudgetQuery struct {
+type BudgetPeriodQuery struct {
 	Month *int `schema:"month"`
 	Year  *int `schema:"year"`
 }

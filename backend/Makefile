@@ -2,6 +2,7 @@ include .env
 
 MIGRATION_PATH = ./migrations/migration.sql
 QUEUE_NAMES = test.queue category.deleted
+MOCKS_DIR = ./mocks
 
 db-migrate:
 	psql -f $(MIGRATION_PATH) $(POSTGRES_URL)
@@ -16,3 +17,8 @@ test: db-migrate create-queues
 
 run-server:
 	export APP_ENV=dev && cd cmd && go run ./ server
+
+gen-mocks:
+	rm -rf $(MOCKS_DIR)
+	mkdir $(MOCKS_DIR)
+	mockery --all --with-expecter --output $(MOCKS_DIR)

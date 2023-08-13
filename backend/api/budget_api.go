@@ -45,9 +45,30 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 	return rest.Ok(budgetm)
 }
 
-// TODO: Check if this shpuld be converted to 'GetForPeriod'
-func (api *BudgetAPI) Filter(req *rest.Request) *rest.Response {
-	return nil
+func (api *BudgetAPI) GetByPeriod(req *rest.Request) *rest.Response {
+	accountId := testAccountId
+	d, err := getDateFromParams(req.Params)
+
+	if err != nil {
+		return rest.Err(err)
+	}
+
+	budgets, err := api.budgetManager.GetByPeriod(accountId, d.Month, d.Year)
+	if err != nil {
+		return rest.Err(err)
+	}
+
+	budgetms := make([]data.BudgetMaterialized, 0, len(budgets))
+	for _, budget := range budgets {
+		budgetm, err := api.getMaterializedBudget(budget)
+		if err != nil {
+			return rest.Err(err)
+		}
+
+		budgetms = append(budgetms, budgetm)
+	}
+
+	return rest.Ok(budgetms)
 }
 
 func (api *BudgetAPI) Create(req *rest.Request) *rest.Response {
@@ -185,6 +206,10 @@ func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpda
 	}
 
 	return nil
+}
+
+func getDateFromParams(params rest.PathParams) (data.Date, error) {
+	return data.Date{}, nil
 }
 
 func (api *BudgetAPI) getMaterializedBudget(budget data.Budget) (data.BudgetMaterialized, error) {

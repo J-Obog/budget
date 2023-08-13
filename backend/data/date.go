@@ -12,6 +12,14 @@ type Date struct {
 	Year  int
 }
 
+func NewWithCurrentDate() Date {
+	return Date{
+		Month: 0,
+		Day:   0,
+		Year:  0,
+	}
+}
+
 func NewDate(month int, day int, year int) Date {
 	return Date{
 		Month: month,

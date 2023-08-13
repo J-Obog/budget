@@ -169,61 +169,6 @@ func (_c *BudgetStore_Get_Call) RunAndReturn(run func(string, string) (*data.Bud
 	return _c
 }
 
-// GetBy provides a mock function with given fields: accountId, filter
-func (_m *BudgetStore) GetBy(accountId string, filter data.BudgetFilter) ([]data.Budget, error) {
-	ret := _m.Called(accountId, filter)
-
-	var r0 []data.Budget
-	var r1 error
-	if rf, ok := ret.Get(0).(func(string, data.BudgetFilter) ([]data.Budget, error)); ok {
-		return rf(accountId, filter)
-	}
-	if rf, ok := ret.Get(0).(func(string, data.BudgetFilter) []data.Budget); ok {
-		r0 = rf(accountId, filter)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]data.Budget)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(string, data.BudgetFilter) error); ok {
-		r1 = rf(accountId, filter)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// BudgetStore_GetBy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBy'
-type BudgetStore_GetBy_Call struct {
-	*mock.Call
-}
-
-// GetBy is a helper method to define mock.On call
-//   - accountId string
-//   - filter data.BudgetFilter
-func (_e *BudgetStore_Expecter) GetBy(accountId interface{}, filter interface{}) *BudgetStore_GetBy_Call {
-	return &BudgetStore_GetBy_Call{Call: _e.mock.On("GetBy", accountId, filter)}
-}
-
-func (_c *BudgetStore_GetBy_Call) Run(run func(accountId string, filter data.BudgetFilter)) *BudgetStore_GetBy_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].(data.BudgetFilter))
-	})
-	return _c
-}
-
-func (_c *BudgetStore_GetBy_Call) Return(_a0 []data.Budget, _a1 error) *BudgetStore_GetBy_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *BudgetStore_GetBy_Call) RunAndReturn(run func(string, data.BudgetFilter) ([]data.Budget, error)) *BudgetStore_GetBy_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // GetByCategory provides a mock function with given fields: accountId, categoryId
 func (_m *BudgetStore) GetByCategory(accountId string, categoryId string) ([]data.Budget, error) {
 	ret := _m.Called(accountId, categoryId)
@@ -275,6 +220,62 @@ func (_c *BudgetStore_GetByCategory_Call) Return(_a0 []data.Budget, _a1 error) *
 }
 
 func (_c *BudgetStore_GetByCategory_Call) RunAndReturn(run func(string, string) ([]data.Budget, error)) *BudgetStore_GetByCategory_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetByPeriod provides a mock function with given fields: accountId, month, year
+func (_m *BudgetStore) GetByPeriod(accountId string, month int, year int) ([]data.Budget, error) {
+	ret := _m.Called(accountId, month, year)
+
+	var r0 []data.Budget
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, int, int) ([]data.Budget, error)); ok {
+		return rf(accountId, month, year)
+	}
+	if rf, ok := ret.Get(0).(func(string, int, int) []data.Budget); ok {
+		r0 = rf(accountId, month, year)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]data.Budget)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, int, int) error); ok {
+		r1 = rf(accountId, month, year)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// BudgetStore_GetByPeriod_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByPeriod'
+type BudgetStore_GetByPeriod_Call struct {
+	*mock.Call
+}
+
+// GetByPeriod is a helper method to define mock.On call
+//   - accountId string
+//   - month int
+//   - year int
+func (_e *BudgetStore_Expecter) GetByPeriod(accountId interface{}, month interface{}, year interface{}) *BudgetStore_GetByPeriod_Call {
+	return &BudgetStore_GetByPeriod_Call{Call: _e.mock.On("GetByPeriod", accountId, month, year)}
+}
+
+func (_c *BudgetStore_GetByPeriod_Call) Run(run func(accountId string, month int, year int)) *BudgetStore_GetByPeriod_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(int), args[2].(int))
+	})
+	return _c
+}
+
+func (_c *BudgetStore_GetByPeriod_Call) Return(_a0 []data.Budget, _a1 error) *BudgetStore_GetByPeriod_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *BudgetStore_GetByPeriod_Call) RunAndReturn(run func(string, int, int) ([]data.Budget, error)) *BudgetStore_GetByPeriod_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -378,23 +379,23 @@ func (_c *BudgetStore_Insert_Call) RunAndReturn(run func(data.Budget) error) *Bu
 	return _c
 }
 
-// Update provides a mock function with given fields: update
-func (_m *BudgetStore) Update(update data.Budget) (bool, error) {
-	ret := _m.Called(update)
+// Update provides a mock function with given fields: updated
+func (_m *BudgetStore) Update(updated data.Budget) (bool, error) {
+	ret := _m.Called(updated)
 
 	var r0 bool
 	var r1 error
 	if rf, ok := ret.Get(0).(func(data.Budget) (bool, error)); ok {
-		return rf(update)
+		return rf(updated)
 	}
 	if rf, ok := ret.Get(0).(func(data.Budget) bool); ok {
-		r0 = rf(update)
+		r0 = rf(updated)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	if rf, ok := ret.Get(1).(func(data.Budget) error); ok {
-		r1 = rf(update)
+		r1 = rf(updated)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -408,12 +409,12 @@ type BudgetStore_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - update data.Budget
-func (_e *BudgetStore_Expecter) Update(update interface{}) *BudgetStore_Update_Call {
-	return &BudgetStore_Update_Call{Call: _e.mock.On("Update", update)}
+//   - updated data.Budget
+func (_e *BudgetStore_Expecter) Update(updated interface{}) *BudgetStore_Update_Call {
+	return &BudgetStore_Update_Call{Call: _e.mock.On("Update", updated)}
 }
 
-func (_c *BudgetStore_Update_Call) Run(run func(update data.Budget)) *BudgetStore_Update_Call {
+func (_c *BudgetStore_Update_Call) Run(run func(updated data.Budget)) *BudgetStore_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(data.Budget))
 	})

@@ -30,6 +30,10 @@ func (manager *BudgetManager) Get(id string, accountId string) (*data.Budget, er
 	return manager.store.Get(id, accountId)
 }
 
+func (manager *BudgetManager) GetByPeriod(accountId string, month int, year int) ([]data.Budget, error) {
+	return manager.store.GetByPeriod(accountId, month, year)
+}
+
 func (manager *BudgetManager) Create(accountId string, reqBody rest.BudgetCreateBody) (data.Budget, error) {
 	timestamp := manager.clock.Now()
 	uuid := manager.uuidProvider.GetUuid()

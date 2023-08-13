@@ -27,6 +27,22 @@ func (pg *PostgresBudgetStore) Get(id string, accountId string) (*data.Budget, e
 	return nil, err
 }
 
+func (pg *PostgresBudgetStore) GetByPeriod(accountId string, month int, year int) ([]data.Budget, error) {
+	budgets := make([]data.Budget, 0)
+
+	err := pg.db.Where(&data.Budget{
+		AccountId: accountId,
+		Month:     month,
+		Year:      year,
+	}).Find(&budgets).Error
+
+	if err != nil {
+		return budgets, err
+	}
+
+	return budgets, nil
+}
+
 func (pg *PostgresBudgetStore) GetByPeriodCategory(accountId string, categoryId string, month int, year int) (*data.Budget, error) {
 	var budget data.Budget
 

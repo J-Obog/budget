@@ -261,23 +261,23 @@ func (_c *AccountStore_SoftDelete_Call) RunAndReturn(run func(string) (bool, err
 	return _c
 }
 
-// Update provides a mock function with given fields: update
-func (_m *AccountStore) Update(update data.Account) (bool, error) {
-	ret := _m.Called(update)
+// Update provides a mock function with given fields: updated
+func (_m *AccountStore) Update(updated data.Account) (bool, error) {
+	ret := _m.Called(updated)
 
 	var r0 bool
 	var r1 error
 	if rf, ok := ret.Get(0).(func(data.Account) (bool, error)); ok {
-		return rf(update)
+		return rf(updated)
 	}
 	if rf, ok := ret.Get(0).(func(data.Account) bool); ok {
-		r0 = rf(update)
+		r0 = rf(updated)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	if rf, ok := ret.Get(1).(func(data.Account) error); ok {
-		r1 = rf(update)
+		r1 = rf(updated)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -291,12 +291,12 @@ type AccountStore_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - update data.Account
-func (_e *AccountStore_Expecter) Update(update interface{}) *AccountStore_Update_Call {
-	return &AccountStore_Update_Call{Call: _e.mock.On("Update", update)}
+//   - updated data.Account
+func (_e *AccountStore_Expecter) Update(updated interface{}) *AccountStore_Update_Call {
+	return &AccountStore_Update_Call{Call: _e.mock.On("Update", updated)}
 }
 
-func (_c *AccountStore_Update_Call) Run(run func(update data.Account)) *AccountStore_Update_Call {
+func (_c *AccountStore_Update_Call) Run(run func(updated data.Account)) *AccountStore_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(data.Account))
 	})

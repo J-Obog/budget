@@ -320,23 +320,23 @@ func (_c *CategoryStore_Insert_Call) RunAndReturn(run func(data.Category) error)
 	return _c
 }
 
-// Update provides a mock function with given fields: update
-func (_m *CategoryStore) Update(update data.Category) (bool, error) {
-	ret := _m.Called(update)
+// Update provides a mock function with given fields: updated
+func (_m *CategoryStore) Update(updated data.Category) (bool, error) {
+	ret := _m.Called(updated)
 
 	var r0 bool
 	var r1 error
 	if rf, ok := ret.Get(0).(func(data.Category) (bool, error)); ok {
-		return rf(update)
+		return rf(updated)
 	}
 	if rf, ok := ret.Get(0).(func(data.Category) bool); ok {
-		r0 = rf(update)
+		r0 = rf(updated)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	if rf, ok := ret.Get(1).(func(data.Category) error); ok {
-		r1 = rf(update)
+		r1 = rf(updated)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -350,12 +350,12 @@ type CategoryStore_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - update data.Category
-func (_e *CategoryStore_Expecter) Update(update interface{}) *CategoryStore_Update_Call {
-	return &CategoryStore_Update_Call{Call: _e.mock.On("Update", update)}
+//   - updated data.Category
+func (_e *CategoryStore_Expecter) Update(updated interface{}) *CategoryStore_Update_Call {
+	return &CategoryStore_Update_Call{Call: _e.mock.On("Update", updated)}
 }
 
-func (_c *CategoryStore_Update_Call) Run(run func(update data.Category)) *CategoryStore_Update_Call {
+func (_c *CategoryStore_Update_Call) Run(run func(updated data.Category)) *CategoryStore_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(data.Category))
 	})

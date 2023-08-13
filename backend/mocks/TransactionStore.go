@@ -323,23 +323,23 @@ func (_c *TransactionStore_Insert_Call) RunAndReturn(run func(data.Transaction) 
 	return _c
 }
 
-// Update provides a mock function with given fields: update
-func (_m *TransactionStore) Update(update data.Transaction) (bool, error) {
-	ret := _m.Called(update)
+// Update provides a mock function with given fields: updated
+func (_m *TransactionStore) Update(updated data.Transaction) (bool, error) {
+	ret := _m.Called(updated)
 
 	var r0 bool
 	var r1 error
 	if rf, ok := ret.Get(0).(func(data.Transaction) (bool, error)); ok {
-		return rf(update)
+		return rf(updated)
 	}
 	if rf, ok := ret.Get(0).(func(data.Transaction) bool); ok {
-		r0 = rf(update)
+		r0 = rf(updated)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	if rf, ok := ret.Get(1).(func(data.Transaction) error); ok {
-		r1 = rf(update)
+		r1 = rf(updated)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -353,12 +353,12 @@ type TransactionStore_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - update data.Transaction
-func (_e *TransactionStore_Expecter) Update(update interface{}) *TransactionStore_Update_Call {
-	return &TransactionStore_Update_Call{Call: _e.mock.On("Update", update)}
+//   - updated data.Transaction
+func (_e *TransactionStore_Expecter) Update(updated interface{}) *TransactionStore_Update_Call {
+	return &TransactionStore_Update_Call{Call: _e.mock.On("Update", updated)}
 }
 
-func (_c *TransactionStore_Update_Call) Run(run func(update data.Transaction)) *TransactionStore_Update_Call {
+func (_c *TransactionStore_Update_Call) Run(run func(updated data.Transaction)) *TransactionStore_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(data.Transaction))
 	})
