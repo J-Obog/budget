@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strconv"
+
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/manager"
 	"github.com/J-Obog/paidoff/rest"
@@ -47,10 +49,16 @@ func (api *BudgetAPI) Get(req *rest.Request) *rest.Response {
 
 func (api *BudgetAPI) GetByPeriod(req *rest.Request) *rest.Response {
 	accountId := testAccountId
-	d, err := getDateFromParams(req.Params)
+	monthParam := req.Params.GetBudgetPeriodMonth()
+	yearParam := req.Params.GetBudgetPeriodYear()
 
-	if err != nil {
-		return rest.Err(err)
+	m, _ := strconv.Atoi(monthParam)
+	y, _ := strconv.Atoi(yearParam)
+
+	d := data.NewDate(m, 1, y)
+
+	if !d.IsValid() {
+		return rest.Err(rest.ErrInvalidBudgetPeriodParams)
 	}
 
 	budgets, err := api.budgetManager.GetByPeriod(accountId, d.Month, d.Year)
@@ -206,10 +214,6 @@ func (api *BudgetAPI) validateUpdate(existing *data.Budget, body rest.BudgetUpda
 	}
 
 	return nil
-}
-
-func getDateFromParams(params rest.PathParams) (data.Date, error) {
-	return data.Date{}, nil
 }
 
 func (api *BudgetAPI) getMaterializedBudget(budget data.Budget) (data.BudgetMaterialized, error) {

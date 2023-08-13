@@ -16,6 +16,11 @@ var (
 		Status: Code_400,
 	}
 
+	ErrInvalidBudgetPeriodParams = &RestError{
+		Msg:    "invalid value for period in path params",
+		Status: Code_400,
+	}
+
 	ErrCategoryNameAlreadyExists = &RestError{
 		Msg:    "category name already exists",
 		Status: Code_400,
