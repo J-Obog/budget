@@ -1,9 +1,16 @@
 package api
 
 import (
+	"testing"
+
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestAccountApi(t *testing.T) {
+	suite.Run(t, new(AccountApiTestSuite))
+}
 
 type AccountApiTestSuite struct {
 	ApiTestSuite
@@ -24,7 +31,7 @@ func (s *AccountApiTestSuite) TestGets() {
 	s.accountStore.Insert(data.Account{Id: testAccountId})
 	req := &rest.Request{}
 	res := s.api.Get(req)
-	s.OkResponse(res, data.Account{})
+	s.OkResponse(res, &data.Account{})
 }
 
 func (s *AccountApiTestSuite) TestGetFailsIfNoAccountExists() {
@@ -38,7 +45,7 @@ func (s *AccountApiTestSuite) TestUpdates() {
 	reqBody := rest.AccountUpdateBody{Name: "New Name"}
 	req := &rest.Request{Body: s.getJSONBody(reqBody)}
 	res := s.api.Update(req)
-	s.OkResponse(res, data.Account{})
+	s.OkResponse(res, &data.Account{})
 }
 
 func (s *AccountApiTestSuite) TestUpdateFailsIfNoAccountExists() {

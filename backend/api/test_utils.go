@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 
@@ -46,6 +47,7 @@ func (s *ApiTestSuite) initDependencies() {
 }
 
 func (s *ApiTestSuite) OkResponse(res *rest.Response, expectedShema any) {
+	fmt.Println(reflect.TypeOf(res.Data))
 	s.Equal(reflect.TypeOf(res.Data), reflect.TypeOf(expectedShema))
 	s.Equal(res.Status, http.StatusOK)
 }

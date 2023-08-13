@@ -16,7 +16,7 @@ func Ok(v any) *Response {
 }
 
 func Success() *Response {
-	return &Response{}
+	return Ok("some success message")
 }
 
 func Err(err error) *Response {

@@ -94,9 +94,13 @@ func (api *TransactionAPI) Delete(req *rest.Request) *rest.Response {
 	id := req.Params.GetTransactionId()
 	accountId := testAccountId
 
-	err := api.transactionManager.Delete(id, accountId)
+	ok, err := api.transactionManager.Delete(id, accountId)
 	if err != nil {
 		return rest.Err(err)
+	}
+
+	if !ok {
+		return rest.Err(rest.ErrInvalidTransactionId)
 	}
 
 	return rest.Success()
