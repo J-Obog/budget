@@ -1,8 +1,15 @@
 package store
 
 import (
+	"testing"
+
 	"github.com/J-Obog/paidoff/data"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestAccountStore(t *testing.T) {
+	suite.Run(t, new(AccountStoreTestSuite))
+}
 
 type AccountStoreTestSuite struct {
 	StoreTestSuite
@@ -30,7 +37,11 @@ func (s *AccountStoreTestSuite) TestInsertAndGet() {
 }
 
 func (s *AccountStoreTestSuite) TestUpdate() {
-	account := data.Account{Id: "account-id"}
+	account := data.Account{
+		Id:        "account-id",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
 	err := s.accountStore.Insert(account)
 	s.NoError(err)
@@ -44,11 +55,16 @@ func (s *AccountStoreTestSuite) TestUpdate() {
 	actual, err := s.accountStore.Get(account.Id)
 	s.NoError(err)
 	s.NotNil(actual)
-	s.Equal(account, actual)
+	s.Equal(account, *actual)
 }
 
 func (s *AccountStoreTestSuite) TestSoftDelete() {
-	account := data.Account{Id: "account-id", IsDeleted: false}
+	account := data.Account{
+		Id:        "account-id",
+		IsDeleted: false,
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
 	err := s.accountStore.Insert(account)
 	s.NoError(err)

@@ -2,9 +2,15 @@ package store
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/J-Obog/paidoff/data"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestBudgetStore(t *testing.T) {
+	suite.Run(t, new(BudgetStoreTestSuite))
+}
 
 type BudgetStoreTestSuite struct {
 	StoreTestSuite
@@ -86,7 +92,11 @@ func (s *BudgetStoreTestSuite) TestGetsBudgetsByFilter() {
 }
 
 func (s *BudgetStoreTestSuite) TestUpdate() {
-	budget := data.Budget{Id: "budget-id"}
+	budget := data.Budget{
+		Id:        "budget-id",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
 	err := s.budgetStore.Insert(budget)
 	s.NoError(err)
@@ -99,7 +109,7 @@ func (s *BudgetStoreTestSuite) TestUpdate() {
 
 	actual, err := s.budgetStore.Get(budget.Id, budget.AccountId)
 	s.NoError(err)
-	s.Equal(actual, budget)
+	s.Equal(*actual, budget)
 }
 
 func (s *BudgetStoreTestSuite) TestDelete() {

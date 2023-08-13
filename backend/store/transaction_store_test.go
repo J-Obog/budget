@@ -2,9 +2,15 @@ package store
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/J-Obog/paidoff/data"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestTransactionStore(t *testing.T) {
+	suite.Run(t, new(TransactionStoreTestSuite))
+}
 
 type TransactionStoreTestSuite struct {
 	StoreTestSuite
@@ -66,7 +72,11 @@ func (s *TransactionStoreTestSuite) TestGetByPeriodCategory() {
 }
 
 func (s *TransactionStoreTestSuite) TestUpdate() {
-	transaction := data.Transaction{Id: "transaction-id"}
+	transaction := data.Transaction{
+		Id:        "transaction-id",
+		CreatedAt: testTimestamp,
+		UpdatedAt: testTimestamp,
+	}
 
 	err := s.transactionStore.Insert(transaction)
 	s.NoError(err)
@@ -79,7 +89,7 @@ func (s *TransactionStoreTestSuite) TestUpdate() {
 
 	actual, err := s.transactionStore.Get(transaction.Id, transaction.AccountId)
 	s.NoError(err)
-	s.Equal(actual, transaction)
+	s.Equal(*actual, transaction)
 }
 
 func (s *TransactionStoreTestSuite) TestDelete() {
