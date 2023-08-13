@@ -43,7 +43,7 @@ func (manager *TransactionManager) Create(
 		CategoryId: body.CategoryId,
 		Note:       body.Note,
 		Type:       body.Type,
-		Amount:     body.Amount,
+		Amount:     round(body.Amount, 2),
 		Month:      body.Month,
 		Day:        body.Day,
 		Year:       body.Year,
@@ -65,7 +65,7 @@ func (manager *TransactionManager) Update(
 	existing.CategoryId = body.CategoryId
 	existing.Note = body.Note
 	existing.Type = body.Type
-	existing.Amount = body.Amount
+	existing.Amount = round(body.Amount, 2)
 	existing.Month = body.Month
 	existing.Day = body.Day
 	existing.Year = body.Year
