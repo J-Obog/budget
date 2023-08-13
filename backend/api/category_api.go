@@ -31,6 +31,10 @@ func (api *CategoryAPI) Get(req *rest.Request) *rest.Response {
 		return rest.Err(err)
 	}
 
+	if category == nil {
+		return rest.Err(rest.ErrInvalidCategoryId)
+	}
+
 	return rest.Ok(category)
 }
 
@@ -132,6 +136,10 @@ func (api *CategoryAPI) validateDelete(id string, accountId string) error {
 }
 
 func (api *CategoryAPI) validateUpdate(existing *data.Category, body rest.CategoryUpdateBody) error {
+	if existing == nil {
+		return rest.ErrInvalidCategoryId
+	}
+
 	if body.Name != existing.Name {
 		if err := api.checkName(body.Name); err != nil {
 			return err

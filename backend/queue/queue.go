@@ -1,6 +1,7 @@
 package queue
 
 const (
+	QueueName_TestQueue       string = "test.queue"
 	QueueName_CategoryDeleted string = "category.deleted"
 )
 

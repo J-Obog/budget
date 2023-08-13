@@ -12,4 +12,4 @@ create-queues:
 	done
 
 test: db-migrate create-queues
-	export APP_ENV=dev && gotest ./... -count=1 -v
+	export APP_ENV=dev && gotest ./... -count=1 -v -p=1

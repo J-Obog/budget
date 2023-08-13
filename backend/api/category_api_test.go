@@ -1,12 +1,18 @@
 package api
 
 import (
+	"testing"
 	"time"
 
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/queue"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestCategoryApi(t *testing.T) {
+	suite.Run(t, new(CategoryApiTestSuite))
+}
 
 type CategoryApiTestSuite struct {
 	ApiTestSuite
@@ -24,6 +30,9 @@ func (s *CategoryApiTestSuite) SetupSuite() {
 func (s *CategoryApiTestSuite) SetupTest() {
 	err := s.categoryStore.DeleteAll()
 	s.NoError(err)
+
+	err = s.budgetStore.DeleteAll()
+	s.NoError(err)
 }
 
 func (s *CategoryApiTestSuite) TestGets() {
@@ -31,7 +40,7 @@ func (s *CategoryApiTestSuite) TestGets() {
 	s.categoryStore.Insert(data.Category{Id: categoryId, AccountId: testAccountId})
 	req := &rest.Request{Params: rest.PathParams{"categoryId": categoryId}}
 	res := s.api.Get(req)
-	s.OkResponse(res, data.Category{})
+	s.OkResponse(res, &data.Category{})
 }
 
 func (s *CategoryApiTestSuite) TestGetFailsIfNoCategoryExists() {
@@ -41,13 +50,24 @@ func (s *CategoryApiTestSuite) TestGetFailsIfNoCategoryExists() {
 	s.ErrRepsonse(res, rest.ErrInvalidCategoryId)
 }
 
+func (s *CategoryApiTestSuite) TestGetsAll() {
+	s.categoryStore.Insert(data.Category{Id: "1", AccountId: testAccountId})
+	s.categoryStore.Insert(data.Category{Id: "2", AccountId: testAccountId})
+	s.categoryStore.Insert(data.Category{Id: "3", AccountId: testAccountId})
+
+	req := &rest.Request{}
+	res := s.api.GetAll(req)
+
+	s.OkResponse(res, []data.Category{})
+}
+
 func (s *CategoryApiTestSuite) TestUpdates() {
 	categoryId := "category-123"
 	s.categoryStore.Insert(data.Category{Id: categoryId, AccountId: testAccountId})
 	reqBody := rest.CategoryUpdateBody{Name: "some-name", Color: 1011011}
 	req := &rest.Request{Body: s.getJSONBody(reqBody), Params: rest.PathParams{"categoryId": categoryId}}
 	res := s.api.Update(req)
-	s.OkResponse(res, data.Category{})
+	s.OkResponse(res, &data.Category{})
 }
 
 func (s *CategoryApiTestSuite) TestUpdateFailsIfNoCategoryExists() {
@@ -125,8 +145,8 @@ func (s *CategoryApiTestSuite) TestDeletes() {
 	s.Eventually(func() bool {
 		msg, err := s.queue.Pop(queue.QueueName_CategoryDeleted)
 		s.NoError(err)
-		return (msg != nil) && (err != nil)
-	}, 2*time.Minute, 15*time.Second)
+		return (msg != nil) && (err == nil)
+	}, 1*time.Minute, 1*time.Second)
 }
 
 func (s *CategoryApiTestSuite) TestDeleteFailsIfNoCategoryExists() {

@@ -79,7 +79,7 @@ func (mq *RabbitMqQueue) Ack(messageId string) error {
 	delete(mq.dtags, messageId)
 
 	if !ok {
-		//update error message
+		// TODO: update error message
 		return errors.New("some errors")
 	}
 
