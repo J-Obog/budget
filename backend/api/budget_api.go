@@ -121,8 +121,8 @@ func (api *BudgetAPI) Delete(req *rest.Request) *rest.Response {
 func (api *BudgetAPI) validateCreate(accountId string, body rest.BudgetCreateBody) error {
 	d := data.NewDate(body.Month, 1, body.Year)
 
-	if err := d.IsValid(); err != nil {
-		return err
+	if ok := d.IsValid(); !ok {
+		return rest.ErrInvalidDate
 	}
 
 	ok, err := api.budgetManager.CategoryIsUniqueForPeriod(

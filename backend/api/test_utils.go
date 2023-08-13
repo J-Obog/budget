@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"reflect"
 
@@ -47,14 +46,13 @@ func (s *ApiTestSuite) initDependencies() {
 }
 
 func (s *ApiTestSuite) OkResponse(res *rest.Response, expectedShema any) {
-	fmt.Println(reflect.TypeOf(res.Data))
-	s.Equal(reflect.TypeOf(res.Data), reflect.TypeOf(expectedShema))
-	s.Equal(res.Status, http.StatusOK)
+	s.Equal(reflect.TypeOf(expectedShema), reflect.TypeOf(res.Data))
+	s.Equal(http.StatusOK, res.Status)
 }
 
 func (s *ApiTestSuite) ErrRepsonse(res *rest.Response, expectedError *rest.RestError) {
-	s.Equal(res.Data, expectedError)
-	s.Equal(res.Status, expectedError.Status)
+	s.Equal(expectedError, res.Data)
+	s.Equal(expectedError.Status, res.Status)
 }
 
 func (s *ApiTestSuite) getJSONBody(obj any) rest.JSONBody {

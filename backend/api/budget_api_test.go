@@ -1,9 +1,16 @@
 package api
 
 import (
+	"testing"
+
 	"github.com/J-Obog/paidoff/data"
 	"github.com/J-Obog/paidoff/rest"
+	"github.com/stretchr/testify/suite"
 )
+
+func TestBudgetApi(t *testing.T) {
+	suite.Run(t, new(BudgetApiTestSuite))
+}
 
 type BudgetApiTestSuite struct {
 	ApiTestSuite
@@ -55,7 +62,7 @@ func (s *BudgetApiTestSuite) TestUpdates() {
 	reqBody := rest.BudgetUpdateBody{CategoryId: categoryId, Projected: 12.34}
 	req := &rest.Request{Body: s.getJSONBody(reqBody), Params: rest.PathParams{"budgetId": budgetId}}
 	res := s.api.Update(req)
-	s.OkResponse(res, data.Budget{})
+	s.OkResponse(res, &data.Budget{})
 }
 
 func (s *BudgetApiTestSuite) TestUpdateFailsIfNoBudgetExists() {
@@ -177,5 +184,5 @@ func (s *BudgetApiTestSuite) TestDeleteFailsIfNoBudgetExists() {
 	budgetId := "budget-1234"
 	req := &rest.Request{Params: rest.PathParams{"budgetId": budgetId}}
 	res := s.api.Delete(req)
-	s.OkResponse(res, rest.ErrInvalidBudgetId)
+	s.ErrRepsonse(res, rest.ErrInvalidBudgetId)
 }

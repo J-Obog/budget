@@ -137,8 +137,8 @@ func (api *TransactionAPI) validateUpdate(existing *data.Transaction, body rest.
 func (api *TransactionAPI) validateCreate(accountId string, body rest.TransactionCreateBody) error {
 	d := data.NewDate(body.Month, body.Day, body.Year)
 
-	if err := d.IsValid(); err != nil {
-		return err
+	if ok := d.IsValid(); !ok {
+		return rest.ErrInvalidDate
 	}
 
 	if body.Note != nil {
