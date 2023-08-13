@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/J-Obog/paidoff/config"
@@ -22,6 +23,7 @@ type QueueTestSuite struct {
 
 func (s *QueueTestSuite) SetupSuite() {
 	cfg := config.Get()
+	fmt.Println(cfg)
 	s.queue = NewQueue(cfg)
 }
 
@@ -30,8 +32,8 @@ func (s *QueueTestSuite) SetupTest() {
 	s.NoError(err)
 }
 
-func (s *QueueTestSuite) TestPushesAndPopsMessage() {
-	msg := Message{Id: "some-id", Data: "some payload"}
+func (s *QueueTestSuite) TestPushAndPop() {
+	msg := Message{Id: "some-id", Body: []byte(`some payload`)}
 
 	err := s.queue.Push(msg, testQueueName)
 	s.NoError(err)
@@ -39,13 +41,15 @@ func (s *QueueTestSuite) TestPushesAndPopsMessage() {
 	m, err := s.queue.Pop(testQueueName)
 	s.NoError(err)
 	s.Equal(msg, *m)
-
 }
 
-func (s *QueueTestSuite) TestDeletesAccount() {
-	msg := Message{Id: "some-id", Data: "some payload"}
+func (s *QueueTestSuite) TestAck() {
+	msg := Message{Id: "some-id", Body: []byte(`some payload`)}
 
 	err := s.queue.Push(msg, testQueueName)
+	s.NoError(err)
+
+	_, err = s.queue.Pop(testQueueName)
 	s.NoError(err)
 
 	err = s.queue.Ack(msg.Id)
