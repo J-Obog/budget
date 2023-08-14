@@ -62,6 +62,20 @@ func (s *BudgetApiTestSuite) TestGetsByPeriod() {
 	s.OkResponse(res, []data.BudgetMaterialized{})
 }
 
+func (s *BudgetApiTestSuite) TestGetByPeriodFailsIfParamsAreInvalid() {
+	invalidParams := []rest.PathParams{
+		{"periodMonth": "nonsense-month", "periodYear": "nonsense-year"},
+		{"periodMonth": "-1", "periodYear": "-1"},
+		{"periodMonth": "0", "periodYear": "2023"},
+	}
+
+	for _, params := range invalidParams {
+		req := &rest.Request{Params: params}
+		res := s.api.GetByPeriod(req)
+		s.ErrRepsonse(res, rest.ErrInvalidBudgetPeriodParams)
+	}
+}
+
 func (s *BudgetApiTestSuite) TestUpdates() {
 	budgetId := "budget-123"
 	categoryId := "category-123"
