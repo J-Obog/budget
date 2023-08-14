@@ -169,8 +169,8 @@ func (_c *TransactionStore_Get_Call) RunAndReturn(run func(string, string) (*dat
 	return _c
 }
 
-// GetBy provides a mock function with given fields: accountId, filter
-func (_m *TransactionStore) GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
+// GetByFilter provides a mock function with given fields: accountId, filter
+func (_m *TransactionStore) GetByFilter(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
 	ret := _m.Called(accountId, filter)
 
 	var r0 []data.Transaction
@@ -195,31 +195,31 @@ func (_m *TransactionStore) GetBy(accountId string, filter data.TransactionFilte
 	return r0, r1
 }
 
-// TransactionStore_GetBy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetBy'
-type TransactionStore_GetBy_Call struct {
+// TransactionStore_GetByFilter_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByFilter'
+type TransactionStore_GetByFilter_Call struct {
 	*mock.Call
 }
 
-// GetBy is a helper method to define mock.On call
+// GetByFilter is a helper method to define mock.On call
 //   - accountId string
 //   - filter data.TransactionFilter
-func (_e *TransactionStore_Expecter) GetBy(accountId interface{}, filter interface{}) *TransactionStore_GetBy_Call {
-	return &TransactionStore_GetBy_Call{Call: _e.mock.On("GetBy", accountId, filter)}
+func (_e *TransactionStore_Expecter) GetByFilter(accountId interface{}, filter interface{}) *TransactionStore_GetByFilter_Call {
+	return &TransactionStore_GetByFilter_Call{Call: _e.mock.On("GetByFilter", accountId, filter)}
 }
 
-func (_c *TransactionStore_GetBy_Call) Run(run func(accountId string, filter data.TransactionFilter)) *TransactionStore_GetBy_Call {
+func (_c *TransactionStore_GetByFilter_Call) Run(run func(accountId string, filter data.TransactionFilter)) *TransactionStore_GetByFilter_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string), args[1].(data.TransactionFilter))
 	})
 	return _c
 }
 
-func (_c *TransactionStore_GetBy_Call) Return(_a0 []data.Transaction, _a1 error) *TransactionStore_GetBy_Call {
+func (_c *TransactionStore_GetByFilter_Call) Return(_a0 []data.Transaction, _a1 error) *TransactionStore_GetByFilter_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *TransactionStore_GetBy_Call) RunAndReturn(run func(string, data.TransactionFilter) ([]data.Transaction, error)) *TransactionStore_GetBy_Call {
+func (_c *TransactionStore_GetByFilter_Call) RunAndReturn(run func(string, data.TransactionFilter) ([]data.Transaction, error)) *TransactionStore_GetByFilter_Call {
 	_c.Call.Return(run)
 	return _c
 }

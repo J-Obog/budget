@@ -49,6 +49,19 @@ func (s *TransactionApiTestSuite) TestGetFailsIfNoTransactionExists() {
 	s.ErrRepsonse(res, rest.ErrInvalidTransactionId)
 }
 
+func (s *TransactionApiTestSuite) TestGetsByQuery() {
+	query := rest.Query{
+		"minAmount": {"56.78"},
+		"maxAmount": {"90.78"},
+		"endDate":   {"2021-07-10"},
+		"startDate": {"2023-07-10"},
+	}
+
+	req := &rest.Request{Query: query}
+	res := s.api.GetByQuery(req)
+	s.OkResponse(res, []data.Transaction{})
+}
+
 func (s *TransactionApiTestSuite) TestUpdates() {
 	transactionId := "transaction-123"
 	s.transactionStore.Insert(data.Transaction{Id: transactionId, AccountId: testAccountId})

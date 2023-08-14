@@ -28,15 +28,27 @@ func (pg *PostgresTransactionStore) Get(id string, accountId string) (*data.Tran
 	return nil, err
 }
 
-func (pg *PostgresTransactionStore) GetBy(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
+func (pg *PostgresTransactionStore) GetByFilter(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
 	transactions := make([]data.Transaction, 0)
+	query := pg.db
 
-	q := pg.db.Where("amount >= ?", filter.GreaterThan)
-	q = q.Where("amount <= ?", filter.LessThan)
-	q = q.Where("make_date(year, month, day) <= ?", dateToSQL(filter.Before))
-	q = q.Where("make_date(year, month, day) >= ?", dateToSQL(filter.After))
+	if filter.MinAmount != nil {
+		query.Where("amount >= ?", filter.MinAmount)
+	}
 
-	err := q.Find(&transactions).Error
+	if filter.MaxAmount != nil {
+		query.Where("amount <= ?", filter.MaxAmount)
+	}
+
+	if filter.StartDate != nil {
+		query.Where("make_date(year, month, day) >= ?", filter.StartDate)
+	}
+
+	if filter.EndDate != nil {
+		query.Where("make_date(year, month, day) <= ?", filter.EndDate)
+	}
+
+	err := query.Find(&transactions).Error
 
 	if err != nil {
 		return nil, err

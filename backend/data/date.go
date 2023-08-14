@@ -28,6 +28,10 @@ func NewDate(month int, day int, year int) Date {
 	}
 }
 
+func NewDateFromString(s string) (Date, error) {
+	return Date{}, nil
+}
+
 func (d *Date) IsValid() bool {
 	monthString := strconv.Itoa(d.Month)
 	if d.Month < 10 {

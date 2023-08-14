@@ -30,6 +30,20 @@ func (manager *TransactionManager) Get(id string, accountId string) (*data.Trans
 	return manager.store.Get(id, accountId)
 }
 
+func (manager *TransactionManager) GetByQuery(
+	accountId string,
+	query rest.TransactionQuery,
+) ([]data.Transaction, error) {
+	filter := data.TransactionFilter{
+		MinAmount: query.MinAmount,
+		MaxAmount: query.MaxAmount,
+		StartDate: query.StartDate,
+		EndDate:   query.EndDate,
+	}
+
+	return manager.store.GetByFilter(accountId, filter)
+}
+
 func (manager *TransactionManager) Create(
 	accountId string,
 	body rest.TransactionCreateBody,

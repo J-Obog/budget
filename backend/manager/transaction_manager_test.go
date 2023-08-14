@@ -43,6 +43,32 @@ func (s *TransactionManagerTestSuite) TestGet() {
 	s.NoError(err)
 }
 
+func (s *TransactionManagerTestSuite) TestGetByFilter() {
+	accountId := "acct-3"
+
+	query := rest.TransactionQuery{
+		MinAmount: types.Float64Ptr(123.45),
+		MaxAmount: types.Float64Ptr(890.123),
+		StartDate: types.Ptr[data.Date](data.NewDate(1, 2, 2002)),
+		EndDate:   types.Ptr[data.Date](data.NewDate(1, 2, 2050)),
+	}
+
+	filter := data.TransactionFilter{
+		MinAmount: query.MinAmount,
+		MaxAmount: query.MaxAmount,
+		StartDate: query.StartDate,
+		EndDate:   query.EndDate,
+	}
+
+	expected := []data.Transaction{{Id: "some-id"}}
+
+	s.transactionStore.EXPECT().GetByFilter(accountId, filter).Return(expected, nil)
+
+	actual, err := s.manager.GetByQuery(accountId, query)
+	s.NoError(err)
+	s.ElementsMatch(expected, actual)
+}
+
 func (s *TransactionManagerTestSuite) TestCreate() {
 	accountId := "account-123"
 	body := rest.TransactionCreateBody{

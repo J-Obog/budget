@@ -17,7 +17,7 @@ func RegisterRoutes(s Server, apiSvc *api.ApiService) {
 	s.RegisterRoute(http.MethodPut, "/category/:categoryId", apiSvc.CategoryAPI.Update)
 	s.RegisterRoute(http.MethodDelete, "/category/:categoryId", apiSvc.CategoryAPI.Delete)
 
-	s.RegisterRoute(http.MethodGet, "/transaction", apiSvc.TransactionAPI.Filter)
+	s.RegisterRoute(http.MethodGet, "/transaction", apiSvc.TransactionAPI.GetByFilter)
 	s.RegisterRoute(http.MethodPost, "/transaction", apiSvc.TransactionAPI.Create)
 	s.RegisterRoute(http.MethodGet, "/transaction/:transactionId", apiSvc.TransactionAPI.Get)
 	s.RegisterRoute(http.MethodPut, "/transaction/:transactionId", apiSvc.TransactionAPI.Update)

@@ -15,10 +15,10 @@ type Transaction struct {
 }
 
 type TransactionFilter struct {
-	Before      Date
-	After       Date
-	GreaterThan float64
-	LessThan    float64
+	StartDate *Date
+	EndDate   *Date
+	MinAmount *float64
+	MaxAmount *float64
 }
 
 type TransactionUpdate struct {

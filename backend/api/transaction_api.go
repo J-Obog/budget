@@ -38,9 +38,20 @@ func (api *TransactionAPI) Get(req *rest.Request) *rest.Response {
 	return rest.Ok(transaction)
 }
 
-// TODO : impl
-func (api *TransactionAPI) Filter(req *rest.Request) *rest.Response {
-	return nil
+func (api *TransactionAPI) GetByQuery(req *rest.Request) *rest.Response {
+	var query rest.TransactionQuery
+	accountId := testAccountId
+
+	if err := req.Query.To(&query); err != nil {
+		return rest.Err(err)
+	}
+
+	transactions, err := api.transactionManager.GetByQuery(accountId, query)
+	if err != nil {
+		return rest.Err(err)
+	}
+
+	return rest.Ok(transactions)
 }
 
 func (api *TransactionAPI) Create(req *rest.Request) *rest.Response {
