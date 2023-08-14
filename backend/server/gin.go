@@ -32,11 +32,16 @@ func (g *GinServer) RegisterRoute(method string, url string, rh rest.RouteHandle
 			p[param.Key] = param.Value
 		}
 
+		q := rest.Query{}
+		for k, v := range c.Request.URL.Query() {
+			q[k] = v
+		}
+
 		req := &rest.Request{
 			Url:    c.Request.URL.String(),
 			Params: p,
-			//Query: c.Request.URL.Query(),
-			Body: rest.NewJSONBody(b),
+			Query:  q,
+			Body:   rest.NewJSONBody(b),
 		}
 
 		res := rh(req)

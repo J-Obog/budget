@@ -23,6 +23,9 @@ func (j *JSONBody) getRestError(err error) *RestError {
 		return ErrInternalServer
 	}
 }
+func (j *JSONBody) Bytes() []byte {
+	return j.bytes
+}
 
 func (j *JSONBody) From(obj any) error {
 	bytes, err := json.Marshal(obj)
