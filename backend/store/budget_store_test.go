@@ -37,6 +37,35 @@ func (s *BudgetStoreTestSuite) TestInsertAndGet() {
 	s.Equal(budget, *actual)
 }
 
+func (s *BudgetStoreTestSuite) TestGetByPeriod() {
+	accountId := "acct-12345"
+	month := 10
+	year := 2024
+
+	budgets := make([]data.Budget, 0)
+
+	for i := 0; i < 5; i++ {
+		budget := data.Budget{
+			Id:        fmt.Sprintf("id-%d", i),
+			AccountId: accountId,
+			Month:     month,
+			Year:      year,
+			CreatedAt: testTimestamp,
+			UpdatedAt: testTimestamp,
+		}
+
+		budgets = append(budgets, budget)
+
+		err := s.budgetStore.Insert(budget)
+		s.NoError(err)
+	}
+
+	actual, err := s.budgetStore.GetByPeriod(accountId, month, year)
+	s.NoError(err)
+	s.NotNil(actual)
+	s.ElementsMatch(budgets, actual)
+}
+
 func (s *BudgetStoreTestSuite) TestGetByPeriodCategory() {
 	budget := data.Budget{
 		Id:         "some-account-id",

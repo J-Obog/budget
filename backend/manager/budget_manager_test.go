@@ -42,6 +42,26 @@ func (s *BudgetManagerTestSuite) TestGets() {
 	s.NoError(err)
 }
 
+func (s *BudgetManagerTestSuite) TestGetsByPeriod() {
+	accountId := "acc-123"
+	month := 10
+	year := 2023
+
+	expected := []data.Budget{
+		{Id: "some-uuid"},
+	}
+
+	s.budgetStore.EXPECT().GetByPeriod(
+		accountId,
+		month,
+		year,
+	).Return(expected, nil)
+
+	actual, err := s.manager.GetByPeriod(accountId, month, year)
+	s.ElementsMatch(expected, actual)
+	s.NoError(err)
+}
+
 func (s *BudgetManagerTestSuite) TestCreates() {
 	accountId := "account-123"
 	body := rest.BudgetCreateBody{

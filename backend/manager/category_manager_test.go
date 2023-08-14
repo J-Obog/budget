@@ -45,7 +45,7 @@ func (s *CategoryManagerTestSuite) TestGet() {
 	s.NoError(err)
 }
 
-/*func (s *CategoryManagerTestSuite) TestCreate() {
+func (s *CategoryManagerTestSuite) TestCreate() {
 	accountId := "account-123"
 	body := rest.CategoryCreateBody{
 		Name:  "some-name",
@@ -68,7 +68,7 @@ func (s *CategoryManagerTestSuite) TestGet() {
 	actual, err := s.manager.Create(accountId, body)
 	s.Equal(actual, expected)
 	s.NoError(err)
-}*/
+}
 
 func (s *CategoryManagerTestSuite) TestUpdate() {
 	expected := true
