@@ -53,6 +53,15 @@ func (s *BudgetApiTestSuite) TestGetFailsIfNoBudgetExists() {
 	s.ErrRepsonse(res, rest.ErrInvalidBudgetId)
 }
 
+func (s *BudgetApiTestSuite) TestGetsByPeriod() {
+	month := "10"
+	year := "2023"
+
+	req := &rest.Request{Params: rest.PathParams{"periodMonth": month, "periodYear": year}}
+	res := s.api.GetByPeriod(req)
+	s.OkResponse(res, []data.BudgetMaterialized{})
+}
+
 func (s *BudgetApiTestSuite) TestUpdates() {
 	budgetId := "budget-123"
 	categoryId := "category-123"
