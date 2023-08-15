@@ -47,111 +47,90 @@ func (s *ServerTestSuite) SetupSuite() {
 	s.server = NewServer(cfg)
 }
 
-// TODO: check if server has been shut down properly
-func (s *ServerTestSuite) TestStartsAndStops() {
+func (s *ServerTestSuite) SetupTest() {
 	go s.server.Start(testSvrAddress, testSvrPort)
+}
 
+func (s *ServerTestSuite) TearDownTest() {
+	s.NoError(s.server.Stop())
+}
+
+func (s *ServerTestSuite) clientDo(method string, url string, body []byte) *http.Response {
+	req, err := http.NewRequest(method, url, bytes.NewReader(body))
+	s.NoError(err)
+
+	res, err := http.DefaultClient.Do(req)
+	s.NoError(err)
+
+	return res
+}
+
+// TODO: check if server has been shut down properly
+func (s *ServerTestSuite) TestStarts() {
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", testSvrAddress, testSvrPort))
 	s.NoError(err)
 	s.NoError(conn.Close())
-
-	err = s.server.Stop()
-	s.NoError(err)
 }
 
 func (s *ServerTestSuite) TestMapsParamsToRequest() {
-	go s.server.Start(testSvrAddress, testSvrPort)
-
-	expectedParams := rest.PathParams{}
+	expected := rest.PathParams{"p1": "foo", "p2": "bar", "p3": "baz"}
 	routePath := pathParamsTestPath
 	url := baseTestUrl + routePath
 
-	for i := 0; i < 10; i++ {
-		pName := fmt.Sprintf("p%d", i)
-		pVal := fmt.Sprintf("foobar%d", i)
-		expectedParams[pName] = pVal
-		routePath += "/:" + pName
-		url += "/" + pVal
+	for k, v := range expected {
+		routePath += "/:" + k
+		url += "/" + v
 	}
 
 	fakeHandler := new(mocks.RouteHandler)
 	fakeHandler.EXPECT().Execute(mock.MatchedBy(func(req *rest.Request) bool {
-		return s.Equal(expectedParams, req.Params)
+		return s.Equal(expected, req.Params)
 	})).Return(rest.Ok(`ok`))
 
 	s.server.RegisterRoute(http.MethodGet, routePath, fakeHandler.Execute)
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	s.NoError(err)
-
-	_, err = http.DefaultClient.Do(req)
-	s.NoError(err)
-
-	err = s.server.Stop()
-	s.NoError(err)
+	s.clientDo(http.MethodGet, url, nil)
 }
 
 func (s *ServerTestSuite) TestMapsQueryToRequest() {
-	go s.server.Start(testSvrAddress, testSvrPort)
+	expected := rest.Query{"q1": {"foo"}, "q2": {"bar"}, "q3": {"baz"}}
+	routePath := queryParamsTestPath
+	url := baseTestUrl + routePath
 
-	q1 := "foo"
-	q2 := "bar"
-	q3 := "baz"
-
-	queryParams := fmt.Sprintf("&q1=%s?q2=%s?q3=%s", q1, q2, q3)
+	i := 0
+	for k, v := range expected {
+		if i == 0 {
+			url += fmt.Sprintf("&%s=%s", k, v[0])
+		} else {
+			url += fmt.Sprintf("?%s=%s", k, v[0])
+		}
+		i++
+	}
 
 	fakeHandler := new(mocks.RouteHandler)
 	fakeHandler.EXPECT().Execute(mock.MatchedBy(func(req *rest.Request) bool {
-		expected := rest.Query{
-			"q1": {q1},
-			"q2": {q2},
-			"q3": {q3},
-		}
-
 		return s.Equal(expected, req.Query)
 	})).Return(rest.Ok(`ok`))
 
-	s.server.RegisterRoute(http.MethodGet, testRoutePath+"boop", fakeHandler.Execute)
+	s.server.RegisterRoute(http.MethodGet, routePath, fakeHandler.Execute)
 
-	url := fmt.Sprintf("http://%s:%d%s", testSvrAddress, testSvrPort, testRoutePath+"boop"+queryParams)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	s.NoError(err)
-
-	_, err = http.DefaultClient.Do(req)
-	s.NoError(err)
-
-	err = s.server.Stop()
-	s.NoError(err)
+	s.clientDo(http.MethodGet, url, nil)
 }
 
 func (s *ServerTestSuite) TestMapsBodyToRequest() {
-	go s.server.Start(testSvrAddress, testSvrPort)
-
-	body := []byte(`{"foo": "bar"}`)
+	body := []byte(`{"key1": "foo", "key2": "bar", "key3": "baz"}`)
 
 	fakeHandler := new(mocks.RouteHandler)
 	fakeHandler.EXPECT().Execute(mock.MatchedBy(func(req *rest.Request) bool {
 		return s.JSONEq(string(req.Body.Bytes()), string(body))
 	})).Return(rest.Ok(`ok`))
 
-	s.server.RegisterRoute(http.MethodPost, testRoutePath+"foo", fakeHandler.Execute)
+	s.server.RegisterRoute(http.MethodPost, bodyTestPath, fakeHandler.Execute)
 
-	url := fmt.Sprintf("http://%s:%d%s", testSvrAddress, testSvrPort, testRoutePath+"foo")
-
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
-	s.NoError(err)
-
-	_, err = http.DefaultClient.Do(req)
-	s.NoError(err)
-
-	err = s.server.Stop()
-	s.NoError(err)
+	s.clientDo(http.MethodGet, baseTestUrl+bodyTestPath, body)
 }
 
 func (s *ServerTestSuite) TestRegistersRoutesAndGetsResponse() {
-	go s.server.Start(testSvrAddress, testSvrPort)
-
 	resp := rest.Ok(`some ok response`)
 
 	fakeHandler := new(mocks.RouteHandler)
@@ -161,11 +140,8 @@ func (s *ServerTestSuite) TestRegistersRoutesAndGetsResponse() {
 		s.server.RegisterRoute(httpMethod, testRoutePath, fakeHandler.Execute)
 		url := fmt.Sprintf("http://%s:%d%s", testSvrAddress, testSvrPort, testRoutePath)
 
-		req, err := http.NewRequest(httpMethod, url, nil)
-		s.NoError(err)
+		res := s.clientDo(httpMethod, url, nil)
 
-		res, err := http.DefaultClient.Do(req)
-		s.NoError(err)
 		s.Equal(res.StatusCode, resp.Status)
 
 		b, err := io.ReadAll(res.Body)
@@ -177,7 +153,4 @@ func (s *ServerTestSuite) TestRegistersRoutesAndGetsResponse() {
 
 		s.JSONEq(string(b), string(respJSONBody.Bytes()))
 	}
-
-	err := s.server.Stop()
-	s.NoError(err)
 }
