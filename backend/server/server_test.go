@@ -16,9 +16,17 @@ import (
 )
 
 const (
-	testRoutePath  = "/test/foobar"
+	testRoutePath       = "/foobar"
+	queryParamsTestPath = "/query.params.test"
+	pathParamsTestPath  = "/path.params.test"
+	bodyTestPath        = "/body.test"
+
 	testSvrAddress = "localhost"
 	testSvrPort    = 8077
+)
+
+var (
+	baseTestUrl = fmt.Sprintf("http://%s:%d", testSvrAddress, testSvrPort)
 )
 
 var (
@@ -54,20 +62,24 @@ func (s *ServerTestSuite) TestStartsAndStops() {
 func (s *ServerTestSuite) TestMapsParamsToRequest() {
 	go s.server.Start(testSvrAddress, testSvrPort)
 
-	param1 := "foo"
-	param2 := "bar"
-	param3 := "baz"
+	expectedParams := rest.PathParams{}
+	routePath := pathParamsTestPath
+	url := baseTestUrl + routePath
+
+	for i := 0; i < 10; i++ {
+		pName := fmt.Sprintf("p%d", i)
+		pVal := fmt.Sprintf("foobar%d", i)
+		expectedParams[pName] = pVal
+		routePath += "/:" + pName
+		url += "/" + pVal
+	}
 
 	fakeHandler := new(mocks.RouteHandler)
 	fakeHandler.EXPECT().Execute(mock.MatchedBy(func(req *rest.Request) bool {
-		expected := rest.PathParams{"p1": param1, "p2": param2, "p3": param3}
-		return s.Equal(expected, req.Params)
+		return s.Equal(expectedParams, req.Params)
 	})).Return(rest.Ok(`ok`))
 
-	s.server.RegisterRoute(http.MethodGet, testRoutePath+"paramsTest/:p1/:p2/:p3", fakeHandler.Execute)
-
-	paramPart := fmt.Sprintf("paramsTest/%s/%s/%s", param1, param2, param3)
-	url := fmt.Sprintf("http://%s:%d%s", testSvrAddress, testSvrPort, testRoutePath+paramPart)
+	s.server.RegisterRoute(http.MethodGet, routePath, fakeHandler.Execute)
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	s.NoError(err)
