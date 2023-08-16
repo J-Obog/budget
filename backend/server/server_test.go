@@ -20,9 +20,8 @@ const (
 	queryParamsTestPath = "/query.params.test"
 	pathParamsTestPath  = "/path.params.test"
 	bodyTestPath        = "/body.test"
-
-	testSvrAddress = "localhost"
-	testSvrPort    = 8077
+	testSvrAddress      = "localhost"
+	testSvrPort         = 8077
 )
 
 var (
