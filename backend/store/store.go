@@ -40,6 +40,7 @@ type TransactionStore interface {
 	GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error)
 	Insert(transaction data.Transaction) error
 	Update(updated data.Transaction) (bool, error)
+	NullCategoryId(id string, accountId string) (bool, error)
 	Delete(id string, accountId string) (bool, error)
 	DeleteAll() error
 }

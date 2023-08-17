@@ -41,11 +41,11 @@ func (pg *PostgresTransactionStore) GetByFilter(accountId string, filter data.Tr
 	}
 
 	if filter.StartDate != nil {
-		query.Where("make_date(year, month, day) >= ?", filter.StartDate)
+		query.Where("make_date(year, month, day) >= ?", dateToSQL(*filter.StartDate))
 	}
 
 	if filter.EndDate != nil {
-		query.Where("make_date(year, month, day) <= ?", filter.EndDate)
+		query.Where("make_date(year, month, day) <= ?", dateToSQL(*filter.EndDate))
 	}
 
 	err := query.Find(&transactions).Error
@@ -83,6 +83,16 @@ func (pg *PostgresTransactionStore) Update(updated data.Transaction) (bool, erro
 		"id = ? AND account_id = ?",
 		updated.Id,
 		updated.AccountId).UpdateColumns(&updated)
+
+	return (res.RowsAffected == 1), res.Error
+}
+
+func (pg *PostgresTransactionStore) NullCategoryId(id string, accountId string) (bool, error) {
+	res := pg.db.Model(&data.Transaction{}).Where(
+		"id = ? AND account_id = ?",
+		id,
+		accountId,
+	).UpdateColumn("category_id", nil)
 
 	return (res.RowsAffected == 1), res.Error
 }

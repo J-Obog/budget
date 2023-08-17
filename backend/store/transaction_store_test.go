@@ -85,6 +85,30 @@ func (s *TransactionStoreTestSuite) TestGetByFilter() {
 	s.ElementsMatch(transactions, actual)
 }
 
+func (s *TransactionStoreTestSuite) TestNullCategoryId() {
+	transaction := data.Transaction{
+		Id:         "some-txn-id",
+		CategoryId: types.StringPtr("foobar-id"),
+		AccountId:  "acct-id-1234",
+		CreatedAt:  testTimestamp,
+		UpdatedAt:  testTimestamp,
+	}
+
+	err := s.transactionStore.Insert(transaction)
+	s.NoError(err)
+
+	ok, err := s.transactionStore.NullCategoryId(transaction.Id, transaction.AccountId)
+	s.True(ok)
+	s.NoError(err)
+
+	transaction.CategoryId = nil
+
+	actual, err := s.transactionStore.Get(transaction.Id, transaction.AccountId)
+	s.NoError(err)
+	s.NotNil(actual)
+	s.Equal(transaction, *actual)
+}
+
 func (s *TransactionStoreTestSuite) TestGetByPeriodCategory() {
 	accountId := "some-account-id"
 	categoryId := "some-category-id"
