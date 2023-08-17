@@ -92,6 +92,10 @@ func (manager *TransactionManager) Delete(id string, accountId string) (bool, er
 	return manager.store.Delete(id, accountId)
 }
 
+func (manager *TransactionManager) NullCategoryId(id string, accountId string) (bool, error) {
+	return manager.store.NullCategoryId(id, accountId)
+}
+
 func (manager *TransactionManager) GetTotalForPeriodCategory(
 	accountId string,
 	categoryId string,

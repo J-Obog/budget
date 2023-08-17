@@ -43,6 +43,19 @@ func (s *TransactionManagerTestSuite) TestGet() {
 	s.NoError(err)
 }
 
+func (s *TransactionManagerTestSuite) TestNullCategoryId() {
+	expected := true
+	id := "some-id"
+	accountId := "some-other-id"
+
+	s.transactionStore.EXPECT().NullCategoryId(id, accountId).Return(expected, nil)
+
+	actual, err := s.manager.NullCategoryId(id, accountId)
+
+	s.Equal(expected, actual)
+	s.NoError(err)
+}
+
 func (s *TransactionManagerTestSuite) TestGetByFilter() {
 	accountId := "acct-3"
 
