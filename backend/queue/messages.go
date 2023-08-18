@@ -15,7 +15,7 @@ type CategoryDeletedMessage struct {
 	CategoryId string `json:"categoryId"`
 }
 
-// TODO: handle unmarshal error?
+// TODO: handle marshal error?
 func ToMessage(id string, obj any) Message {
 	bytes, err := json.Marshal(obj)
 
@@ -26,5 +26,14 @@ func ToMessage(id string, obj any) Message {
 	return Message{
 		Id:   id,
 		Body: bytes,
+	}
+}
+
+// TODO: handle unmarshal error?
+func FromMessage(msg Message, obj any) {
+	err := json.Unmarshal(msg.Body, obj)
+
+	if err != nil {
+		fmt.Println(err)
 	}
 }

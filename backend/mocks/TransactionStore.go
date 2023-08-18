@@ -169,6 +169,61 @@ func (_c *TransactionStore_Get_Call) RunAndReturn(run func(string, string) (*dat
 	return _c
 }
 
+// GetByCategory provides a mock function with given fields: categoryId, accountId
+func (_m *TransactionStore) GetByCategory(categoryId string, accountId string) ([]data.Transaction, error) {
+	ret := _m.Called(categoryId, accountId)
+
+	var r0 []data.Transaction
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) ([]data.Transaction, error)); ok {
+		return rf(categoryId, accountId)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) []data.Transaction); ok {
+		r0 = rf(categoryId, accountId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]data.Transaction)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(categoryId, accountId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// TransactionStore_GetByCategory_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByCategory'
+type TransactionStore_GetByCategory_Call struct {
+	*mock.Call
+}
+
+// GetByCategory is a helper method to define mock.On call
+//   - categoryId string
+//   - accountId string
+func (_e *TransactionStore_Expecter) GetByCategory(categoryId interface{}, accountId interface{}) *TransactionStore_GetByCategory_Call {
+	return &TransactionStore_GetByCategory_Call{Call: _e.mock.On("GetByCategory", categoryId, accountId)}
+}
+
+func (_c *TransactionStore_GetByCategory_Call) Run(run func(categoryId string, accountId string)) *TransactionStore_GetByCategory_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *TransactionStore_GetByCategory_Call) Return(_a0 []data.Transaction, _a1 error) *TransactionStore_GetByCategory_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *TransactionStore_GetByCategory_Call) RunAndReturn(run func(string, string) ([]data.Transaction, error)) *TransactionStore_GetByCategory_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetByFilter provides a mock function with given fields: accountId, filter
 func (_m *TransactionStore) GetByFilter(accountId string, filter data.TransactionFilter) ([]data.Transaction, error) {
 	ret := _m.Called(accountId, filter)
@@ -323,8 +378,8 @@ func (_c *TransactionStore_Insert_Call) RunAndReturn(run func(data.Transaction) 
 	return _c
 }
 
-// NullCategoryId provides a mock function with given fields: id, accountId
-func (_m *TransactionStore) NullCategoryId(id string, accountId string) (bool, error) {
+// NullCategory provides a mock function with given fields: id, accountId
+func (_m *TransactionStore) NullCategory(id string, accountId string) (bool, error) {
 	ret := _m.Called(id, accountId)
 
 	var r0 bool
@@ -347,31 +402,31 @@ func (_m *TransactionStore) NullCategoryId(id string, accountId string) (bool, e
 	return r0, r1
 }
 
-// TransactionStore_NullCategoryId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'NullCategoryId'
-type TransactionStore_NullCategoryId_Call struct {
+// TransactionStore_NullCategory_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'NullCategory'
+type TransactionStore_NullCategory_Call struct {
 	*mock.Call
 }
 
-// NullCategoryId is a helper method to define mock.On call
+// NullCategory is a helper method to define mock.On call
 //   - id string
 //   - accountId string
-func (_e *TransactionStore_Expecter) NullCategoryId(id interface{}, accountId interface{}) *TransactionStore_NullCategoryId_Call {
-	return &TransactionStore_NullCategoryId_Call{Call: _e.mock.On("NullCategoryId", id, accountId)}
+func (_e *TransactionStore_Expecter) NullCategory(id interface{}, accountId interface{}) *TransactionStore_NullCategory_Call {
+	return &TransactionStore_NullCategory_Call{Call: _e.mock.On("NullCategory", id, accountId)}
 }
 
-func (_c *TransactionStore_NullCategoryId_Call) Run(run func(id string, accountId string)) *TransactionStore_NullCategoryId_Call {
+func (_c *TransactionStore_NullCategory_Call) Run(run func(id string, accountId string)) *TransactionStore_NullCategory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(string), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *TransactionStore_NullCategoryId_Call) Return(_a0 bool, _a1 error) *TransactionStore_NullCategoryId_Call {
+func (_c *TransactionStore_NullCategory_Call) Return(_a0 bool, _a1 error) *TransactionStore_NullCategory_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *TransactionStore_NullCategoryId_Call) RunAndReturn(run func(string, string) (bool, error)) *TransactionStore_NullCategoryId_Call {
+func (_c *TransactionStore_NullCategory_Call) RunAndReturn(run func(string, string) (bool, error)) *TransactionStore_NullCategory_Call {
 	_c.Call.Return(run)
 	return _c
 }

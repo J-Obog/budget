@@ -57,6 +57,21 @@ func (pg *PostgresTransactionStore) GetByFilter(accountId string, filter data.Tr
 	return transactions, nil
 }
 
+func (pg *PostgresTransactionStore) GetByCategory(accountId string, categoryId string) ([]data.Transaction, error) {
+	transactions := make([]data.Transaction, 0)
+
+	err := pg.db.Where(&data.Transaction{
+		AccountId:  accountId,
+		CategoryId: types.StringPtr(categoryId),
+	}).Find(&transactions).Error
+
+	if err == nil {
+		return transactions, nil
+	}
+
+	return nil, err
+}
+
 func (pg *PostgresTransactionStore) GetByPeriodCategory(accountId string, categoryId string, month int, year int) ([]data.Transaction, error) {
 	transactions := make([]data.Transaction, 0)
 
@@ -87,7 +102,7 @@ func (pg *PostgresTransactionStore) Update(updated data.Transaction) (bool, erro
 	return (res.RowsAffected == 1), res.Error
 }
 
-func (pg *PostgresTransactionStore) NullCategoryId(id string, accountId string) (bool, error) {
+func (pg *PostgresTransactionStore) NullCategory(id string, accountId string) (bool, error) {
 	res := pg.db.Model(&data.Transaction{}).Where(
 		"id = ? AND account_id = ?",
 		id,

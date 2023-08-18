@@ -85,7 +85,33 @@ func (s *TransactionStoreTestSuite) TestGetByFilter() {
 	s.ElementsMatch(transactions, actual)
 }
 
-func (s *TransactionStoreTestSuite) TestNullCategoryId() {
+func (s *TransactionStoreTestSuite) TestGetByCategory() {
+	accountId := "some-account-id"
+	categoryId := "some-category-id"
+
+	transactions := []data.Transaction{}
+
+	for i := 0; i < 5; i++ {
+		transaction := data.Transaction{
+			Id:         fmt.Sprintf("id-%d", i),
+			AccountId:  accountId,
+			CategoryId: &categoryId,
+			CreatedAt:  testTimestamp,
+			UpdatedAt:  testTimestamp,
+		}
+
+		transactions = append(transactions, transaction)
+
+		err := s.transactionStore.Insert(transaction)
+		s.NoError(err)
+	}
+
+	actual, err := s.transactionStore.GetByCategory(accountId, categoryId)
+	s.NoError(err)
+	s.ElementsMatch(actual, transactions)
+}
+
+func (s *TransactionStoreTestSuite) TestNullCategory() {
 	transaction := data.Transaction{
 		Id:         "some-txn-id",
 		CategoryId: types.StringPtr("foobar-id"),
@@ -97,7 +123,7 @@ func (s *TransactionStoreTestSuite) TestNullCategoryId() {
 	err := s.transactionStore.Insert(transaction)
 	s.NoError(err)
 
-	ok, err := s.transactionStore.NullCategoryId(transaction.Id, transaction.AccountId)
+	ok, err := s.transactionStore.NullCategory(transaction.Id, transaction.AccountId)
 	s.True(ok)
 	s.NoError(err)
 
