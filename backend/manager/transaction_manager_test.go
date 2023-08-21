@@ -48,12 +48,24 @@ func (s *TransactionManagerTestSuite) TestNullCategory() {
 	id := "some-id"
 	accountId := "some-other-id"
 
-	s.transactionStore.EXPECT().NullCategoryId(id, accountId).Return(expected, nil)
+	s.transactionStore.EXPECT().NullCategory(id, accountId).Return(expected, nil)
 
 	actual, err := s.manager.NullCategory(id, accountId)
 
 	s.Equal(expected, actual)
 	s.NoError(err)
+}
+
+func (s *TransactionManagerTestSuite) TestGetByCategory() {
+	categoryId := "cat-1234"
+	accountId := "acct-123"
+	expected := []data.Transaction{{Id: "some-id"}}
+
+	s.transactionStore.EXPECT().GetByCategory(categoryId, accountId).Return(expected, nil)
+
+	actual, err := s.manager.GetByCategory(categoryId, accountId)
+	s.NoError(err)
+	s.ElementsMatch(expected, actual)
 }
 
 func (s *TransactionManagerTestSuite) TestGetByFilter() {

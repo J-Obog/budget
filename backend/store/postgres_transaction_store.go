@@ -57,7 +57,7 @@ func (pg *PostgresTransactionStore) GetByFilter(accountId string, filter data.Tr
 	return transactions, nil
 }
 
-func (pg *PostgresTransactionStore) GetByCategory(accountId string, categoryId string) ([]data.Transaction, error) {
+func (pg *PostgresTransactionStore) GetByCategory(categoryId string, accountId string) ([]data.Transaction, error) {
 	transactions := make([]data.Transaction, 0)
 
 	err := pg.db.Where(&data.Transaction{

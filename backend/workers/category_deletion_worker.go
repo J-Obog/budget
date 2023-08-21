@@ -28,14 +28,14 @@ func (worker *CategoryDeletionWorker) Work() error {
 		}
 
 		if !ok {
-			transactions, err := worker.transactionManager.GetByCategoryId(task.CategoryId, task.AccountId)
+			transactions, err := worker.transactionManager.GetByCategory(task.CategoryId, task.AccountId)
 
 			if err != nil {
 				return err
 			}
 
 			for _, transaction := range transactions {
-				_, err := worker.transactionManager.NullCategoryId(transaction.Id, task.AccountId)
+				_, err := worker.transactionManager.NullCategory(transaction.Id, task.AccountId)
 				if err != nil {
 					return err
 				}
