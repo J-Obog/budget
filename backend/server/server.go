@@ -1,9 +1,11 @@
 package server
 
-import "github.com/J-Obog/paidoff/rest"
+import "github.com/J-Obog/paidoff/types/rest"
+
+type RouteHandler func(*rest.Request, *rest.Response)
 
 type Server interface {
-	Start(address string, port int)
+	Start()
 	Stop() error
-	RegisterRoute(method string, url string, rh rest.RouteHandler)
+	Handle(method string, url string, handler RouteHandler)
 }
